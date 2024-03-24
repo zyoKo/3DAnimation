@@ -14,11 +14,11 @@ namespace AnimationEngine
 	public:
 		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override;
 
-		std::weak_ptr<Shader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
+		std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
 
-		std::weak_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) override;
+		std::weak_ptr<ITexture2D> RetrieveTextureFromStorage(const std::string& textureName) const override;
 
-		std::weak_ptr<Shader> RetrieveShaderFromStorage(const std::string& shaderName) override;
+		std::weak_ptr<IShader> RetrieveShaderFromStorage(const std::string& shaderName) const override;
 
 		void ClearStores() override;
 

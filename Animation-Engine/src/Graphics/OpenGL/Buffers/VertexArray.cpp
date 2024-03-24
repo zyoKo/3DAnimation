@@ -66,9 +66,11 @@ namespace AnimationEngine
 			{
 				// Floating point numbers use this
 				GL_CALL(glVertexAttribPointer, 
-					i, GetNumberOfElementsFromType(element.type), 
+					i, 
+					GetNumberOfElementsFromType(element.type), 
 					GetOpenGLTypeFromCustomType(element.type), 
-					element.normalized, vertexBuffer->GetVertexBufferLayout().GetStride(), 
+					element.normalized, 
+					vertexBuffer->GetVertexBufferLayout().GetStride(), 
 					(const void*)offset);
 			}
 

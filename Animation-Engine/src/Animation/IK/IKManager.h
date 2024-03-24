@@ -13,7 +13,7 @@ namespace AnimationEngine
 
 	class IVertexBuffer;
 
-	class Shader;
+	class IShader;
 }
 
 namespace AnimationEngine
@@ -63,7 +63,7 @@ namespace AnimationEngine
 
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
-		std::weak_ptr<Shader> shader;
+		std::weak_ptr<IShader> shader;
 
 		bool FindJointWithName(AssimpNodeData* node, const std::string& name, AssimpNodeData*& result);
 		void ReadHierarchyToFrom(const AssimpNodeData* to, AssimpNodeData* from);

@@ -3,8 +3,8 @@
 namespace AnimationEngine
 {
 	struct AssimpNodeData;
-
 	class Animation;
+	class IShader;
 }
 
 namespace AnimationEngine
@@ -33,5 +33,7 @@ namespace AnimationEngine
 		virtual void SetAnimationSpeedFactor(float value) = 0;
 
 		virtual void ClearJoints() = 0;
+
+		virtual void SetShader(std::weak_ptr<IShader> shader) noexcept = 0;
 	};
 }

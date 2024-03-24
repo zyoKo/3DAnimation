@@ -1,6 +1,13 @@
 #pragma once
 
+#include <Math/Math.h>
+
 #include "Animation/Interface/IAnimator.h"
+
+namespace AnimationEngine
+{
+	class IShader;
+}
 
 namespace AnimationEngine
 {
@@ -25,5 +32,8 @@ namespace AnimationEngine
 		void SetAnimationSpeedFactor(float value) override;
 
 		void ClearJoints() override;
+
+	public:
+		void SetShader(std::weak_ptr<IShader> shader) noexcept override;
 	};
 }

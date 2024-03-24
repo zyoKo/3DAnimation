@@ -1,15 +1,20 @@
 #pragma once
 
+#include <Math/Math.h>
+
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 
 namespace AnimationEngine
 {
-	class Shader;
+	class IShader;
 	class ITexture2D;
 	class IVertexArray;
 	class IIndexBuffer;
+}
 
+namespace AnimationEngine
+{
 	class GridMesh
 	{
 	public:
@@ -25,7 +30,7 @@ namespace AnimationEngine
 
 		void UnBind() const;
 
-		void Update(const std::shared_ptr<Shader>& shader, const glm::mat4& projection, const glm::mat4& view);
+		void Update(const std::shared_ptr<IShader>& shader);
 
 		void SetVertices(const std::vector<Math::Vector3F>& vertices);
 
@@ -33,7 +38,7 @@ namespace AnimationEngine
 
 		void SetIndices(const std::vector<unsigned>& indices);
 
-		void SetGridTexture(const std::shared_ptr<ITexture2D>& texture);
+		void SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept;
 
 	private:
 		std::vector<Math::Vector3F> vertices;
@@ -45,7 +50,7 @@ namespace AnimationEngine
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 		std::shared_ptr<IIndexBuffer> indexBuffer;
 
-		std::shared_ptr<ITexture2D> gridTexture;
+		std::weak_ptr<ITexture2D> gridTexture;
 
 		bool dirtyFlag;
 

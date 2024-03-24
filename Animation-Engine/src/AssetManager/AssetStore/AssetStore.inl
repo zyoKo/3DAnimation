@@ -18,7 +18,7 @@ namespace AnimationEngine
 	}
 
 	template <typename T>
-	std::weak_ptr<T> AssetStore<T>::RetrieveFromStorage(const std::string& assetName)
+	std::weak_ptr<T> AssetStore<T>::RetrieveFromStorage(const std::string& assetName) const
 	{
 		if (!assetStorage.contains(assetName))
 		{
@@ -26,7 +26,6 @@ namespace AnimationEngine
 			return {};
 		}
 
-		LOG_INFO("Successfully retrived asset[{0}] from Asset Storage!", assetName);
 		return assetStorage.at(assetName);
 	}
 

@@ -31,7 +31,7 @@ namespace AnimationEngine
 
 	Texture2D::~Texture2D()
 	{
-		glDeleteTextures(1, &textureID);
+		GL_CALL(glDeleteTextures, 1, &textureID);
 	}
 
 	unsigned Texture2D::GetTextureID() const
@@ -41,13 +41,13 @@ namespace AnimationEngine
 
 	void Texture2D::Bind(unsigned slot) const
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, textureID);
+		GL_CALL(glActiveTexture, GL_TEXTURE0 + slot);
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
 	}
 
 	void Texture2D::UnBind() const
 	{
-		glBindTexture(GL_TEXTURE_2D, 0);
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, 0);
 	}
 
 	void Texture2D::SetTextureName(const std::string& textureName)

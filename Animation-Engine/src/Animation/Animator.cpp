@@ -7,6 +7,11 @@
 #include "DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
 #include "Animation/IK/IKManager.h"
+#include "Core/Memory/WeakPointer.h"
+#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
+#include "Graphics/OpenGL/Shader/Interface/IShader.h"
+#include "Animation/Repository/AnimationStorage.h"
+#include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 
 namespace AnimationEngine
 {
@@ -52,6 +57,20 @@ namespace AnimationEngine
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
 			CalculateBoneTransformWithVQS(&currentAnimation->GetRootNode(), Math::VQS());
 		}
+
+		const auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
+		const auto* animator = AnimatorLocator::GetAnimator();
+
+		const Memory::WeakPointer<IShader> animationShaderPtr{ animationShader };
+
+		animationShaderPtr->Bind();
+		animationShaderPtr->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+		for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
+		{
+			std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
+			animationShaderPtr->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+		}
+		animationShaderPtr->UnBind();
 	}
 
 	void Animator::PlayAnimation(Animation* animation)
@@ -73,7 +92,7 @@ namespace AnimationEngine
 		auto* bone = currentAnimation->FindBone(nodeName);
 		if (bone)
 		{
-			if (ikManager->CanRunIK() && ikManager->WasFabrikSolved())
+			if (ikManager && ikManager->CanRunIK() && ikManager->WasFabrikSolved())
 			{
 				static bool restrictBonesToIK = false;
 				for (const auto& boneInChain : ikManager->GetChain())
@@ -179,6 +198,11 @@ namespace AnimationEngine
 	void Animator::SetIKManager(IKManager* ikManager)
 	{
 		this->ikManager = ikManager;
+	}
+
+	void Animator::SetShader(std::weak_ptr<IShader> shader) noexcept
+	{
+		animationShader = std::move(shader);
 	}
 
 	void Animator::ProcessChildNodes(const AssimpNodeData* node)

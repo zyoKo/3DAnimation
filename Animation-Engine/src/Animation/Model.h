@@ -12,14 +12,17 @@
 
 namespace AnimationEngine
 {
-	class Shader;
+	class IShader;
+}
 
+namespace AnimationEngine
+{
 	class Model
 	{
 	public:
 		Model(const std::string& path);
 
-		void Draw(const std::shared_ptr<Shader>& shader) const;
+		void Draw(const std::shared_ptr<IShader>& shader) const;
 
 		const std::vector<Mesh>& GetMeshes() const;
 
