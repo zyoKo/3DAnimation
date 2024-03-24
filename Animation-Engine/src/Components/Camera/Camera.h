@@ -2,8 +2,12 @@
 
 #include "Type/CameraMovement.h"
 
+#include <Math/Math.h>
+
 namespace AnimationEngine
 {
+	class IWindow;
+
 	class Camera
 	{
 	public:
@@ -32,11 +36,15 @@ namespace AnimationEngine
 		void SetZoomSpeed(float speed);
 		float GetZoomSpeed() const;
 
+		glm::mat4 GetProjectionMatrix() const;
+
 		glm::mat4 GetViewMatrix() const;
 
 		void ProcessKeyboard(CameraMovement direction);
 
 		void Reset();
+
+		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 
 	private:
 		static Camera instance;
@@ -71,6 +79,8 @@ namespace AnimationEngine
 		float initialYaw, initialPitch;
 
 		float initialZoom;
+
+		std::weak_ptr<IWindow> window;
 
 		Camera() = default;
 

@@ -5,7 +5,9 @@
 #include <glm/ext/matrix_transform.hpp>
 
 #include "Constants/CameraConstants.h"
+#include "Core/Memory/WeakPointer.h"
 #include "Core/Utilities/Time.h"
+#include "Core/Window/IWindow.h"
 
 namespace AnimationEngine
 {
@@ -106,6 +108,13 @@ namespace AnimationEngine
 		return zoomSpeed;
 	}
 
+	glm::mat4 Camera::GetProjectionMatrix() const
+	{
+		const Memory::WeakPointer<IWindow> windowPtr{ window };
+
+		return glm::perspective(glm::radians(zoom), windowPtr->GetAspectRatio(), CAMERA_NEAR_CLIPPING_PLANE, CAMERA_FAR_CLIPPING_PLANE);
+	}
+
 	void Camera::SetCameraPosition(const glm::vec3& position)
 	{
 		this->cameraPosition = position;
@@ -183,6 +192,11 @@ namespace AnimationEngine
 	    zoom			= initialZoom;
 	
 	    UpdateCameraVectors();
+	}
+
+	void Camera::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
+	{
+		window = std::move(windowsWindow);
 	}
 
 	void Camera::UpdateCameraVectors()

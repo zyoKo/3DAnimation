@@ -2,6 +2,8 @@
 
 #include "AnimationStorageLocator.h"
 
+#include "Core/Logger/Log.h"
+
 namespace AnimationEngine
 {
 	AnimationStorage* AnimationStorageLocator::GetAnimationStorage()

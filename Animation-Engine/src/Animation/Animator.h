@@ -2,14 +2,15 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <Math/Math.h>
+
 #include "Interface/IAnimator.h"
 
 namespace AnimationEngine
 {
+	class IShader;
 	class IKManager;
-
 	struct AssimpNodeData;
-
 	class Animation;
 }
 
@@ -46,12 +47,16 @@ namespace AnimationEngine
 
 		void SetIKManager(IKManager* ikManager);
 
+		void SetShader(std::weak_ptr<IShader> shader) noexcept override;
+
 	private:
 		std::vector<glm::mat4> finalBoneMatrices;
 
 		std::vector<Math::Vector3F> jointPositions;
 
 		std::vector<Math::Vector3F> bindPose;
+
+		std::weak_ptr<IShader> animationShader;
 
 		Animation* currentAnimation;
 

@@ -38,7 +38,7 @@ namespace AnimationEngine
 
 		~Mesh() = default;
 
-		void Draw(const std::shared_ptr<Shader>& shader) const;
+		void Draw(const std::shared_ptr<IShader>& shader) const;
 
 		const Vertices_V3F& GetVertices() const;
 		void SetVertices(Vertices_V3F vertexList) noexcept;

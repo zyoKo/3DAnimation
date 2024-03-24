@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Math/Math.h>
+
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/string_cast.hpp>

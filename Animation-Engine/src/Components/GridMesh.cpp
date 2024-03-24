@@ -2,7 +2,9 @@
 
 #include "GridMesh.h"
 
+#include "Camera/Camera.h"
 #include "Core/Logger/GLDebug.h"
+#include "Core/Memory/WeakPointer.h"
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
 
@@ -52,7 +54,7 @@ namespace AnimationEngine
 		vertexArrayObject->UnBind();
 	}
 
-	void GridMesh::Update(const std::shared_ptr<Shader>& shader, const glm::mat4& projection, const glm::mat4& view)
+	void GridMesh::Update(const std::shared_ptr<IShader>& shader)
 	{
 		if (dirtyFlag)
 		{
@@ -68,19 +70,26 @@ namespace AnimationEngine
 		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
 		model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
+		const auto* camera = Camera::GetInstance();
+
+		const glm::mat4 projection	= camera->GetProjectionMatrix();
+		const glm::mat4 view		= camera->GetViewMatrix();
+
 		shader->SetUniformMatrix4F(projection, "projection");
 		shader->SetUniformMatrix4F(view, "view");
 		shader->SetUniformMatrix4F(model, "model");
 
-		gridTexture->Bind(0);
-		shader->SetUniformInt(0, gridTexture->GetTextureName());
+		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ gridTexture };
+
+		gridTexturePtr->Bind(0);
+		shader->SetUniformInt(0, gridTexturePtr->GetTextureName());
 
 		// Draw Call
 		Bind();
 		GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
 		UnBind();
 
-		gridTexture->UnBind();
+		gridTexturePtr->UnBind();
 
 		shader->UnBind();
 	}
@@ -88,8 +97,6 @@ namespace AnimationEngine
 	void GridMesh::SetVertices(const std::vector<Math::Vector3F>& vertices)
 	{
 		this->vertices = vertices;
-
-		//dirtyFlag = true;
 	}
 
 	void GridMesh::SetTextureCoordinates(const std::vector<Math::Vector2F>& textureCoordinates)
@@ -100,15 +107,11 @@ namespace AnimationEngine
 	void GridMesh::SetIndices(const std::vector<unsigned>& indices)
 	{
 		this->indices = indices;
-
-		//dirtyFlag = true;
 	}
 
-	void GridMesh::SetGridTexture(const std::shared_ptr<ITexture2D>& texture)
+	void GridMesh::SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept
 	{
-		this->gridTexture = texture;
-
-		//dirtyFlag = true;
+		gridTexture = std::move(texture);
 	}
 
 	void GridMesh::SetupMesh() const

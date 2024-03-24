@@ -1,11 +1,9 @@
 #pragma once
 
-#include <assimp/matrix3x3.h>
+#include <Math/Math.h>
+
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "Math.h"
 
 namespace AnimationEngine::Utils
 {
@@ -62,9 +60,9 @@ namespace AnimationEngine::Utils
 	public:
 		static glm::mat4 ConvertQuaternionToGLMMatrix(const Math::QuatF& quaternion)
 		{
-			const auto right	= quaternion * Math::Vector3F(1, 0, 0);
-			const auto up		= quaternion * Math::Vector3F(0, 1, 0);
-			const auto forward	= quaternion * Math::Vector3F(0, 0, 1);
+			const auto right = quaternion * Math::Vector3F(1, 0, 0);
+			const auto up = quaternion * Math::Vector3F(0, 1, 0);
+			const auto forward = quaternion * Math::Vector3F(0, 0, 1);
 
 			return {
 				right.x,		right.y,		right.z,		0,
@@ -79,7 +77,7 @@ namespace AnimationEngine::Utils
 			auto rotationMat = glm::mat3(matrix);
 			for (int i = 0; i < 3; i++)
 				rotationMat[i] = glm::normalize(rotationMat[i]);
-			
+
 			const auto glmQuat = glm::quat_cast(rotationMat);
 
 			return { glmQuat.x, glmQuat.y, glmQuat.z, glmQuat.w };
@@ -118,9 +116,9 @@ namespace AnimationEngine::Utils
 		{
 			const auto translation = glm::translate(glm::mat4(1.0f), vqs.translationVector);
 
-			const auto right	= vqs.quatRotation * Math::Vector3F(1, 0, 0);
-			const auto up		= vqs.quatRotation * Math::Vector3F(0, 1, 0);
-			const auto forward	= vqs.quatRotation * Math::Vector3F(0, 0, 1);
+			const auto right = vqs.quatRotation * Math::Vector3F(1, 0, 0);
+			const auto up = vqs.quatRotation * Math::Vector3F(0, 1, 0);
+			const auto forward = vqs.quatRotation * Math::Vector3F(0, 0, 1);
 			const glm::mat4 rotation = {
 				right.x,		right.y,		right.z,		0,
 				up.x,		up.y,		up.z,		0,
@@ -129,7 +127,7 @@ namespace AnimationEngine::Utils
 			};
 
 			const auto scale = glm::scale(glm::mat4(1.0f), vqs.scalingVector);
-		
+
 			return translation * rotation * scale;
 		}
 	};
@@ -148,7 +146,13 @@ namespace AnimationEngine::Utils
 				static_cast<float>(orientation.x),
 				static_cast<float>(orientation.y),
 				static_cast<float>(orientation.z),
-				static_cast<float>(orientation.w)};
+				static_cast<float>(orientation.w) };
 		}
 	};
+
+	template <typename T>
+	bool IsInBounds(const T& value, const T& low, const T& high)
+	{
+		return !(value < low) && (value < high);
+	}
 }

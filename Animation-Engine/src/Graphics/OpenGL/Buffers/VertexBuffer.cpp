@@ -71,7 +71,9 @@ namespace AnimationEngine
 
 		int customOffset = 0;
 		if (layoutLocation == 3 || layoutLocation == 4)
+		{
 			customOffset = sizeof(int) * 4;
+		}
 
 		auto bufferStart = static_cast<const char*>(bufferData);
 		const auto bufferEnd = bufferStart + bufferSize;

@@ -15,7 +15,7 @@ namespace AnimationEngine
 		LoadModel(path);
 	}
 
-	void Model::Draw(const std::shared_ptr<Shader>& shader) const
+	void Model::Draw(const std::shared_ptr<IShader>& shader) const
 	{
 		for (const auto& mesh : meshes)
 		{
