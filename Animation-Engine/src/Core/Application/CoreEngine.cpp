@@ -16,6 +16,8 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
+#include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
+#include "Components/ScreenQuad.h"
 
 namespace AnimationEngine
 {
@@ -50,13 +52,19 @@ namespace AnimationEngine
 	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
 	{
 		this->application = app;
+
+		application->SetWindowsWindow(window);
 	}
 
-	void CoreEngine::Initialize() const
+	void CoreEngine::Initialize()
 	{
 		Camera::GetInstance()->Initialize();
 
 		application->Initialize();
+
+		screenQuad = std::make_shared<ScreenQuad>();
+
+		frameBuffer = std::make_shared<FrameBuffer>(window);
 	}
 
 	void CoreEngine::Update() const

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "glad/glad.h"
+#include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
 
 #include "Graphics/OpenGL/Buffers/Structure/VertexBufferElements.h"
 
@@ -118,5 +119,61 @@ namespace AnimationEngine
 		}
 
 		return GL_NONE;
+	}
+
+	inline int AttachmentTypeToInternalFormat(AttachmentType type)
+	{
+		int internalFormat;
+		switch(type)
+		{
+		case AttachmentType::DEPTH:
+			internalFormat = GL_DEPTH;
+			break;
+
+		case AttachmentType::STENCIL:
+			internalFormat = GL_STENCIL;
+			break;
+
+		case AttachmentType::DEPTH_STENCIL:
+			internalFormat = GL_DEPTH_STENCIL;
+			break;
+
+		default:
+		case AttachmentType::COLOR:
+			internalFormat = GL_RGB;
+			break;
+		}
+
+		return internalFormat;
+	}
+
+	inline std::tuple<int, int> AttachmentTypeToFormatAndType(AttachmentType attachmentType)
+	{
+		int format, type;
+		switch(attachmentType)
+		{
+		case AttachmentType::DEPTH:
+			format	= GL_DEPTH_COMPONENT;
+			type	= GL_UNSIGNED_BYTE;
+			break;
+
+		case AttachmentType::STENCIL:
+			format	= GL_STENCIL_INDEX;
+			type	= GL_UNSIGNED_BYTE;
+			break;
+
+		case AttachmentType::DEPTH_STENCIL:
+			format	= GL_DEPTH_STENCIL;
+			type	= GL_UNSIGNED_INT_24_8;
+			break;
+
+		default: 
+		case AttachmentType::COLOR:
+			format	= GL_RGB;
+			type	= GL_UNSIGNED_BYTE;
+			break;
+		}
+
+		return std::make_tuple(format, type);
 	}
 }

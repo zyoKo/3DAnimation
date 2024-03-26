@@ -67,4 +67,24 @@ namespace AnimationEngine
 	static constexpr float IK_TARGET_MOVEMENT_SPEED = 20.0f;
 
 	static constexpr float TOTAL_LERP_TIME_TO_REACH_TARGET = 40.0f;
+
+	//-- Screen Quad Constants --//
+	static const std::vector<Math::Vec2F> DEFAULT_SCREEN_QUAD_VERTICES{
+		{ -1.0f,  1.0f },		// Top Left
+		{ -1.0f, -1.0f },		// Bottom Left
+		{  1.0f, -1.0f },		// Bottom Right
+		{  1.0f,  1.0f }		// Top Right
+	};
+
+	static const std::vector<Math::Vec2F> DEFAULT_SCREEN_QUAD_TEXTURE_COORDINATES{
+		{ 0.0f, 1.0f },
+		{ 0.0f, 0.0f },
+		{ 1.0f, 0.0f },
+		{ 1.0f, 1.0f }
+	};
+
+	static const std::vector<unsigned> DEFAULT_SCREEN_QUAD_INDICES{
+		0, 1, 2,
+		2, 1, 3
+	};
 }

@@ -6,6 +6,8 @@
 
 namespace AnimationEngine
 {
+	class ScreenQuad;
+	class FrameBuffer;
 	class IApplication;
 	class IAnimator;
 	class IAssetManager;
@@ -30,7 +32,7 @@ namespace AnimationEngine
 
 		void SetApplication(const std::shared_ptr<IApplication>& app);
 
-		void Initialize() const;
+		void Initialize();
 
 		void Update() const;
 
@@ -46,6 +48,10 @@ namespace AnimationEngine
 		std::shared_ptr<IAnimator> animator;
 
 		std::shared_ptr<AnimationStorage> animationStorage;
+
+		std::shared_ptr<FrameBuffer> frameBuffer;
+
+		std::shared_ptr<ScreenQuad> screenQuad;
 
 		bool running = true;
 		

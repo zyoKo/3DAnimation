@@ -1,6 +1,9 @@
 #pragma once
 
-#include <memory>
+namespace AnimationEngine
+{
+	class IWindow;
+}
 
 namespace AnimationEngine
 {
@@ -18,6 +21,11 @@ namespace AnimationEngine
 		virtual void PostUpdate() = 0;
 
 		virtual void Shutdown() = 0;
+
+		virtual void SetWindowsWindow(std::weak_ptr<IWindow> window) noexcept { windowsWindow = std::move(window); }
+
+	private:
+		std::weak_ptr<IWindow> windowsWindow;
 	};
 
 	std::shared_ptr<IApplication> CreateApplication();
