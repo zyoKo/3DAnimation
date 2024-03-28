@@ -169,7 +169,7 @@ namespace AnimationEngine
 
 		for (const auto& texture : textures)
 		{
-			texture->Bind(0);
+			texture->UnBind();
 		}
 
 		shader->UnBind();

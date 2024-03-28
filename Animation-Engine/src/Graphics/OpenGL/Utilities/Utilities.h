@@ -140,7 +140,7 @@ namespace AnimationEngine
 
 		default:
 		case AttachmentType::COLOR:
-			internalFormat = GL_RGB;
+			internalFormat = GL_RGB4;
 			break;
 		}
 

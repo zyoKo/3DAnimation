@@ -22,6 +22,7 @@ namespace AnimationEngine
 		const int width  = static_cast<int>(windowPtr->GetWidth());
 		const int height = static_cast<int>(windowPtr->GetHeight());
 
+		GL_CALL(glBindRenderbuffer, GL_RENDERBUFFER, renderBufferObject);
 		GL_CALL(glRenderbufferStorage, GL_RENDERBUFFER, internalFormat, width, height);
 	}
 

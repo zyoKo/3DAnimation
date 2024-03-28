@@ -22,13 +22,17 @@ namespace AnimationEngine
 
 		~FrameBuffer();
 
-		void CreateAttachment(AttachmentType type);
+		void CreateAttachment(AttachmentType type, bool sample);
 
 		void Bind() const;
 
 		void UnBind() const;
 
 		unsigned GetBufferID() const;
+
+		void IsValid() const;
+
+		const std::vector<std::shared_ptr<BufferTexture>>& GetFrameBufferTextures() const;
 
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 
@@ -39,10 +43,8 @@ namespace AnimationEngine
 
 		ColorAttachment lastColorAttachment;
 
-		std::shared_ptr<RenderBuffer> renderBuffer;
+		std::vector<std::shared_ptr<RenderBuffer>> renderBuffers;
 
 		std::weak_ptr<IWindow> window;
-
-		bool IsValid() const;
 	};
 }

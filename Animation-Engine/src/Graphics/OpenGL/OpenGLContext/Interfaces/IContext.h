@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Math/Math.h"
+
 namespace AnimationEngine
 {
 	class IContext
@@ -13,9 +15,13 @@ namespace AnimationEngine
 
 		virtual void SwapBuffer() = 0;
 
-		virtual void ClearBuffer() = 0;
+		virtual void ClearBuffers() = 0;
 
-		virtual void ClearColor() = 0;
+		virtual void ClearColorBuffer() = 0;
+
+		virtual void ClearDepthBuffer() = 0;
+
+		virtual void ClearColor(Math::Vec4F color = { 0.1f, 0.1f, 0.1f, 1.0f}) = 0;
 
 		virtual void EnableDepthTest(bool value) = 0;
 

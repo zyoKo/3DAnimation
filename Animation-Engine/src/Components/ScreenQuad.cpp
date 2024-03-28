@@ -7,13 +7,14 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
+#include "Graphics/OpenGL/Textures/BufferTexture.h"
+#include "Types/DebugDrawMode.h"
 
 namespace AnimationEngine
 {
 	ScreenQuad::ScreenQuad()
 		:	vertices(DEFAULT_SCREEN_QUAD_VERTICES),
 			textureCoordinates(DEFAULT_SCREEN_QUAD_TEXTURE_COORDINATES),
-			indices(DEFAULT_SCREEN_QUAD_INDICES),
 			dirtyFlag(false)
 	{
 		vertexArrayObject	= GraphicsAPI::CreateVertexArray();
@@ -31,18 +32,29 @@ namespace AnimationEngine
 
 	void ScreenQuad::Draw() const
 	{
-		if (dirtyFlag)
-		{
-			// TODO: Setup Mesh again
-		}
-
 		const Memory::WeakPointer<IShader> shaderPtr{ shader };
 
 		shaderPtr->Bind();
 
+		for (const auto& texture : textures)
+		{
+			const Memory::WeakPointer<BufferTexture> texturePtr{ texture };
+
+			texturePtr->Bind();
+
+			shaderPtr->SetUniformInt(0, "screenTexture");
+		}
+
 		vertexArrayObject->Bind();
-		GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<int>(indices.size()), GL_UNSIGNED_INT, indices.data());
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(DebugDrawMode::Triangles), 0, static_cast<int>(vertices.size()));
 		vertexArrayObject->UnBind();
+
+		for (const auto& texture : textures)
+		{
+			const Memory::WeakPointer<BufferTexture> texturePtr{ texture };
+		
+			texturePtr->UnBind();
+		}
 
 		shaderPtr->UnBind();
 	}
@@ -61,18 +73,13 @@ namespace AnimationEngine
 		dirtyFlag = true;
 	}
 
-	void ScreenQuad::SetIndices(std::vector<unsigned> indexData) noexcept
+	void ScreenQuad::AddTexture(std::weak_ptr<BufferTexture> texture) noexcept
 	{
-		indices = std::move(indexData);
-
-		dirtyFlag = true;
+		textures.push_back(std::move(texture));
 	}
 
 	void ScreenQuad::SetupMesh() const
 	{
-		indexBuffer->SetSize(sizeof(unsigned) * static_cast<unsigned>(indices.size()));
-		indexBuffer->SetData(indices.data());
-
 		VertexBufferLayout layout;
 
 		if (!vertices.empty())
@@ -96,7 +103,6 @@ namespace AnimationEngine
 			bufferSize = GetSizeofCustomType(VertexDataType::Vector2F) * static_cast<unsigned>(vertices.size());
 
 			vertexBuffer->OverwriteVertexBufferData(layoutLocation++, vertices.data(), bufferSize);
-			layoutLocation++;
 		}
 
 		if (!textureCoordinates.empty())

@@ -4,6 +4,7 @@
 
 namespace AnimationEngine
 {
+	class BufferTexture;
 	class IShader;
 	class IIndexBuffer;
 	class IVertexArray;
@@ -24,22 +25,20 @@ namespace AnimationEngine
 
 		void SetTextureCoordinates(std::vector<Math::Vec2F> texCoords) noexcept;
 
-		void SetIndices(std::vector<unsigned> indexData) noexcept;
+		void AddTexture(std::weak_ptr<BufferTexture> texture) noexcept;
 
 	private:
 		std::vector<Math::Vec2F> vertices;
 
 		std::vector<Math::Vec2F> textureCoordinates;
 
-		std::vector<unsigned> indices;
-
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 
-		std::shared_ptr<IIndexBuffer> indexBuffer;
-
 		std::weak_ptr<IShader> shader;
+
+		std::vector<std::weak_ptr<BufferTexture>> textures;
 
 		bool dirtyFlag;
 

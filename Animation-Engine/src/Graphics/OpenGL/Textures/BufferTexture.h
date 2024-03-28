@@ -12,7 +12,7 @@ namespace AnimationEngine
 	class BufferTexture
 	{
 	public:
-		BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int width = 0, int height = 0, int levels = 0);
+		BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int width = 0, int height = 0, int levels = 1);
 
 		~BufferTexture();
 
@@ -23,6 +23,8 @@ namespace AnimationEngine
 		unsigned GetTextureID() const;
 
 		void OverwriteTexture(const void* data) const;
+
+		AttachmentType GetAttachmentType() const;
 
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 

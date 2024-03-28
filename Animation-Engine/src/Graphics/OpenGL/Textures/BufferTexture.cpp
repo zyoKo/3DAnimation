@@ -14,6 +14,7 @@ namespace AnimationEngine
 			attachmentType(type)
 	{
 		GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
 
 		const Memory::WeakPointer<IWindow> windowPtr{ window };
 
@@ -58,6 +59,11 @@ namespace AnimationEngine
 		const auto [ format, type ] = AttachmentTypeToFormatAndType(attachmentType);
 
 		GL_CALL(glTextureSubImage2D, textureID, 0 /* mipmap level */, 0, 0, width, height, format, type, data);
+	}
+
+	AttachmentType BufferTexture::GetAttachmentType() const
+	{
+		return attachmentType;
 	}
 
 	void BufferTexture::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept

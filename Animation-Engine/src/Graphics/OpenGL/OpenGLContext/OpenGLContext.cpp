@@ -49,14 +49,24 @@ namespace AnimationEngine
 		glfwSwapBuffers(window);
 	}
 
-	void OpenGLContext::ClearBuffer()
+	void OpenGLContext::ClearBuffers()
 	{
 		GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 
-	void OpenGLContext::ClearColor()
+	void OpenGLContext::ClearColorBuffer()
 	{
-		GL_CALL(glClearColor, 0.25f, 0.25f, 0.25f, 1.0f);
+		GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+	}
+
+	void OpenGLContext::ClearDepthBuffer()
+	{
+		GL_CALL(glClear, GL_DEPTH_BUFFER_BIT);
+	}
+
+	void OpenGLContext::ClearColor(Math::Vec4F color)
+	{
+		GL_CALL(glClearColor, color.x, color.y, color.z, color.w);
 	}
 
 	void OpenGLContext::EnableDepthTest(bool value)
@@ -64,11 +74,10 @@ namespace AnimationEngine
 		if (value)
 		{
 			GL_CALL(glEnable, GL_DEPTH_TEST);
+			return;
 		}
-		else
-		{
-			GL_CALL(glDisable, GL_DEPTH_TEST);
-		}
+
+		GL_CALL(glDisable, GL_DEPTH_TEST);
 	}
 
 	void OpenGLContext::EnableWireFrameMode(bool value)

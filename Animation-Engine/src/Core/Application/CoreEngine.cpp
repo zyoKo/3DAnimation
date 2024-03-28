@@ -3,7 +3,6 @@
 #include "CoreEngine.h"
 
 #include <GLFW/glfw3.h>
-#include <execution>
 
 #include "Interface/IApplication.h"
 #include "Core/Logger/Log.h"
@@ -18,6 +17,7 @@
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
 #include "Components/ScreenQuad.h"
+#include "Graphics/OpenGL/Textures/BufferTexture.h"
 
 namespace AnimationEngine
 {
@@ -60,15 +60,27 @@ namespace AnimationEngine
 	{
 		Camera::GetInstance()->Initialize();
 
-		application->Initialize();
-
-		screenQuad = std::make_shared<ScreenQuad>();
-
 		frameBuffer = std::make_shared<FrameBuffer>(window);
+		frameBuffer->Bind();
+		frameBuffer->CreateAttachment(AttachmentType::COLOR, true);
+		frameBuffer->CreateAttachment(AttachmentType::DEPTH_STENCIL, false);
+		frameBuffer->IsValid();
+		frameBuffer->UnBind();
+		
+		screenQuad = std::make_shared<ScreenQuad>();
+		screenQuad->Initialize();
+		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
+		{
+			screenQuad->AddTexture(texture);
+		}
+
+		// Application Initialize
+		application->Initialize();
 	}
 
 	void CoreEngine::Update() const
 	{
+		// Application Pre-Update
 		application->PreUpdate();
 
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
@@ -76,18 +88,31 @@ namespace AnimationEngine
 
 		while (running && !window->WindowShouldClose())
 		{
+			frameBuffer->Bind();
+			GraphicsAPI::GetContext()->EnableDepthTest(true);
+
 			GraphicsAPI::GetContext()->ClearColor();
-			GraphicsAPI::GetContext()->ClearBuffer();
+			GraphicsAPI::GetContext()->ClearBuffers();
 
 			Time::Update();
 
 			ProcessInput();
 
+			// Application Update
 			application->Update();
+
+			frameBuffer->UnBind();
+			GraphicsAPI::GetContext()->EnableDepthTest(false);
+			
+			GraphicsAPI::GetContext()->ClearColor({ 1.0f, 1.0f, 1.0f, 1.0f });
+			GraphicsAPI::GetContext()->ClearColorBuffer();
+
+			screenQuad->Draw();
 
 			window->Update();
 		}
 
+		// Application PostUpdate
 		application->PostUpdate();
 
 		assetManager->ClearStores();

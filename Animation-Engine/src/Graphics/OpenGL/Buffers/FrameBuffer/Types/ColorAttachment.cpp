@@ -9,7 +9,9 @@ namespace AnimationEngine
 {
 	int InternalAttachmentToOpenGLColorAttachment(ColorAttachment attachment)
 	{
-		return (GL_COLOR_ATTACHMENT0 - 1 + static_cast<int>(attachment));
+		ANIM_ASSERT(attachment != ColorAttachment::None, "Cannot convert color attachment None to OpenGLColorAttachment.");
+
+		return (GL_COLOR_ATTACHMENT0 + static_cast<int>(attachment) - 1);
 	}
 
 	ColorAttachment OpenGLAttachmentToColorAttachment(int openGLAttachment)
@@ -23,10 +25,6 @@ namespace AnimationEngine
 
 	ColorAttachment operator+(const ColorAttachment& attachment, int i)
 	{
-		ColorAttachment newAttachment(attachment);
-
-		newAttachment = OpenGLAttachmentToColorAttachment(static_cast<int>(attachment) + 1);
-
-		return newAttachment;
+		return static_cast<ColorAttachment>(static_cast<int>(attachment) + i);
 	}
 }
