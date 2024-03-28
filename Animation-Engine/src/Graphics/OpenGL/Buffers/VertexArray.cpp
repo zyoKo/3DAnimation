@@ -60,7 +60,7 @@ namespace AnimationEngine
 					GetNumberOfElementsFromType(element.type), 
 					GetOpenGLTypeFromCustomType(element.type),
 					vertexBuffer->GetVertexBufferLayout().GetStride(), 
-					(const void*)offset);
+					reinterpret_cast<const void*>(offset));
 			}
 			else
 			{
@@ -71,7 +71,7 @@ namespace AnimationEngine
 					GetOpenGLTypeFromCustomType(element.type), 
 					element.normalized, 
 					vertexBuffer->GetVertexBufferLayout().GetStride(), 
-					(const void*)offset);
+					reinterpret_cast<const void*>(offset));
 			}
 
 			GL_CALL(glEnableVertexAttribArray, i);

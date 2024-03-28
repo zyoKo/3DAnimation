@@ -2,6 +2,12 @@
 
 #include "Math/Math.h"
 
+#define WHITE AnimationEngine::Math::Vec4F{ 1.0f, 1.0f, 1.0f, 1.0f }
+#define BLACK AnimationEngine::Math::Vec4F{ 0.0f, 0.0f, 0.0f, 1.0f }
+#define RED	  AnimationEngine::Math::Vec4F{ 1.0f, 0.0f, 0.0f, 1.0f }
+#define GREEN AnimationEngine::Math::Vec4F{ 0.0f, 1.0f, 0.0f, 1.0f }
+#define BLUE  AnimationEngine::Math::Vec4F{ 0.0f, 0.0f, 1.0f, 1.0f }
+
 namespace AnimationEngine
 {
 	class IContext

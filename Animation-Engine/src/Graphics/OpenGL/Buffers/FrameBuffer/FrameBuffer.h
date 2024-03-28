@@ -22,7 +22,7 @@ namespace AnimationEngine
 
 		~FrameBuffer();
 
-		void CreateAttachment(AttachmentType type, bool sample);
+		void CreateAttachment(AttachmentType type, bool sample, std::string name = "");
 
 		void Bind() const;
 

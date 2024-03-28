@@ -22,14 +22,20 @@ namespace AnimationEngine
 
 		unsigned GetTextureID() const;
 
-		void OverwriteTexture(const void* data) const;
-
 		AttachmentType GetAttachmentType() const;
+
+		const std::string& GetName() const;
+
+		void SetName(std::string newName) noexcept;
+
+		void OverwriteTexture(const void* data) const;
 
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 
 	private:
 		unsigned textureID;
+
+		std::string name;
 
 		std::weak_ptr<IWindow> window;
 

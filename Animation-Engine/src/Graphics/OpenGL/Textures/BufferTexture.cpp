@@ -10,7 +10,8 @@
 namespace AnimationEngine
 {
 	BufferTexture::BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int width /* = 0 */, int height /* = 0 */, int levels /* = 0 */)
-		:	window(std::move(windowsWindow)),
+		:	name("Texture"),
+			window(std::move(windowsWindow)),
 			attachmentType(type)
 	{
 		GL_CALL(glCreateTextures, GL_TEXTURE_2D, 1, &textureID);
@@ -65,6 +66,17 @@ namespace AnimationEngine
 	{
 		return attachmentType;
 	}
+
+	const std::string& BufferTexture::GetName() const
+	{
+		return name;
+	}
+
+	void BufferTexture::SetName(std::string newName) noexcept
+	{
+		name = std::move(newName);
+	}
+
 
 	void BufferTexture::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
 	{

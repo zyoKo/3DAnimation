@@ -7,7 +7,6 @@
 #include "Interface/IApplication.h"
 #include "Core/Logger/Log.h"
 #include "Core/Utilities/Time.h"
-#include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/Camera/Camera.h"
 #include "Animation/Animator.h"
@@ -15,9 +14,8 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
-#include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
-#include "Components/ScreenQuad.h"
-#include "Graphics/OpenGL/Textures/BufferTexture.h"
+#include "Graphics/OpenGL/Pipeline/DeferredShading.h"
+#include "Graphics/OpenGL/Pipeline/Fixed/CreatePipeline.h"
 
 namespace AnimationEngine
 {
@@ -32,7 +30,12 @@ namespace AnimationEngine
 
 		Camera::GetInstance()->SetWindowsWindow(window);
 
-		// Bind Event Callback here
+		// Create Pipeline
+		const PipelineInitializer pipelineData{
+			.window = this->window
+		};
+
+		graphicsPipeline = CreatePipeline<DeferredShading>(&pipelineData);
 
 		AssetManagerLocator::Initialize();
 		AnimatorLocator::Initialize();
@@ -56,23 +59,11 @@ namespace AnimationEngine
 		application->SetWindowsWindow(window);
 	}
 
-	void CoreEngine::Initialize()
+	void CoreEngine::Initialize() const
 	{
 		Camera::GetInstance()->Initialize();
 
-		frameBuffer = std::make_shared<FrameBuffer>(window);
-		frameBuffer->Bind();
-		frameBuffer->CreateAttachment(AttachmentType::COLOR, true);
-		frameBuffer->CreateAttachment(AttachmentType::DEPTH_STENCIL, false);
-		frameBuffer->IsValid();
-		frameBuffer->UnBind();
-		
-		screenQuad = std::make_shared<ScreenQuad>();
-		screenQuad->Initialize();
-		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
-		{
-			screenQuad->AddTexture(texture);
-		}
+		graphicsPipeline->Initialize();
 
 		// Application Initialize
 		application->Initialize();
@@ -83,34 +74,25 @@ namespace AnimationEngine
 		// Application Pre-Update
 		application->PreUpdate();
 
-		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
+		graphicsPipeline->PreUpdateSetup();
 
 		while (running && !window->WindowShouldClose())
 		{
-			frameBuffer->Bind();
-			GraphicsAPI::GetContext()->EnableDepthTest(true);
-
-			GraphicsAPI::GetContext()->ClearColor();
-			GraphicsAPI::GetContext()->ClearBuffers();
-
 			Time::Update();
 
 			ProcessInput();
 
+			graphicsPipeline->PreFrameRender();
+
 			// Application Update
 			application->Update();
 
-			frameBuffer->UnBind();
-			GraphicsAPI::GetContext()->EnableDepthTest(false);
-			
-			GraphicsAPI::GetContext()->ClearColor({ 1.0f, 1.0f, 1.0f, 1.0f });
-			GraphicsAPI::GetContext()->ClearColorBuffer();
-
-			screenQuad->Draw();
+			graphicsPipeline->PostFrameRender();
 
 			window->Update();
 		}
+
+		graphicsPipeline->PostUpdate();
 
 		// Application PostUpdate
 		application->PostUpdate();
@@ -120,6 +102,8 @@ namespace AnimationEngine
 
 	bool CoreEngine::Shutdown()
 	{
+		graphicsPipeline->Shutdown();
+
 		application->Shutdown();
 
 		running = false;

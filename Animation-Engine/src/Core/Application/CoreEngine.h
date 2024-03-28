@@ -6,6 +6,11 @@
 
 namespace AnimationEngine
 {
+	class IPipeline;
+}
+
+namespace AnimationEngine
+{
 	class ScreenQuad;
 	class FrameBuffer;
 	class IApplication;
@@ -32,7 +37,7 @@ namespace AnimationEngine
 
 		void SetApplication(const std::shared_ptr<IApplication>& app);
 
-		void Initialize();
+		void Initialize() const;
 
 		void Update() const;
 
@@ -49,9 +54,7 @@ namespace AnimationEngine
 
 		std::shared_ptr<AnimationStorage> animationStorage;
 
-		std::shared_ptr<FrameBuffer> frameBuffer;
-
-		std::shared_ptr<ScreenQuad> screenQuad;
+		std::shared_ptr<IPipeline> graphicsPipeline;
 
 		bool running = true;
 		

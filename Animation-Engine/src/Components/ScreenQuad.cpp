@@ -32,6 +32,12 @@ namespace AnimationEngine
 
 	void ScreenQuad::Draw() const
 	{
+		if (shader.expired())
+		{
+			LOG_WARN("Cannot draw ScreenQuad as shader weak reference has expired.");
+			return;
+		}
+
 		const Memory::WeakPointer<IShader> shaderPtr{ shader };
 
 		shaderPtr->Bind();
@@ -42,7 +48,7 @@ namespace AnimationEngine
 
 			texturePtr->Bind();
 
-			shaderPtr->SetUniformInt(0, "screenTexture");
+			shaderPtr->SetUniformInt(0, texturePtr->GetName());
 		}
 
 		vertexArrayObject->Bind();

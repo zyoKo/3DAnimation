@@ -30,12 +30,17 @@ namespace AnimationEngine
 		GL_CALL(glDeleteFramebuffers, 1, &frameBuffer);
 	}
 
-	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample)
+	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample, std::string name)
 	{
 		if (sample)
 		{
 			frameBufferTextures.reserve(frameBufferTextures.size() + 1);
 			frameBufferTextures.emplace_back(std::make_shared<BufferTexture>(window, type));
+
+			if (!name.empty())
+			{
+				frameBufferTextures.back()->SetName(std::move(name));
+			}
 		}
 
 		int nextAttachment;
