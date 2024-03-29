@@ -38,7 +38,6 @@ namespace AnimationEngine
 		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, POSITION_TEXTURE, 16);
 		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, NORMAL_TEXTURE, 16);
 		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, ALBEDO_TEXTURE, 8);
-		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, SPECULAR_TEXTURE, 8);
 
 		const auto totalBuffers = static_cast<int>(frameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;
@@ -61,20 +60,24 @@ namespace AnimationEngine
 		srand(13);
 		lightPositions.reserve(NR_LIGHTS);
 		lightColors.reserve(NR_LIGHTS);
-		for (unsigned int i = 0; i < NR_LIGHTS; i++)
-		{
-		    // calculate slightly random offsets
-		    float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-		    float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
-		    float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-		    lightPositions.emplace_back(xPos, yPos, zPos);
 
-		    // also calculate random color
-		    float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		    float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		    float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		    lightColors.emplace_back(rColor, gColor, bColor);
-		}
+		lightPositions.emplace_back(100.0f, 100.0f, 100.0f);
+		lightColors.emplace_back(1.0f, 0.2f, 0.2f);
+
+		//for (unsigned int i = 0; i < NR_LIGHTS; i++)
+		//{
+		//    // calculate slightly random offsets
+		//    float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+		//    float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
+		//    float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+		//    lightPositions.emplace_back(xPos, yPos, zPos);
+		//
+		//    // also calculate random color
+		//    float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+		//    float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+		//    float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+		//    lightColors.emplace_back(rColor, gColor, bColor);
+		//}
 
 		screenQuad = std::make_shared<ScreenQuad>();
 		screenQuad->Initialize();
@@ -107,14 +110,13 @@ namespace AnimationEngine
 		const Memory::WeakPointer<IShader> lightingPassShader{ shaderLightingPass };
 		lightingPassShader->Bind();
 
-		int currentSlot = 0;
-		for (auto& frameBufferTexture : frameBuffer->GetFrameBufferTextures())
+		const Memory::WeakPointer<IWindow> windowPtr{ window };
+
+		if (glfwGetKey(static_cast<GLFWwindow*>(windowPtr->GetNativeWindow()), GLFW_KEY_B) == GLFW_PRESS)
 		{
-			frameBufferTexture->Bind(currentSlot);
-			++currentSlot;
+		    lightPositions[0] = { lightPositions[0].x + 5.0f, lightPositions[0].y, lightPositions[0].z };
 		}
 
-		// TODO: Create Storage Buffer instead of this bs
 		for (unsigned i = 0; i < lightPositions.size(); ++i)
 		{
 			lightingPassShader->SetUniformVector3F(lightPositions[i],	"lights[" + std::to_string(i) + "].Position");
@@ -130,12 +132,17 @@ namespace AnimationEngine
 
 		lightingPassShader->UnBind();
 
+		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
+		{
+			screenQuad->AddTexture(texture);
+		}
+
 		screenQuad->Draw();
 
 		GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer->GetBufferID());
 		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0);
 
-		const Memory::WeakPointer<IWindow> windowPtr{ window };
+		//const Memory::WeakPointer<IWindow> windowPtr{ window };
 
 		const auto width  = static_cast<int>(windowPtr->GetWidth());
 		const auto height = static_cast<int>(windowPtr->GetHeight());

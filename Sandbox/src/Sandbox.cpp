@@ -1,5 +1,6 @@
 #include "Sandbox.h"
 
+#include "Animation/Animator.h"
 #include "Components/GridMesh.h"
 #include "Core/Application/CoreEngine.h"
 #include "Core/Memory/WeakPointer.h"

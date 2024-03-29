@@ -46,8 +46,8 @@ namespace AnimationEngine
 		for (const auto& texture : textures)
 		{
 			const Memory::WeakPointer<BufferTexture> texturePtr{ texture };
+
 			texturePtr->Bind(currentTextureSlot);
-			shaderPtr->SetUniformInt(currentTextureSlot, texturePtr->GetName());
 
 			++currentTextureSlot;
 		}
@@ -77,6 +77,17 @@ namespace AnimationEngine
 
 	void ScreenQuad::AddTexture(std::weak_ptr<BufferTexture> texture) noexcept
 	{
+		const Memory::WeakPointer<BufferTexture> incomingTexturePtr{ texture };
+		for (const auto& memberTexture : textures)
+		{
+			Memory::WeakPointer<BufferTexture> memberTexturePtr{ memberTexture };
+
+			if (memberTexturePtr.GetShared() == incomingTexturePtr.GetShared())
+			{
+				return;
+			}
+		}
+
 		textures.push_back(std::move(texture));
 	}
 
@@ -121,8 +132,20 @@ namespace AnimationEngine
 	{
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
 
-		const std::string frameBufferVertexShaderPath = "./assets/shaders/frame_buffer_test.vert";
-		const std::string frameBufferFragmentShaderPath = "./assets/shaders/frame_buffer_test.frag";
+		const std::string frameBufferVertexShaderPath	= "./assets/shaders/Deferred/lighting_pass.vert";
+		const std::string frameBufferFragmentShaderPath = "./assets/shaders/Deferred/lighting_pass.frag";
 		shader = assetManager->CreateShader("FrameBufferTest", frameBufferVertexShaderPath, frameBufferFragmentShaderPath);
+
+		const Memory::WeakPointer<IShader> lightingPassShader{ shader };
+
+		shader.lock()->Bind();
+		const std::vector<std::string> tempUniformNames{ "gPosition", "gNormal", "gAlbedoSpec" };
+		int currentSlot = 0;
+		for (int i = 0; i < tempUniformNames.size(); ++i)
+		{
+			shader.lock()->SetUniformInt(currentSlot, tempUniformNames[currentSlot]);
+			++currentSlot;
+		}
+		shader.lock()->UnBind();
 	}
 }

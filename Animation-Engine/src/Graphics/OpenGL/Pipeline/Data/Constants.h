@@ -23,7 +23,7 @@ namespace AnimationEngine
 	//-- Shader Files --//
 
 	//-- Lights Data --//
-	static constexpr unsigned NR_LIGHTS		{ 32 };
+	static constexpr unsigned NR_LIGHTS		{ 1 };
 	static constexpr float LIGHT_LINEAR		{ 0.7f };
 	static constexpr float LIGHT_QUADRATIC	{ 1.8f };
 	//-- !Lights Data --//
