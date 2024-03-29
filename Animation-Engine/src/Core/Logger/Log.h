@@ -36,7 +36,7 @@ namespace AnimationEngine
 			std::string formattedMessage = std::format("Condition \"{0}\" failed! ", #condition); \
 			formattedMessage += std::format(message, __VA_ARGS__); \
 			LOG_ERROR(formattedMessage);\
-			__debugbreak();\
+			std::terminate();\
 		}\
 	}\
 	while(0)

@@ -21,6 +21,8 @@ namespace AnimationEngine
 	{
 	public:
 		AnimationStorage();
+
+		void AddAssetToStorage(const std::string& filename, const std::vector<std::shared_ptr<ITexture2D>>& textures);
 	
 		void AddAssetToStorage(const std::string& filename, const std::shared_ptr<ITexture2D>& textureDiffuse = nullptr);
 	
@@ -29,6 +31,8 @@ namespace AnimationEngine
 		Animation* GetAnimationForCurrentlyBoundIndex() const;
 
 		ITexture2D* GetDiffuseTextureFromCurrentlyBoundIndex() const;
+
+		ITexture2D* GetSpecularTextureFromCurrentlyBoundIndex() const;
 	
 		void ChangeModel();
 	
@@ -38,6 +42,8 @@ namespace AnimationEngine
 		std::vector<std::shared_ptr<Animation>> animationList;
 
 		std::vector<std::shared_ptr<ITexture2D>> diffuseTextures;
+
+		std::vector<std::shared_ptr<ITexture2D>> specularTextures;
 	
 		int currentIndex;
 	};

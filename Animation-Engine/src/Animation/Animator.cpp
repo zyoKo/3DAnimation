@@ -65,6 +65,7 @@ namespace AnimationEngine
 
 		animationShaderPtr->Bind();
 		animationShaderPtr->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
+		animationShaderPtr->SetUniformInt(1, animationStorage->GetSpecularTextureFromCurrentlyBoundIndex()->GetTextureName());
 		for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
 		{
 			std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";

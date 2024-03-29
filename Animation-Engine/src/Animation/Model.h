@@ -30,6 +30,8 @@ namespace AnimationEngine
 
 		int& GetBoneCount();
 
+		void SetTextures(const std::vector<std::shared_ptr<ITexture2D>>& textures);
+
 		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
 
 	private:

@@ -18,6 +18,7 @@ namespace Sandbox
 
 		//-- Texture Paths --//
 		const std::string dreyarDiffuseTextureFile	= "./assets/dreyar/textures/Dreyar_diffuse.png";
+		const std::string dreyarSpecularTextureFile	= "./assets/dreyar/textures/Dreyar_specular.png";
 		const std::string gridTextureFile			= "./assets/grid.png";
 
 		//-- Shader Paths --//
@@ -34,6 +35,9 @@ namespace Sandbox
 		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse { assetManager->CreateTexture(dreyarDiffuseTextureFile) };
 		modelTextureDiffuse->SetTextureName("texture_diffuse1");
 
+		const Memory::WeakPointer<ITexture2D> modelTextureSpecular { assetManager->CreateTexture(dreyarSpecularTextureFile) };
+		modelTextureSpecular->SetTextureName("texture_specular1");
+
 		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ assetManager->CreateTexture(gridTextureFile) };
 		gridTexturePtr->SetTextureName("gridTexture");
 
@@ -42,8 +46,8 @@ namespace Sandbox
 
 		// Adding Model And Animation to Storage
 		//animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
-		animationStorage->AddAssetToStorage(dreyar2ColladaFile, modelTextureDiffuse.GetShared());
-		animationStorage->AddAssetToStorage(dreyar3ColladaFile, modelTextureDiffuse.GetShared());
+		animationStorage->AddAssetToStorage(dreyar2ColladaFile, { modelTextureDiffuse.GetShared(), modelTextureSpecular.GetShared() });
+		animationStorage->AddAssetToStorage(dreyar3ColladaFile, { modelTextureDiffuse.GetShared(), modelTextureSpecular.GetShared() });
 
 		gridMesh = std::make_unique<GridMesh>();
 	}

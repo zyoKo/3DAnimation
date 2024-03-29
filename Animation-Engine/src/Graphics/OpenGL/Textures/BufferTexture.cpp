@@ -9,7 +9,7 @@
 
 namespace AnimationEngine
 {
-	BufferTexture::BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int width /* = 0 */, int height /* = 0 */, int levels /* = 0 */)
+	BufferTexture::BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int floatingPrecision, int width /* = 0 */, int height /* = 0 */, int levels /* = 0 */)
 		:	name("Texture"),
 			window(std::move(windowsWindow)),
 			attachmentType(type)
@@ -22,7 +22,7 @@ namespace AnimationEngine
 		const int bufferWidth  = width  > 0 ? width  : static_cast<int>(windowPtr->GetWidth());
 		const int bufferHeight = height > 0 ? height : static_cast<int>(windowPtr->GetHeight());
 
-		const int internalFormat = AttachmentTypeToInternalFormat(type);
+		const int internalFormat = AttachmentTypeToInternalFormat(type, floatingPrecision);
 
 		GL_CALL(glTextureStorage2D, textureID, levels, internalFormat, bufferWidth, bufferHeight);
 
@@ -40,9 +40,15 @@ namespace AnimationEngine
 		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
 	}
 
+	void BufferTexture::Bind(unsigned slot) const
+	{
+		GL_CALL(glActiveTexture, GL_TEXTURE0 + slot);
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
+	}
+
 	void BufferTexture::UnBind() const
 	{
-		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, 0);
 	}
 
 	unsigned BufferTexture::GetTextureID() const

@@ -12,11 +12,13 @@ namespace AnimationEngine
 	class BufferTexture
 	{
 	public:
-		BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int width = 0, int height = 0, int levels = 1);
+		BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int floatingPrecision, int width = 0, int height = 0, int levels = 1);
 
 		~BufferTexture();
 
 		void Bind() const;
+
+		void Bind(unsigned slot) const;
 
 		void UnBind() const;
 

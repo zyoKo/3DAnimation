@@ -22,7 +22,7 @@ namespace AnimationEngine
 
 		~FrameBuffer();
 
-		void CreateAttachment(AttachmentType type, bool sample, std::string name = "");
+		void CreateAttachment(AttachmentType type, bool sample, std::string name = "", int floatingPrecision = 0);
 
 		void Bind() const;
 
@@ -33,6 +33,8 @@ namespace AnimationEngine
 		void IsValid() const;
 
 		const std::vector<std::shared_ptr<BufferTexture>>& GetFrameBufferTextures() const;
+
+		ColorAttachment GetLastColorAttachment() const;
 
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 

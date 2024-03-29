@@ -18,7 +18,7 @@ namespace AnimationEngine
 
 		GL_CALL(glGenRenderbuffers, 1, &renderBufferObject);
 
-		const int internalFormat = AttachmentTypeToInternalFormat(type);
+		const int internalFormat = AttachmentTypeToInternalFormat(type, 0);
 		const int width  = static_cast<int>(windowPtr->GetWidth());
 		const int height = static_cast<int>(windowPtr->GetHeight());
 

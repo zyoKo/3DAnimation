@@ -30,12 +30,12 @@ namespace AnimationEngine
 		GL_CALL(glDeleteFramebuffers, 1, &frameBuffer);
 	}
 
-	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample, std::string name)
+	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample, std::string name /* = "" */, int floatingPrecision /* = 0 */)
 	{
 		if (sample)
 		{
 			frameBufferTextures.reserve(frameBufferTextures.size() + 1);
-			frameBufferTextures.emplace_back(std::make_shared<BufferTexture>(window, type));
+			frameBufferTextures.emplace_back(std::make_shared<BufferTexture>(window, type, floatingPrecision));
 
 			if (!name.empty())
 			{
@@ -69,15 +69,14 @@ namespace AnimationEngine
 		{
 			const unsigned textureID = frameBufferTextures.back()->GetTextureID();
 			GL_CALL(glFramebufferTexture2D, GL_FRAMEBUFFER, nextAttachment, GL_TEXTURE_2D, textureID, 0);
+			return;
 		}
-		else
-		{
-			renderBuffers.reserve(frameBufferTextures.size() + 1);
-			renderBuffers.emplace_back(std::make_shared<RenderBuffer>(window, type));
+		
+		renderBuffers.reserve(frameBufferTextures.size() + 1);
+		renderBuffers.emplace_back(std::make_shared<RenderBuffer>(window, type));
 
-			const unsigned bufferID = renderBuffers.back()->GetBufferID();
-			GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, nextAttachment, GL_RENDERBUFFER, bufferID);
-		}
+		const unsigned bufferID = renderBuffers.back()->GetBufferID();
+		GL_CALL(glFramebufferRenderbuffer, GL_FRAMEBUFFER, nextAttachment, GL_RENDERBUFFER, bufferID);
 	}
 
 	void FrameBuffer::Bind() const
@@ -87,10 +86,10 @@ namespace AnimationEngine
 
 	void FrameBuffer::UnBind() const
 	{
-		for (const auto& renderBuffer : renderBuffers)
-		{
-			renderBuffer->UnBind();
-		}
+		//for (const auto& renderBuffer : renderBuffers)
+		//{
+		//	renderBuffer->UnBind();
+		//}
 
 		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 	}
@@ -156,6 +155,11 @@ namespace AnimationEngine
 	const std::vector<std::shared_ptr<BufferTexture>>& FrameBuffer::GetFrameBufferTextures() const
 	{
 		return frameBufferTextures;
+	}
+
+	ColorAttachment FrameBuffer::GetLastColorAttachment() const
+	{
+		return lastColorAttachment;
 	}
 
 	void FrameBuffer::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept

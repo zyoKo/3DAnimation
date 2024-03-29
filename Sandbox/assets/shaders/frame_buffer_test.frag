@@ -4,12 +4,12 @@ out vec4 fragColor;
 
 in vec2 texCoords;
 
-uniform sampler2D screenTexture;
+uniform sampler2D positionTexture;
 
 void main()
 {
 	// Inversion
-	//fragColor = vec4(vec3(1.0 - texture(screenTexture, texCoords)), 1.0);
+	//fragColor = vec4(vec3(1.0 - texture(positionTexture, texCoords)), 1.0);
 
-	fragColor = texture(screenTexture, texCoords);
+	fragColor = texture(positionTexture, texCoords);
 }

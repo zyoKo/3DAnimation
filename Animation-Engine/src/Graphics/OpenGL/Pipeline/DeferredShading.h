@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPipeline.h"
+#include "Math/Math.h"
 
 namespace AnimationEngine
 {
@@ -30,12 +31,24 @@ namespace AnimationEngine
 
 		void Shutdown() override;
 
+		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
+
 	private:
-		std::vector<std::shared_ptr<FrameBuffer>> frameBuffers;
-
-		std::vector<std::shared_ptr<IShader>> shaders;
-
 		std::shared_ptr<FrameBuffer> frameBuffer;
+
+		//-- Shader --//
+		std::weak_ptr<IShader> shaderGeometryPass;
+
+		std::weak_ptr<IShader> shaderLightingPass;
+
+		//std::weak_ptr<IShader> shaderLightBox;
+		//-- !Shader --//
+
+		//-- Lights Data --//
+		std::vector<Math::Vec3F> lightPositions;
+
+		std::vector<Math::Vec3F> lightColors;
+		//-- !Lights Data --//
 
 		std::shared_ptr<ScreenQuad> screenQuad;
 

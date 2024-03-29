@@ -1,8 +1,9 @@
 #pragma once
 
-#include "glad/glad.h"
-#include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
+#include <glad/glad.h>
 
+#include "Core/Logger/Log.h"
+#include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
 #include "Graphics/OpenGL/Buffers/Structure/VertexBufferElements.h"
 
 namespace AnimationEngine
@@ -121,13 +122,37 @@ namespace AnimationEngine
 		return GL_NONE;
 	}
 
-	inline int AttachmentTypeToInternalFormat(AttachmentType type)
+	inline int OpenGLInternalColorFormatBasedOnPrecision(int floatPrecision)
+	{
+		int internalFormat;
+
+		if (floatPrecision == 8)
+		{
+			internalFormat = GL_RGBA8;
+		}
+		else if (floatPrecision == 16)
+		{
+			internalFormat = GL_RGBA16F;
+		}
+		else if (floatPrecision == 32)
+		{
+			internalFormat = GL_RGBA32F;
+		}
+		else
+		{
+			ANIM_ASSERT(false, "Invalid float precision provided.");
+		}
+
+		return internalFormat;
+	}
+
+	inline int AttachmentTypeToInternalFormat(AttachmentType type, int floatingPrecision) noexcept
 	{
 		int internalFormat;
 		switch(type)
 		{
 		case AttachmentType::DEPTH:
-			internalFormat = GL_DEPTH;
+			internalFormat = GL_DEPTH_COMPONENT;
 			break;
 
 		case AttachmentType::STENCIL:
@@ -140,7 +165,7 @@ namespace AnimationEngine
 
 		default:
 		case AttachmentType::COLOR:
-			internalFormat = GL_RGB4;
+			internalFormat = floatingPrecision > 0 ? OpenGLInternalColorFormatBasedOnPrecision(floatingPrecision) : GL_RGB4;
 			break;
 		}
 
@@ -167,8 +192,8 @@ namespace AnimationEngine
 			type	= GL_UNSIGNED_INT_24_8;
 			break;
 
-		default: 
-		case AttachmentType::COLOR:
+		default:
+		case AttachmentType::COLOR:	// TODO: Handle floating precision 8, 16, 32... format = GL_RGBA/GL_RGBA16F/GL_RGBA32F... type = GL_FLOAT
 			format	= GL_RGB;
 			type	= GL_UNSIGNED_BYTE;
 			break;

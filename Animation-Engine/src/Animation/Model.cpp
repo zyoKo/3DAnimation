@@ -125,6 +125,17 @@ namespace AnimationEngine
 		return boneCounter;
 	}
 
+	void Model::SetTextures(const std::vector<std::shared_ptr<ITexture2D>>& textures)
+	{
+		for (auto& mesh : meshes)
+		{
+			for (auto& texture : textures)
+			{
+				mesh.AddTexture(texture);
+			}
+		}
+	}
+
 	void Model::ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize)
 	{
 		for (unsigned boneIndex = 0; boneIndex < aiMesh->mNumBones; ++boneIndex)

@@ -42,25 +42,21 @@ namespace AnimationEngine
 
 		shaderPtr->Bind();
 
+		int currentTextureSlot = 0;
 		for (const auto& texture : textures)
 		{
 			const Memory::WeakPointer<BufferTexture> texturePtr{ texture };
+			texturePtr->Bind(currentTextureSlot);
+			shaderPtr->SetUniformInt(currentTextureSlot, texturePtr->GetName());
 
-			texturePtr->Bind();
-
-			shaderPtr->SetUniformInt(0, texturePtr->GetName());
+			++currentTextureSlot;
 		}
 
 		vertexArrayObject->Bind();
 		GL_CALL(glDrawArrays, DrawModeToGLEnum(DebugDrawMode::Triangles), 0, static_cast<int>(vertices.size()));
 		vertexArrayObject->UnBind();
 
-		for (const auto& texture : textures)
-		{
-			const Memory::WeakPointer<BufferTexture> texturePtr{ texture };
-		
-			texturePtr->UnBind();
-		}
+		GL_CALL(glBindTexture, GL_TEXTURE_2D, 0);
 
 		shaderPtr->UnBind();
 	}
