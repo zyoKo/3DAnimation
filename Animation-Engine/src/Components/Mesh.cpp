@@ -2,14 +2,19 @@
 
 #include "Mesh.h"
 
+#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
+#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
+#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Camera/Camera.h"
 #include "Core/Logger/GLDebug.h"
 #include "Data/Constants.h"
+#include "Graphics/GraphicsAPI.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
 namespace AnimationEngine
 {
 	Mesh::Mesh()
+		:	location(0.0f, 0.0f, 0.0f)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -33,7 +38,8 @@ namespace AnimationEngine
 			tangents(std::move(tangents)),
 			biTangents(std::move(biTangents)),
 			boneData(std::move(boneData)),
-			indices(std::move(indices))
+			indices(std::move(indices)),
+			location(0.0f, 0.0f, 0.0f)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -143,6 +149,11 @@ namespace AnimationEngine
 		}
 	}
 
+	void Mesh::SetLocation(const glm::vec3& newLocation) noexcept
+	{
+		location = newLocation;
+	}
+
 	void Mesh::Draw(const std::shared_ptr<IShader>& shader) const
 	{
 		shader->Bind();
@@ -157,7 +168,9 @@ namespace AnimationEngine
 
 		const glm::mat4 projection	= camera->GetProjectionMatrix();
 		const glm::mat4 view		= camera->GetViewMatrix();
-		const glm::mat4 model		= glm::mat4(1.0f);
+
+		glm::mat4 model	= glm::mat4(1.0f);
+		model = glm::translate(model, location);
 
 		shader->SetUniformMatrix4F(projection, "projection");
 		shader->SetUniformMatrix4F(view, "view");

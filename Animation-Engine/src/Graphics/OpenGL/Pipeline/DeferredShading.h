@@ -44,12 +44,6 @@ namespace AnimationEngine
 		//std::weak_ptr<IShader> shaderLightBox;
 		//-- !Shader --//
 
-		//-- Lights Data --//
-		std::vector<Math::Vec3F> lightPositions;
-
-		std::vector<Math::Vec3F> lightColors;
-		//-- !Lights Data --//
-
 		std::shared_ptr<ScreenQuad> screenQuad;
 
 		std::weak_ptr<IWindow> window;

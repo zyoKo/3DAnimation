@@ -7,12 +7,12 @@
 
 namespace AnimationEngine
 {
-	std::weak_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath)
+	std::weak_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath, bool flipOnLoad /* = true */)
 	{
 		const auto textureName = Utils::RetrieveFilenameFromFilepath(filepath);
 
 		int width, height, depth;
-		auto textureData = LoadTexture(filepath, &width, &height, &depth);
+		auto textureData = LoadTexture(flipOnLoad, filepath, &width, &height, &depth);
 
 		auto texture2D = GraphicsAPI::CreateTexture2D(textureData, width, height, depth);
 		texture2D->SetTextureName(textureName);
@@ -26,6 +26,12 @@ namespace AnimationEngine
 
 	std::weak_ptr<IShader> AssetManager::CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath)
 	{
+		auto retrievedShader = shaderStore.RetrieveFromStorage(shaderName);
+		if (!retrievedShader.expired())
+		{
+			return retrievedShader;
+		}
+
 		const std::string vertexShaderSource = ReadShaderFile(vertexFilepath);
 		const std::string fragmentShaderSource = ReadShaderFile(fragmentFilepath);
 
@@ -54,9 +60,9 @@ namespace AnimationEngine
 	}
 
 	// Private/Helper Functions /////////////////////////
-	stbi_uc* AssetManager::LoadTexture(const std::string& textureFile, int* width, int* height, int* depth)
+	stbi_uc* AssetManager::LoadTexture(bool flipOnLoad, const std::string& textureFile, int* width, int* height, int* depth)
 	{
-		stbi_set_flip_vertically_on_load(1);
+		stbi_set_flip_vertically_on_load(flipOnLoad);
 
 		stbi_uc* data = stbi_load(textureFile.c_str(), width, height, depth, 4);
 
@@ -85,7 +91,7 @@ namespace AnimationEngine
 			stream.seekg(0, std::ios::beg);
 			stream.read(shaderSource.data(), fileSize);
 		}
-		catch (std::exception& e)
+		catch ([[maybe_unused]] std::exception& e)
 		{
 			ANIM_ASSERT(false, "Failed to open shader source file: {0}\nException Raised: {1}", filepath, e.what());
 		}

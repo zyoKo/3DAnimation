@@ -6,11 +6,11 @@
 
 #include "AssetManager/AssetManager.h"
 #include "Core/Utilities/Utilites.h"
+#include "Graphics/OpenGL/Textures/ITexture2D.h"
 
 namespace AnimationEngine
 {
 	Model::Model(const std::string& path)
-		:	gammaCorrection(false)
 	{
 		LoadModel(path);
 	}
@@ -24,6 +24,11 @@ namespace AnimationEngine
 	}
 
 	const std::vector<Mesh>& Model::GetMeshes() const
+	{
+		return meshes;
+	}
+
+	std::vector<Mesh>& Model::GetMeshes()
 	{
 		return meshes;
 	}

@@ -6,13 +6,12 @@
 #include <assimp/scene.h>
 
 #include "Components/Mesh.h"
-#include "Components/DebugMesh.h"
 #include "Animation/DataTypes/BoneInfo.h"
-#include "Graphics/OpenGL/Textures/ITexture2D.h"
 
 namespace AnimationEngine
 {
 	class IShader;
+	class ITexture2D;
 }
 
 namespace AnimationEngine
@@ -26,6 +25,8 @@ namespace AnimationEngine
 
 		const std::vector<Mesh>& GetMeshes() const;
 
+		std::vector<Mesh>& GetMeshes();
+
 		std::map<std::string, BoneInfo>& GetBoneInfoMap();
 
 		int& GetBoneCount();
@@ -36,8 +37,6 @@ namespace AnimationEngine
 
 	private:
 		std::vector<Mesh> meshes;
-
-		bool gammaCorrection;
 
 		std::map<std::string, BoneInfo> boneInfoMap;
 

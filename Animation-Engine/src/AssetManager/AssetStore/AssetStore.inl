@@ -22,7 +22,7 @@ namespace AnimationEngine
 	{
 		if (!assetStorage.contains(assetName))
 		{
-			LOG_WARN("Failed to retrive asset[{0}] from the Asset Storage!", assetName);
+			LOG_INFO("Failed to retrive asset[{0}] from the Asset Storage!", assetName);
 			return {};
 		}
 

@@ -1,12 +1,12 @@
 #include "Sandbox.h"
 
-#include "Animation/Animator.h"
-#include "Components/GridMesh.h"
 #include "Core/Application/CoreEngine.h"
 #include "Core/Memory/WeakPointer.h"
-#include "Core/ServiceLocators/Animation/AnimatorLocator.h"
-#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
+#include "AssetManager/Interface/IAssetManager.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
+#include "Animation/Model.h"
+#include "Components/GridMesh.h"
+#include "Data/Constants.h"
 
 namespace Sandbox
 {
@@ -14,85 +14,60 @@ namespace Sandbox
 	{
 		using namespace AnimationEngine;
 
-		auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
-		auto* assetManager		= AssetManagerLocator::GetAssetManager();
+		//-- ## ASSET LOADING ## --//
+		assetManager = AssetManagerLocator::GetAssetManager();
 
-		//-- Texture Paths --//
-		const std::string dreyarDiffuseTextureFile	= "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const std::string dreyarSpecularTextureFile	= "./assets/dreyar/textures/Dreyar_specular.png";
-		const std::string gridTextureFile			= "./assets/grid.png";
+		//-- Texture Creation --//
+		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse { assetManager->CreateTexture(BACKPACK_DIFFUSE_TEXTURE_FILE_PATH, false) };
+		modelTextureDiffuse->SetTextureName(TEXTURE_DIFFUSE_1);
 
-		//-- Shader Paths --//
-		const std::string vertexShaderFile			= "./assets/shaders/anim_model.vert";
-		const std::string fragmentShaderFile		= "./assets/shaders/anim_model.frag";
-		const std::string gridVertexShaderFile		= "./assets/shaders/inf_grid.vert";
-		const std::string gridFragmentShaderFile	= "./assets/shaders/inf_grid.frag";
+		const Memory::WeakPointer<ITexture2D> modelTextureSpecular { assetManager->CreateTexture(BACKPACK_SPECULAR_TEXTURE_FILE_PATH, false) };
+		modelTextureSpecular->SetTextureName(TEXTURE_SPECULAR_1);
 
-		//-- Model/Animation Path --//
-		//const std::string dreyar1ColladaFile		= "./assets/dreyar/Capoeira.dae";
-		const std::string dreyar2ColladaFile		= "./assets/dreyar/Walking.dae";
-		const std::string dreyar3ColladaFile		= "./assets/dreyar/Running.dae";
+		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ assetManager->CreateTexture(FLOOR_DIFFUSE_FILE_PATH) };
+		gridTexturePtr->SetTextureName(GRID_SHADER_REFERENCE_NAME);
+		//-- !Texture Creation --//
 
-		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse { assetManager->CreateTexture(dreyarDiffuseTextureFile) };
-		modelTextureDiffuse->SetTextureName("texture_diffuse1");
+		//-- Shader Creation --//
+		assetManager->CreateShader(BACKPACK_SHADER_NAME, BACKPACK_VERTEX_SHADER_FILE_PATH, BACKPACK_FRAGMENT_SHADER_FILE_PATH);
+		assetManager->CreateShader(GRID_SHADER_NAME, GRID_VERTEX_SHADER_FILE_PATH, GRID_FRAGMENT_SHADER_FILE_PATH);
+		//-- !Shader Creation --//
 
-		const Memory::WeakPointer<ITexture2D> modelTextureSpecular { assetManager->CreateTexture(dreyarSpecularTextureFile) };
-		modelTextureSpecular->SetTextureName("texture_specular1");
+		//-- ## !ASSET LOADING ## --//
 
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ assetManager->CreateTexture(gridTextureFile) };
-		gridTexturePtr->SetTextureName("gridTexture");
-
-		assetManager->CreateShader("AnimationShader", vertexShaderFile, fragmentShaderFile);
-		assetManager->CreateShader("GridShader", gridVertexShaderFile, gridFragmentShaderFile);
-
-		// Adding Model And Animation to Storage
-		//animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
-		animationStorage->AddAssetToStorage(dreyar2ColladaFile, { modelTextureDiffuse.GetShared(), modelTextureSpecular.GetShared() });
-		animationStorage->AddAssetToStorage(dreyar3ColladaFile, { modelTextureDiffuse.GetShared(), modelTextureSpecular.GetShared() });
-
-		gridMesh = std::make_unique<GridMesh>();
+		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
+		gridMesh = std::make_shared<GridMesh>();
 	}
 
 	void SandboxApp::PreUpdate()
 	{
 		using namespace AnimationEngine;
 
-		const auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
-		const auto* assetManager		= AssetManagerLocator::GetAssetManager();
-		auto* animator					= AnimatorLocator::GetAnimator();
+		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
+		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
+		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
 
-		const Memory::WeakPointer<IShader> animationShaderPtr	{ assetManager->RetrieveShaderFromStorage("AnimationShader") };
-		const Memory::WeakPointer<IShader> gridShaderPtr		{ assetManager->RetrieveShaderFromStorage("GridShader") };
-
-		const Memory::WeakPointer<ITexture2D> textureDiffusePtr	{ assetManager->RetrieveTextureFromStorage("Dreyar_diffuse") };
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr	{ assetManager->RetrieveTextureFromStorage("grid") };
-
-		animator->ChangeAnimation(animationStorage->GetAnimationForCurrentlyBoundIndex());
-		animator->SetShader(animationShaderPtr.GetWeakPointer());
-
-		gridMesh->SetGridTexture(gridTexturePtr.GetWeakPointer());
+		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
+		gridMesh->SetGridTexture(gridTexture);
 	}
 
 	void SandboxApp::Update()
 	{
 		using namespace AnimationEngine;
 
-		const auto* assetManager		= AssetManagerLocator::GetAssetManager();
-		const auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
+		const Memory::WeakPointer<IShader> backPackShaderPtr { assetManager->RetrieveShaderFromStorage(BACKPACK_SHADER_NAME) };
+		const Memory::WeakPointer<IShader> gridShaderPtr	 { assetManager->RetrieveShaderFromStorage("GridShader") };
 
-		auto* animator	= AnimatorLocator::GetAnimator();
-		
-		const Memory::WeakPointer<IShader> animationShaderPtr	{ assetManager->RetrieveShaderFromStorage("AnimationShader") };
-		const Memory::WeakPointer<IShader> gridShaderPtr		{ assetManager->RetrieveShaderFromStorage("GridShader") };
+		for (unsigned i = 0; i < 9; ++i)
+		{
+			for (auto& mesh : backPack->GetMeshes())
+			{
+				mesh.SetLocation(BACKPACK_LOCATIONS[i]);
+			}
 
-		const Memory::WeakPointer<ITexture2D> textureDiffusePtr	{ assetManager->RetrieveTextureFromStorage("Dreyar_diffuse") };
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr	{ assetManager->RetrieveTextureFromStorage("grid") };
+			backPack->Draw(backPackShaderPtr.GetShared());
+		}
 
-		animator->UpdateAnimation();
-		//animator->ResetAnimation();
-
-		animationStorage->GetModelForCurrentlyBoundIndex()->Draw(animationShaderPtr.GetShared());
-		
 		gridMesh->Update(gridShaderPtr.GetShared());
 	}
 
@@ -101,6 +76,7 @@ namespace Sandbox
 
 	void SandboxApp::Shutdown()
 	{
+		backPack.reset();
 		gridMesh.reset();
 	}
 }

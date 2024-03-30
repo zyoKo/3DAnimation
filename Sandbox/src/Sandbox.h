@@ -1,7 +1,15 @@
 #pragma once
 
-#include "Components/GridMesh.h"
+#include <memory>
+
 #include "Core/Application/Interface/IApplication.h"
+
+namespace AnimationEngine
+{
+	class GridMesh;
+	class Model;
+	class IAssetManager;
+}
 
 namespace Sandbox
 {
@@ -21,6 +29,10 @@ namespace Sandbox
 	private:
 		bool enableModelMesh{ true };
 
-		std::unique_ptr<AnimationEngine::GridMesh> gridMesh;
+		AnimationEngine::IAssetManager* assetManager{ nullptr };
+
+		std::shared_ptr<AnimationEngine::Model> backPack;
+
+		std::shared_ptr<AnimationEngine::GridMesh> gridMesh;
 	};
 }

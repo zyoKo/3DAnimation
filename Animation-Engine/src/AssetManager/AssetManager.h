@@ -12,7 +12,7 @@ namespace AnimationEngine
 	class AssetManager : public IAssetManager
 	{
 	public:
-		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override;
+		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad /* = true */) override;
 
 		std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
 
@@ -27,7 +27,7 @@ namespace AnimationEngine
 
 		AssetStore<Shader> shaderStore;
 
-		static stbi_uc* LoadTexture(const std::string& textureFile, int* width, int* height, int* depth);
+		static stbi_uc* LoadTexture(bool flipOnLoad, const std::string& textureFile, int* width, int* height, int* depth);
 
 		static std::string ReadShaderFile(const std::string& filepath);
 	};

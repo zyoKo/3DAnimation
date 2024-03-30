@@ -7,7 +7,6 @@
 #include "Graphics/OpenGL/OpenGLContext/Interfaces/IContext.h"
 #include "Graphics/OpenGL/Shader/Interface/IShader.h"
 #include "Components/ScreenQuad.h"
-#include "Components/Camera/Camera.h"
 #include "Core/Logger/GLDebug.h"
 #include "Core/Memory/WeakPointer.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
@@ -31,7 +30,7 @@ namespace AnimationEngine
 
 		shaderGeometryPass	= assetManager->CreateShader(GEOMETRY_PASS_SHADER_NAME, GEOMETRY_PASS_VERTEX_SHADER_PATH, GEOMETRY_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightingPass	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
-		//shaderLightBox		= assetManager->CreateShader(LIGHTS_SHADER_NAME, LIGHTS_SHADER_VERTEX_PATH, LIGHTS_SHADER_FRAGMENT_PATH);
+		//shaderLightBox = assetManager->CreateShader(LIGHTS_SHADER_NAME, LIGHTS_SHADER_VERTEX_PATH, LIGHTS_SHADER_FRAGMENT_PATH);
 
 		frameBuffer = std::make_shared<FrameBuffer>(window);
 		frameBuffer->Bind();
@@ -57,30 +56,14 @@ namespace AnimationEngine
 		frameBuffer->IsValid();
 		frameBuffer->UnBind();
 
-		srand(13);
-		lightPositions.reserve(NR_LIGHTS);
-		lightColors.reserve(NR_LIGHTS);
-
-		lightPositions.emplace_back(100.0f, 100.0f, 100.0f);
-		lightColors.emplace_back(1.0f, 0.2f, 0.2f);
-
-		//for (unsigned int i = 0; i < NR_LIGHTS; i++)
-		//{
-		//    // calculate slightly random offsets
-		//    float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-		//    float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
-		//    float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-		//    lightPositions.emplace_back(xPos, yPos, zPos);
-		//
-		//    // also calculate random color
-		//    float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		//    float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		//    float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-		//    lightColors.emplace_back(rColor, gColor, bColor);
-		//}
-
 		screenQuad = std::make_shared<ScreenQuad>();
+		screenQuad->SetShader(shaderLightingPass);
+		screenQuad->SetWindowsWindow(window);
 		screenQuad->Initialize();
+		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
+		{
+			screenQuad->AddTexture(texture);
+		}
 	}
 
 	void DeferredShading::PreUpdateSetup()
@@ -107,43 +90,14 @@ namespace AnimationEngine
 
 		GraphicsAPI::GetContext()->ClearBuffers();
 
-		const Memory::WeakPointer<IShader> lightingPassShader{ shaderLightingPass };
-		lightingPassShader->Bind();
-
-		const Memory::WeakPointer<IWindow> windowPtr{ window };
-
-		if (glfwGetKey(static_cast<GLFWwindow*>(windowPtr->GetNativeWindow()), GLFW_KEY_B) == GLFW_PRESS)
-		{
-		    lightPositions[0] = { lightPositions[0].x + 5.0f, lightPositions[0].y, lightPositions[0].z };
-		}
-
-		for (unsigned i = 0; i < lightPositions.size(); ++i)
-		{
-			lightingPassShader->SetUniformVector3F(lightPositions[i],	"lights[" + std::to_string(i) + "].Position");
-			lightingPassShader->SetUniformVector3F(lightColors[i],		"lights[" + std::to_string(i) + "].Color");
-
-			lightingPassShader->SetUniformFloat(LIGHT_LINEAR,		"lights[" + std::to_string(i) + "].Linear");
-			lightingPassShader->SetUniformFloat(LIGHT_QUADRATIC,	"lights[" + std::to_string(i) + "].Quadratic");
-		}
-
-		const auto* camera = Camera::GetInstance();
-		const Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
-		lightingPassShader->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
-
-		lightingPassShader->UnBind();
-
-		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
-		{
-			screenQuad->AddTexture(texture);
-		}
-
+		//-- 2. Global Lighting Pass --//
+		screenQuad->Update();
 		screenQuad->Draw();
 
 		GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer->GetBufferID());
 		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0);
 
-		//const Memory::WeakPointer<IWindow> windowPtr{ window };
-
+		const Memory::WeakPointer<IWindow> windowPtr{ window };
 		const auto width  = static_cast<int>(windowPtr->GetWidth());
 		const auto height = static_cast<int>(windowPtr->GetHeight());
 
@@ -154,14 +108,10 @@ namespace AnimationEngine
 	}
 
 	void DeferredShading::PostUpdate()
-	{
-		
-	}
+	{ }
 
 	void DeferredShading::Shutdown()
-	{
-		
-	}
+	{ }
 
 	void DeferredShading::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
 	{

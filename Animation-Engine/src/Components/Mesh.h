@@ -1,12 +1,15 @@
 #pragma once
 
-#include <optional>
-
 #include "Animation/DataTypes/BoneData.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
-#include "Graphics/GraphicsAPI.h"
+
+namespace AnimationEngine
+{
+	class IIndexBuffer;
+	class IVertexBuffer;
+	class IVertexArray;
+	class IShader;
+	class ITexture2D;
+}
 
 namespace AnimationEngine
 {
@@ -65,6 +68,8 @@ namespace AnimationEngine
 		void SetTextures(ITexturesList textures);
 		void AddTexture(const std::shared_ptr<ITexture2D>& texture);
 
+		void SetLocation(const glm::vec3& newLocation) noexcept;
+
 	private:
 		Vertices_V3F vertices;
 		Colors_V3F colors;
@@ -79,7 +84,9 @@ namespace AnimationEngine
 
 		ITexturesList textures;
 
-		// Buffers
+		glm::vec3 location;
+
+		// VAO and Buffers
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 		std::shared_ptr<IIndexBuffer> indexBuffer;

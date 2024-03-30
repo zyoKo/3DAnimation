@@ -13,7 +13,7 @@ namespace AnimationEngine
 	public:
 		virtual ~IAssetManager() = default;
 
-		virtual std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) = 0;
+		virtual std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad = true) = 0;
 
 		virtual std::weak_ptr<IShader> CreateShader(
 			const std::string& shaderName, 

@@ -7,7 +7,7 @@ namespace AnimationEngine
 	class NullAssetManager : public IAssetManager
 	{
 	public:
-		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override
+		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad) override
 		{
 			return {};
 		}
