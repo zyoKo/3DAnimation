@@ -6,6 +6,7 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Animation/Model.h"
 #include "Components/GridMesh.h"
+#include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
 
 namespace Sandbox
@@ -49,6 +50,11 @@ namespace Sandbox
 
 		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
 		gridMesh->SetGridTexture(gridTexture);
+
+		auto* camera = Camera::GetInstance();
+		camera->SetCameraPosition({ 7.0f, 14.0f, 13.0f });
+		camera->SetPitch(-21.0f);
+		camera->SetYaw(-120.0f);
 	}
 
 	void SandboxApp::Update()

@@ -14,7 +14,8 @@
 namespace AnimationEngine
 {
 	Mesh::Mesh()
-		:	location(0.0f, 0.0f, 0.0f)
+		:	location(0.0f, 0.0f, 0.0f),
+			scale(1.0f, 1.0f, 1.0f)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -39,7 +40,8 @@ namespace AnimationEngine
 			biTangents(std::move(biTangents)),
 			boneData(std::move(boneData)),
 			indices(std::move(indices)),
-			location(0.0f, 0.0f, 0.0f)
+			location(0.0f, 0.0f, 0.0f),
+			scale(1.0f, 1.0f, 1.0f)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -149,9 +151,14 @@ namespace AnimationEngine
 		}
 	}
 
-	void Mesh::SetLocation(const glm::vec3& newLocation) noexcept
+	void Mesh::SetLocation(const glm::vec3& newLocation)
 	{
 		location = newLocation;
+	}
+
+	void Mesh::SetScale(const glm::vec3& newScale)
+	{
+		scale = newScale;
 	}
 
 	void Mesh::Draw(const std::shared_ptr<IShader>& shader) const
@@ -171,6 +178,7 @@ namespace AnimationEngine
 
 		glm::mat4 model	= glm::mat4(1.0f);
 		model = glm::translate(model, location);
+		model = glm::scale(model, scale);
 
 		shader->SetUniformMatrix4F(projection, "projection");
 		shader->SetUniformMatrix4F(view, "view");

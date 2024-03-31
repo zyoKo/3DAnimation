@@ -14,6 +14,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/OpenGL/Textures/BufferTexture.h"
 #include "Structures/PipelineInitializer.h"
+#include "Animation/Model.h"
 
 namespace AnimationEngine
 {
@@ -30,7 +31,7 @@ namespace AnimationEngine
 
 		shaderGeometryPass	= assetManager->CreateShader(GEOMETRY_PASS_SHADER_NAME, GEOMETRY_PASS_VERTEX_SHADER_PATH, GEOMETRY_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightingPass	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
-		//shaderLightBox = assetManager->CreateShader(LIGHTS_SHADER_NAME, LIGHTS_SHADER_VERTEX_PATH, LIGHTS_SHADER_FRAGMENT_PATH);
+		shaderLightBox		= assetManager->CreateShader(LIGHTS_BOX_SHADER_NAME, LIGHTS_BOX_SHADER_VERTEX_PATH, LIGHTS_BOX_SHADER_FRAGMENT_PATH);
 
 		frameBuffer = std::make_shared<FrameBuffer>(window);
 		frameBuffer->Bind();
@@ -64,6 +65,8 @@ namespace AnimationEngine
 		{
 			screenQuad->AddTexture(texture);
 		}
+
+		lightBoxes = std::make_shared<Model>("./assets/models/box/cube.obj");
 	}
 
 	void DeferredShading::PreUpdateSetup()
@@ -105,6 +108,25 @@ namespace AnimationEngine
 		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 
 		// TODO: Currently not drawing boxes where light is coming from
+		const Memory::WeakPointer<IShader> shaderLightBoxPtr{ shaderLightBox };
+
+		const auto& lightPositions = screenQuad->GetLightPositions();
+		const auto& lightColors = screenQuad->GetLightColors();
+
+		for (unsigned i = 0; i < lightPositions.size(); ++i)
+		{
+			for (auto& mesh : lightBoxes->GetMeshes())
+			{
+				mesh.SetScale({ 0.125f, 0.125f, 0.125f });
+				mesh.SetLocation({ lightPositions[i].x, lightPositions[i].y, lightPositions[i].z });
+			}
+
+			shaderLightBoxPtr->Bind();
+			shaderLightBoxPtr->SetUniformVector3F(lightColors[i], "lightColor");
+			shaderLightBoxPtr->UnBind();
+
+			lightBoxes->Draw(shaderLightBoxPtr.GetShared());
+		}
 	}
 
 	void DeferredShading::PostUpdate()

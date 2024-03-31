@@ -24,6 +24,10 @@ namespace AnimationEngine
 
 		void Draw() const;
 
+		const std::vector<Math::Vec3F>& GetLightPositions() const;
+
+		const std::vector<Math::Vec3F>& GetLightColors() const;
+
 		void SetVertices(std::vector<Math::Vec2F> vertexData) noexcept;
 
 		void SetTextureCoordinates(std::vector<Math::Vec2F> texCoords) noexcept;

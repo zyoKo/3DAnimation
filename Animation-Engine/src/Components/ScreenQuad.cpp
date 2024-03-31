@@ -46,7 +46,7 @@ namespace AnimationEngine
 			{
 			    // calculate slightly random offsets
 			    float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-			    float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
+			    float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0) + 10.0f;
 			    float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
 			    lightPositions.emplace_back(xPos, yPos, zPos);
 			
@@ -103,7 +103,7 @@ namespace AnimationEngine
 		{
 			shaderPtr->SetUniformVector3F(lightPositions[i],	"lights[" + std::to_string(i) + "].Position");
 			shaderPtr->SetUniformVector3F(lightColors[i],		"lights[" + std::to_string(i) + "].Color");
-			shaderPtr->SetUniformFloat(lightRadius[i],			"lights[" + std::to_string(i) + "].Radius");
+			//shaderPtr->SetUniformFloat(lightRadius[i],			"lights[" + std::to_string(i) + "].Radius");
 
 			shaderPtr->SetUniformFloat(LIGHT_LINEAR,		"lights[" + std::to_string(i) + "].Linear");
 			shaderPtr->SetUniformFloat(LIGHT_QUADRATIC,	"lights[" + std::to_string(i) + "].Quadratic");
@@ -120,6 +120,16 @@ namespace AnimationEngine
 		GL_CALL(glBindTexture, GL_TEXTURE_2D, 0);
 
 		shaderPtr->UnBind();
+	}
+
+	const std::vector<Math::Vec3F>& ScreenQuad::GetLightPositions() const
+	{
+		return lightPositions;
+	}
+
+	const std::vector<Math::Vec3F>& ScreenQuad::GetLightColors() const
+	{
+		return lightColors;
 	}
 
 	void ScreenQuad::SetVertices(std::vector<Math::Vec2F> vertexData) noexcept

@@ -17,13 +17,13 @@ namespace AnimationEngine
 	static const std::string LIGHTING_PASS_VERTEX_SHADER_PATH	{ "./assets/shaders/deferred/lighting_pass.vert" };
 	static const std::string LIGHTING_PASS_FRAGMENT_SHADER_PATH	{ "./assets/shaders/deferred/lighting_pass.frag" };
 
-	static const std::string LIGHTS_SHADER_NAME					{ "LightsShader" };
-	static const std::string LIGHTS_SHADER_VERTEX_PATH			{ "./assets/shaders/deferred/lights.vert" };
-	static const std::string LIGHTS_SHADER_FRAGMENT_PATH		{ "./assets/shaders/deferred/lights.frag" };
+	static const std::string LIGHTS_BOX_SHADER_NAME				{ "LightBoxShader" };
+	static const std::string LIGHTS_BOX_SHADER_VERTEX_PATH		{ "./assets/shaders/deferred/light_box.vert" };
+	static const std::string LIGHTS_BOX_SHADER_FRAGMENT_PATH	{ "./assets/shaders/deferred/light_box.frag" };
 	//-- Shader Files --//
 
 	//-- Lights Data --//
-	static constexpr unsigned NR_LIGHTS		{ 1 };
+	static constexpr unsigned NR_LIGHTS		{ 32 };
 	static constexpr float LIGHT_LINEAR		{ 0.7f };
 	static constexpr float LIGHT_QUADRATIC	{ 1.8f };
 	//-- !Lights Data --//

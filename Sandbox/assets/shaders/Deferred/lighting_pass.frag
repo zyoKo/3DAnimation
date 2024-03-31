@@ -16,8 +16,8 @@ struct Light {
     float Quadratic;
 };
 
-const int NR_LIGHTS = 1;
-//const int NR_LIGHTS = 32;
+//const int NR_LIGHTS = 1;
+const int NR_LIGHTS = 32;
 uniform Light lights[NR_LIGHTS];
 uniform vec3 cameraPosition;
 

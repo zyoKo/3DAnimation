@@ -68,7 +68,8 @@ namespace AnimationEngine
 		void SetTextures(ITexturesList textures);
 		void AddTexture(const std::shared_ptr<ITexture2D>& texture);
 
-		void SetLocation(const glm::vec3& newLocation) noexcept;
+		void SetLocation(const glm::vec3& newLocation);
+		void SetScale(const glm::vec3& newScale);
 
 	private:
 		Vertices_V3F vertices;
@@ -85,6 +86,7 @@ namespace AnimationEngine
 		ITexturesList textures;
 
 		glm::vec3 location;
+		glm::vec3 scale;
 
 		// VAO and Buffers
 		std::shared_ptr<IVertexArray> vertexArrayObject;

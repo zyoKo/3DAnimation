@@ -21,6 +21,10 @@ namespace AnimationEngine
 	public:
 		Model(const std::string& path);
 
+		explicit Model(const Model& model) = delete;
+
+		explicit Model(Model&& model) = delete;
+
 		void Draw(const std::shared_ptr<IShader>& shader) const;
 
 		const std::vector<Mesh>& GetMeshes() const;

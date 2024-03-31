@@ -7,11 +7,15 @@ uniform mat4 projection;
 uniform mat4 view;
 uniform mat4 model;
 
+out vec3 FragPos;
 out vec2 TexCoords;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(pos, 1.0);
-
     TexCoords = tex;
+
+    vec4 worldPos = model * vec4(pos, 1.0);
+    FragPos = worldPos.xyz;
+
+    gl_Position = projection * view * model * vec4(pos, 1.0);
 }
