@@ -41,13 +41,15 @@ namespace AnimationEngine
 		//-- Shader --//
 		std::weak_ptr<IShader> shaderGeometryPass;
 
-		std::weak_ptr<IShader> shaderLightingPass;
+		std::weak_ptr<IShader> globalLightShader;
+
+		std::weak_ptr<IShader> pointLightShader;
 
 		std::weak_ptr<IShader> shaderLightBox;
 		//-- !Shader --//
 
 		std::shared_ptr<ScreenQuad> screenQuad;
 
-		std::shared_ptr<Model> lightBoxes;
+		std::shared_ptr<Model> lightBox;
 	};
 }

@@ -1,9 +1,11 @@
 #pragma once
 
+#include "Graphics/OpenGL/Pipeline/Structures/PointLight.h"
 #include "Math/Math.h"
 
 namespace AnimationEngine
 {
+	class Model;
 	class IWindow;
 	class BufferTexture;
 	class IShader;
@@ -24,9 +26,7 @@ namespace AnimationEngine
 
 		void Draw() const;
 
-		const std::vector<Math::Vec3F>& GetLightPositions() const;
-
-		const std::vector<Math::Vec3F>& GetLightColors() const;
+		const std::vector<PointLight>& GetPointLights() const;
 
 		void SetVertices(std::vector<Math::Vec2F> vertexData) noexcept;
 
@@ -52,11 +52,9 @@ namespace AnimationEngine
 		std::vector<std::weak_ptr<BufferTexture>> textures;
 
 		//-- Lights Data --//
-		std::vector<Math::Vec3F> lightPositions;
+		std::vector<PointLight> pointLights;
 
-		std::vector<Math::Vec3F> lightColors;
-
-		std::vector<float> lightRadius;
+		std::shared_ptr<Model> lightSphere;
 		//-- !Lights Data --//
 
 		std::weak_ptr<IWindow> window;

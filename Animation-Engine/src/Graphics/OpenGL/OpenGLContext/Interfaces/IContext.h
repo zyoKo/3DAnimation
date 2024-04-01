@@ -35,5 +35,9 @@ namespace AnimationEngine
 		virtual void EnableWireFrameMode(bool value) = 0;
 
 		virtual void EnablePointSize(bool value) = 0;
+
+		virtual void EnableDepthMask(bool value) = 0;
+
+		virtual void EnableBlending(bool value) = 0;
 	};
 }

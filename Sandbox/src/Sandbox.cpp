@@ -74,7 +74,7 @@ namespace Sandbox
 			backPack->Draw(backPackShaderPtr.GetShared());
 		}
 
-		gridMesh->Update(gridShaderPtr.GetShared());
+		//gridMesh->Update(gridShaderPtr.GetShared());
 	}
 
 	void SandboxApp::PostUpdate()

@@ -152,7 +152,7 @@ namespace AnimationEngine
 		switch(type)
 		{
 		case AttachmentType::DEPTH:
-			internalFormat = GL_DEPTH_COMPONENT;
+			internalFormat = (floatingPrecision <= 8 ? GL_DEPTH_COMPONENT : (floatingPrecision <= 16 ? GL_DEPTH_COMPONENT16 : GL_DEPTH_COMPONENT32F));
 			break;
 
 		case AttachmentType::STENCIL:
@@ -160,12 +160,12 @@ namespace AnimationEngine
 			break;
 
 		case AttachmentType::DEPTH_STENCIL:
-			internalFormat = GL_DEPTH_STENCIL;
+			internalFormat = (floatingPrecision <= 8 ? GL_DEPTH_STENCIL : (floatingPrecision <= 24 ? GL_DEPTH24_STENCIL8 : GL_DEPTH32F_STENCIL8));
 			break;
 
 		default:
 		case AttachmentType::COLOR:
-			internalFormat = floatingPrecision > 0 ? OpenGLInternalColorFormatBasedOnPrecision(floatingPrecision) : GL_RGB4;
+			internalFormat = (floatingPrecision > 0 ? OpenGLInternalColorFormatBasedOnPrecision(floatingPrecision) : GL_RGB4);
 			break;
 		}
 

@@ -23,9 +23,12 @@ namespace AnimationEngine
 	//-- Shader Files --//
 
 	//-- Lights Data --//
-	static constexpr unsigned NR_LIGHTS		{ 32 };
-	static constexpr float LIGHT_LINEAR		{ 0.7f };
-	static constexpr float LIGHT_QUADRATIC	{ 1.8f };
+	static constexpr unsigned NR_DIR_LIGHTS		{ 1 };
+	static constexpr unsigned NR_POINT_LIGHTS	{ 2 };
+	static constexpr float POINT_LIGHT_DEFAULT_ATTENUATION_CONSTANT		{ 1.0f  };	// 1.0f
+	static constexpr float POINT_LIGHT_DEFAULT_ATTENUATION_LINEAR		{ 0.7f  };	// 0.7f
+	static constexpr float POINT_LIGHT_DEFAULT_ATTENUATION_QUADRATIC	{ 1.8f  };	// 1.8f
+	static constexpr float POINT_LIGHT_DEFAULT_DIFFUSE_INTENSITY		{ 0.25f };	// 0.25f
 	//-- !Lights Data --//
 
 	//-- Misc Data --//
@@ -33,4 +36,9 @@ namespace AnimationEngine
 	static const std::string PROJECTION_MATRIX	{ "projection" };
 	static const std::string VIEW_MATRIX		{ "view" };
 	//-- !Misc Data --//
+
+	//-- Light Box --//
+	static const std::string CUBE_FILE_PATH		{ "./assets/models/primitives/cube.obj" };
+	static const std::string SPHERE_FILE_PATH	{ "./assets/models/primitives/sphere_old.obj" };
+	//-- !Light Box--//
 }

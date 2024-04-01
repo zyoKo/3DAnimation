@@ -47,6 +47,7 @@ namespace AnimationEngine
 		switch(type)
 		{
 		case AttachmentType::DEPTH:
+			lastColorAttachment = sample ? lastColorAttachment + 1 : lastColorAttachment;
 			nextAttachment = GL_DEPTH_ATTACHMENT;
 			break;
 
@@ -72,7 +73,7 @@ namespace AnimationEngine
 			return;
 		}
 		
-		renderBuffers.reserve(frameBufferTextures.size() + 1);
+		renderBuffers.reserve(renderBuffers.size() + 1);
 		renderBuffers.emplace_back(std::make_shared<RenderBuffer>(window, type));
 
 		const unsigned bufferID = renderBuffers.back()->GetBufferID();
@@ -84,13 +85,18 @@ namespace AnimationEngine
 		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, frameBuffer);
 	}
 
+	void FrameBuffer::BindForReading() const
+	{
+		GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer);
+	}
+
+	void FrameBuffer::BindForWriting() const
+	{
+		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, frameBuffer);
+	}
+
 	void FrameBuffer::UnBind() const
 	{
-		//for (const auto& renderBuffer : renderBuffers)
-		//{
-		//	renderBuffer->UnBind();
-		//}
-
 		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 	}
 

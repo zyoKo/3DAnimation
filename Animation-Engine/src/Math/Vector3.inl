@@ -3,6 +3,7 @@
 #include "Vector3.h"
 
 #include "Core/Logger/Log.h"
+#include "Math/Constants.h"
 
 namespace AnimationEngine::Math
 {

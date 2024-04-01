@@ -26,6 +26,10 @@ namespace AnimationEngine
 
 		void Bind() const;
 
+		void BindForReading() const;
+
+		void BindForWriting() const;
+
 		void UnBind() const;
 
 		unsigned GetBufferID() const;

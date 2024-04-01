@@ -30,8 +30,9 @@ namespace AnimationEngine
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
 
 		shaderGeometryPass	= assetManager->CreateShader(GEOMETRY_PASS_SHADER_NAME, GEOMETRY_PASS_VERTEX_SHADER_PATH, GEOMETRY_PASS_FRAGMENT_SHADER_PATH);
-		shaderLightingPass	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
+		globalLightShader	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightBox		= assetManager->CreateShader(LIGHTS_BOX_SHADER_NAME, LIGHTS_BOX_SHADER_VERTEX_PATH, LIGHTS_BOX_SHADER_FRAGMENT_PATH);
+		pointLightShader	= assetManager->CreateShader("PointLightShader", "./assets/shaders/Deferred/point_light.vert", "./assets/shaders/Deferred/point_light.frag");
 
 		frameBuffer = std::make_shared<FrameBuffer>(window);
 		frameBuffer->Bind();
@@ -50,15 +51,15 @@ namespace AnimationEngine
 			++currentAttachment;
 		}
 
-		GL_CALL(glDrawBuffers, totalBuffers, usedOpenGLColorAttachments.data());
-
 		frameBuffer->CreateAttachment(AttachmentType::DEPTH, false);
+
+		GL_CALL(glDrawBuffers, totalBuffers, usedOpenGLColorAttachments.data());
 
 		frameBuffer->IsValid();
 		frameBuffer->UnBind();
 
 		screenQuad = std::make_shared<ScreenQuad>();
-		screenQuad->SetShader(shaderLightingPass);
+		screenQuad->SetShader(globalLightShader);
 		screenQuad->SetWindowsWindow(window);
 		screenQuad->Initialize();
 		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
@@ -66,20 +67,23 @@ namespace AnimationEngine
 			screenQuad->AddTexture(texture);
 		}
 
-		lightBoxes = std::make_shared<Model>("./assets/models/box/cube.obj");
+		lightBox = std::make_shared<Model>(CUBE_FILE_PATH);
 	}
 
 	void DeferredShading::PreUpdateSetup()
-	{
-		GraphicsAPI::GetContext()->EnableDepthTest(true);
-	}
+	{ }
 
 	void DeferredShading::PreFrameRender()
 	{
+		//-- 1. Geometry Pass --//
+		GraphicsAPI::GetContext()->EnableDepthTest(true);
+		GraphicsAPI::GetContext()->EnableDepthMask(true);
+		GL_CALL(glDepthFunc, GL_LESS);
 		GraphicsAPI::GetContext()->ClearColor(BLACK);
 		GraphicsAPI::GetContext()->ClearBuffers();
+		GraphicsAPI::GetContext()->EnableBlending(false);
 
-		frameBuffer->Bind();
+		frameBuffer->BindForWriting();
 		GraphicsAPI::GetContext()->ClearBuffers();
 
 		/* [... Start Rendering Scene ...] */
@@ -91,13 +95,25 @@ namespace AnimationEngine
 
 		frameBuffer->UnBind();
 
+		GraphicsAPI::GetContext()->EnableDepthMask(false);
+		GraphicsAPI::GetContext()->EnableDepthTest(false);
 		GraphicsAPI::GetContext()->ClearBuffers();
+		//-- 1. !Geometry Pass --//
 
 		//-- 2. Global Lighting Pass --//
+		GraphicsAPI::GetContext()->EnableBlending(true);
+		GL_CALL(glBlendEquation, GL_FUNC_ADD);
+		GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
+		//GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 		screenQuad->Update();
+
+		frameBuffer->BindForReading();
+		GraphicsAPI::GetContext()->ClearColorBuffer();
+
 		screenQuad->Draw();
 
-		GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer->GetBufferID());
+		//GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer->GetBufferID());
 		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0);
 
 		const Memory::WeakPointer<IWindow> windowPtr{ window };
@@ -109,23 +125,22 @@ namespace AnimationEngine
 
 		// TODO: Currently not drawing boxes where light is coming from
 		const Memory::WeakPointer<IShader> shaderLightBoxPtr{ shaderLightBox };
-
-		const auto& lightPositions = screenQuad->GetLightPositions();
-		const auto& lightColors = screenQuad->GetLightColors();
-
-		for (unsigned i = 0; i < lightPositions.size(); ++i)
+		
+		const auto& pointLights = screenQuad->GetPointLights();
+		
+		for (const auto& light : pointLights)
 		{
-			for (auto& mesh : lightBoxes->GetMeshes())
+			for (auto& mesh : lightBox->GetMeshes())
 			{
-				mesh.SetScale({ 0.125f, 0.125f, 0.125f });
-				mesh.SetLocation({ lightPositions[i].x, lightPositions[i].y, lightPositions[i].z });
+				mesh.SetLocation({ light.position.x, light.position.y, light.position.z });
+				mesh.SetScale({ 0.1f, 0.1f, 0.1f });
 			}
-
+		
 			shaderLightBoxPtr->Bind();
-			shaderLightBoxPtr->SetUniformVector3F(lightColors[i], "lightColor");
+			shaderLightBoxPtr->SetUniformVector3F(light.color, "lightColor");
 			shaderLightBoxPtr->UnBind();
-
-			lightBoxes->Draw(shaderLightBoxPtr.GetShared());
+		
+			lightBox->Draw(shaderLightBoxPtr.GetShared());
 		}
 	}
 

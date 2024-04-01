@@ -2,8 +2,6 @@
 
 out vec4 FragColor;
 
-in vec2 TexCoords;
-
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
@@ -12,70 +10,70 @@ struct Light
 {
     vec3 Position;
     vec3 Color;
+    float Radius;
     float Constant;
     float Linear;
     float Quadratic;
 };
 
-const int NR_LIGHTS = 3;
-//const int NR_LIGHTS = 32;
-uniform Light lights[NR_LIGHTS];
+uniform Light light;
 uniform vec3 cameraPosition;
+uniform vec2 screenSize;
 
 void main()
 {
+    vec2 texCoord = gl_FragCoord.xy / screenSize;
+
     // retrieve data from gbuffer
-    vec3 FragPos    = texture(gPosition,    TexCoords).rgb;
-    vec3 Normal     = texture(gNormal,      TexCoords).rgb;
-    vec3 Diffuse    = texture(gAlbedoSpec,  TexCoords).rgb;
-    float Specular  = texture(gAlbedoSpec,  TexCoords).a;
+    vec3 FragPos    = texture(gPosition,    texCoord).rgb;
+    vec3 Normal     = texture(gNormal,      texCoord).rgb;
+    vec3 Diffuse    = texture(gAlbedoSpec,  texCoord).rgb;
+    float Specular  = texture(gAlbedoSpec,  texCoord).a;
     Normal = normalize(Normal);
     
     // hard-coded constants
-    float ambientIntensity  = 0.1;
-    float shininess         = 16.0;
+    float ambientIntensity      = 0.1;
+    float lightColorIntensity   = 5.0;
+    float shininess             = 16.0;
 
+    // then calculate lighting as usual
+    vec3 lighting = vec3(0.0, 0.0, 0.0);
     vec3 ambient  = vec3(0.0, 0.0, 0.0);
     vec3 diffuse  = vec3(0.0, 0.0, 0.0);
     vec3 specular = vec3(0.0, 0.0, 0.0);
-    vec3 lighting = vec3(0.0, 0.0, 0.0);
 
-    for(int i = 0; i < NR_LIGHTS; ++i)
+    vec3 viewDir  = normalize(cameraPosition - FragPos);
+
+    // calculate distance between light source and current fragment
+    float distance = length(light.Position - FragPos);
+    if(distance < light.Radius)
     {
-        vec3 lightDir   = normalize(FragPos - lights[i].Position);
-        lightDir        = normalize(lightDir);
-
         // ambient
-        ambient = lights[i].Color * ambientIntensity;
+        ambient  = light.Color * ambientIntensity;  // hard-coded ambient intensity
 
-        //-- diffuse
-        float diffuseFactor = dot(Normal, -lightDir);
-        if (diffuseFactor > 0.0)
-        {
-            diffuse = diffuseFactor * Diffuse * lights[i].Color;
+        lighting = Diffuse * ambient;
 
-            vec3 viewDir    = normalize(cameraPosition - FragPos);
-            vec3 reflectDir = normalize(reflect(lightDir, Normal));
+        // diffuse
+        vec3 lightDir       = normalize(light.Position - FragPos);
+        float diffuseFactor = dot(Normal, lightDir);
+        diffuse             = max(diffuseFactor, 0.0) * Diffuse * light.Color;
 
-            //-- specular
-            float specularFactor = dot(viewDir, reflectDir);
-            if (specularFactor > 0.0)
-            {
-                specularFactor  = pow(specularFactor, shininess);
-                specular        = lights[i].Color * specularFactor * Specular;
-            }
-        }
-
-        // attenuation
-        float distance          = length(lightDir);
-        float attenuationFactor = lights[i].Constant + lights[i].Linear * distance + lights[i].Quadratic * (distance * distance);
-        float attenuation       = 1.0 / max(1.0, attenuationFactor);
-        
-        ambient  *= attenuation;
-        diffuse  *= attenuation;
-        specular *= attenuation;
-        lighting  = ambient + diffuse + specular;       
+        // specular
+        vec3 halfwayDir         = normalize(lightDir + viewDir);
+        float specularFactor    = dot(Normal, halfwayDir);
+        float spec              = pow(max(specularFactor, 0.0), shininess);
+        specular                = light.Color * spec * Specular;
     }
+
+    // attenuation
+    float attenuationSmoothness = smoothstep(0.0, light.Radius, distance);
+    float attenuationFactor = light.Constant + (light.Linear * distance) + (light.Quadratic * (distance * distance));
+    float attenuation       = (1.0 / max(1.0, attenuationFactor)) * attenuationSmoothness;
+
+    ambient  *= attenuation;
+    diffuse  *= attenuation;
+    specular *= attenuation;
+    lighting += ambient + (diffuse + specular) * lightColorIntensity;
 
     FragColor = vec4(lighting, 1.0);
 }

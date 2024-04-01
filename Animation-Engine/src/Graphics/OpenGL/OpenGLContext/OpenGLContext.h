@@ -32,6 +32,10 @@ namespace AnimationEngine
 
 		void EnablePointSize(bool value) override;
 
+		void EnableDepthMask(bool value) override;
+
+		void EnableBlending(bool value) override;
+
 	private:
 		GLFWwindow* window;
 	};

@@ -85,11 +85,10 @@ namespace AnimationEngine
 		if (value)
 		{
 			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE);
+			return;
 		}
-		else
-		{
-			GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
-		}
+		
+		GL_CALL(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL);
 	}
 
 	void OpenGLContext::EnablePointSize(bool value)
@@ -97,10 +96,27 @@ namespace AnimationEngine
 		if (value)
 		{
 			GL_CALL(glEnable, GL_PROGRAM_POINT_SIZE);
+			return;
 		}
-		else
+		
+		GL_CALL(glDisable, GL_PROGRAM_POINT_SIZE);
+	}
+
+	void OpenGLContext::EnableDepthMask(bool value)
+	{
+		const auto dMask = value ? GL_TRUE : GL_FALSE;
+
+		GL_CALL(glDepthMask, dMask);
+	}
+
+	void OpenGLContext::EnableBlending(bool value)
+	{
+		if (value)
 		{
-			GL_CALL(glDisable, GL_PROGRAM_POINT_SIZE);
+			GL_CALL(glEnable, GL_BLEND);
+			return;
 		}
+
+		GL_CALL(glDisable, GL_BLEND);
 	}
 }
