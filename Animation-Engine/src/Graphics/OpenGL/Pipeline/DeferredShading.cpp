@@ -71,20 +71,40 @@ namespace AnimationEngine
 		lightSphere = std::make_shared<Model>(SPHERE_FILE_PATH);
 
 		// Initialize Point Lights
-		pointLights.reserve(TOTAL_POINT_LIGHTS);
-		if (1 == TOTAL_POINT_LIGHTS)
+		constexpr bool doRandomLights = true;
+		if (doRandomLights)
 		{
-			pointLights.emplace_back(PointLight(LightType::STATIC, { 0.0f, 10.0f, 6.0f }, { 1.0f, 1.0f, 1.0f }));
+			pointLights.reserve(TOTAL_RANDOM_POINT_LIGHTS);
+		
+			for (unsigned i = 0; i < TOTAL_RANDOM_POINT_LIGHTS; ++i)
+			{
+				// random lights
+				Math::Vec3F lightLocation{
+					(static_cast<float>(Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
+					(static_cast<float>(Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
+					(static_cast<float>(Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE)
+				};
+
+				Math::Vec3F lightColor{
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE
+				};
+
+				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
+				pointLights.emplace_back(LightType::DYNAMIC, lightLocation, WHITE_LIGHT);
+			}
 		}
 		else
 		{
+			pointLights.reserve(TOTAL_POINT_LIGHTS);
 			for (const auto& lightLocation : POINT_LIGHTS_POSITIONS)
 			{
 				// also calculate random color (between 0.2 and 1.0)
 				Math::Vec3F lightColor{
-					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f,
-					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f,
-					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f
 				};
 
 				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
@@ -164,6 +184,12 @@ namespace AnimationEngine
 		GL_CALL(glDepthFunc, GL_LESS);
 
 		//-- LightBoxes for lights: Visualization Purposes --//
+		constexpr bool renderLightBoxes = true;
+		if (!renderLightBoxes)
+		{
+			return;
+		}
+
 		const Memory::WeakPointer<IShader> shaderLightBoxPtr{ shaderLightBox };
 		
 		for (const auto& light : pointLights)

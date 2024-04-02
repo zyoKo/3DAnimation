@@ -16,7 +16,7 @@ namespace AnimationEngine
 			ambientIntensity{ LOCAL_POINT_LIGHT_DEFAULT_AMBIENT_INTENSITY },
 			lightIntensity{ LOCAL_POINT_LIGHT_DEFAULT_LIGHT_INTENSITY },
 			diffuseIntensity{ LOCAL_POINT_LIGHT_DEFAULT_DIFFUSE_INTENSITY },
-			moveVelocity{ 0.5f }
+			moveVelocity{ LOCAL_POINT_LIGHT_MOVE_VELOCITY }
 	{
 		radius = CalculateLightRadius(*this);
 	}

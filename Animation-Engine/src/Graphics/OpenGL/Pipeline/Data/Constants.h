@@ -32,9 +32,11 @@ namespace AnimationEngine
 
 	//-- Lights Data --//
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
-	static constexpr Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{  };
+	static constexpr Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
 
-	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 10 };	// This should be used to generate 10 random point lights
+	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 5000 };	// This should be used to generate 10 random point lights
+	static constexpr float LIGHT_COLOR_START_RANGE{ 0.5f };
+	static constexpr int LIGHT_SPREAD_RANGE{ 100 };
 
 	static constexpr Math::Vec3F WHITE_LIGHT{ 1.0f, 1.0f, 1.0f };
 	static const std::vector<Math::Vec3F> POINT_LIGHTS_POSITIONS
@@ -52,8 +54,9 @@ namespace AnimationEngine
 	static constexpr float LOCAL_POINT_LIGHT_DEFAULT_AMBIENT_INTENSITY		{ 0.1f  };	// 0.1f
 	static constexpr float LOCAL_POINT_LIGHT_DEFAULT_LIGHT_INTENSITY		{ 20.0f };	// 5.0f
 	static constexpr float LOCAL_POINT_LIGHT_DEFAULT_DIFFUSE_INTENSITY		{ 0.2f  };	// 5.0f
-	static constexpr float LOCAL_POINT_LIGHT_MIN_Y	{ 0.0f };
-	static constexpr float LOCAL_POINT_LIGHT_MAX_Y	{ 4.0f };
+	static constexpr float LOCAL_POINT_LIGHT_MIN_Y	{ -0.2f };
+	static constexpr float LOCAL_POINT_LIGHT_MAX_Y	{  4.0f };
+	static constexpr float LOCAL_POINT_LIGHT_MOVE_VELOCITY { 1.0f };
 
 	static constexpr glm::vec3 LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
 	static const std::string LIGHT_COLOR_UNIFORM_NAME{ "lightColor" };
