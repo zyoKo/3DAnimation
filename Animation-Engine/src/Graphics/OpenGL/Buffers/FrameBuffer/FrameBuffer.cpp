@@ -172,4 +172,19 @@ namespace AnimationEngine
 	{
 		this->window = std::move(windowsWindow);
 	}
+
+	void FrameBuffer::BindDefaultFrameBuffer()
+	{
+		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+	}
+
+	void FrameBuffer::BindDefaultFrameBufferForReading()
+	{
+		GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, 0);
+	}
+
+	void FrameBuffer::BindDefaultFrameBufferForWriting()
+	{
+		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0);
+	}
 }

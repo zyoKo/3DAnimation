@@ -6,15 +6,41 @@
 
 namespace AnimationEngine
 {
-	PointLight::PointLight(const Math::Vec3F& newPosition, const Math::Vec3F& newColor)
-		:	position(newPosition),
-			color(newColor),
-			constant		{ POINT_LIGHT_DEFAULT_ATTENUATION_CONSTANT	},
-			linear			{ POINT_LIGHT_DEFAULT_ATTENUATION_LINEAR	},
-			quadratic		{ POINT_LIGHT_DEFAULT_ATTENUATION_QUADRATIC },
-			diffuseIntensity{ POINT_LIGHT_DEFAULT_DIFFUSE_INTENSITY		}
+	PointLight::PointLight(LightType type, const Math::Vec3F& newPosition, const Math::Vec3F& newColor)
+		:	lightType{ type },
+			position{ newPosition },
+			color{ newColor },
+			constant{ LOCAL_POINT_LIGHT_DEFAULT_ATTENUATION_CONSTANT },
+			linear{ LOCAL_POINT_LIGHT_DEFAULT_ATTENUATION_LINEAR },
+			quadratic{ LOCAL_POINT_LIGHT_DEFAULT_ATTENUATION_QUADRATIC },
+			ambientIntensity{ LOCAL_POINT_LIGHT_DEFAULT_AMBIENT_INTENSITY },
+			lightIntensity{ LOCAL_POINT_LIGHT_DEFAULT_LIGHT_INTENSITY },
+			diffuseIntensity{ LOCAL_POINT_LIGHT_DEFAULT_DIFFUSE_INTENSITY },
+			moveVelocity{ 0.5f }
 	{
 		radius = CalculateLightRadius(*this);
+	}
+
+	void PointLight::MoveUpAndDown(float deltaTime, float minY, float maxY)
+	{
+		if (lightType == LightType::STATIC)
+		{
+			return;
+		}
+
+		position.y += moveVelocity * deltaTime;
+
+		if (position.y > maxY)
+		{
+			position.y = maxY;
+			moveVelocity *= -1.0f;
+		}
+
+		if (position.y < minY)
+		{
+			position.y = minY;
+			moveVelocity *= -1.0f;
+		}
 	}
 
 	float CalculateLightRadius(const PointLight& light)

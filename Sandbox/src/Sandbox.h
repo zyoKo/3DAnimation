@@ -6,7 +6,7 @@
 
 namespace AnimationEngine
 {
-	class GridMesh;
+	class Quad;
 	class Model;
 	class IAssetManager;
 }
@@ -33,6 +33,6 @@ namespace Sandbox
 
 		std::shared_ptr<AnimationEngine::Model> backPack;
 
-		std::shared_ptr<AnimationEngine::GridMesh> gridMesh;
+		std::shared_ptr<AnimationEngine::Quad> floor;
 	};
 }

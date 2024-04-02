@@ -14,7 +14,7 @@ namespace AnimationEngine
 			return;
 		}
 
-		LOG_INFO("Asset[{0}] is already present in the storage!", assetName);
+		LOG_TRACE("Asset[{0}] is already present in the storage!", assetName);
 	}
 
 	template <typename T>
@@ -22,7 +22,7 @@ namespace AnimationEngine
 	{
 		if (!assetStorage.contains(assetName))
 		{
-			LOG_INFO("Failed to retrive asset[{0}] from the Asset Storage!", assetName);
+			LOG_TRACE("Failed to retrive asset[{0}] from the Asset Storage!", assetName);
 			return {};
 		}
 

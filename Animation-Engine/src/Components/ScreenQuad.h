@@ -1,13 +1,10 @@
 #pragma once
 
-#include "Graphics/OpenGL/Pipeline/Structures/PointLight.h"
 #include "Math/Math.h"
 
 namespace AnimationEngine
 {
-	class Model;
 	class IWindow;
-	class BufferTexture;
 	class IShader;
 	class IIndexBuffer;
 	class IVertexArray;
@@ -22,17 +19,11 @@ namespace AnimationEngine
 
 		void Initialize();
 
-		void Update();
-
 		void Draw() const;
-
-		const std::vector<PointLight>& GetPointLights() const;
 
 		void SetVertices(std::vector<Math::Vec2F> vertexData) noexcept;
 
 		void SetTextureCoordinates(std::vector<Math::Vec2F> texCoords) noexcept;
-
-		void AddTexture(std::weak_ptr<BufferTexture> texture) noexcept;
 
 		void SetShader(std::weak_ptr<IShader> shader) noexcept;
 
@@ -49,14 +40,6 @@ namespace AnimationEngine
 
 		std::weak_ptr<IShader> shader;
 
-		std::vector<std::weak_ptr<BufferTexture>> textures;
-
-		//-- Lights Data --//
-		std::vector<PointLight> pointLights;
-
-		std::shared_ptr<Model> lightSphere;
-		//-- !Lights Data --//
-
 		std::weak_ptr<IWindow> window;
 
 		bool dirtyFlag;
@@ -64,7 +47,5 @@ namespace AnimationEngine
 		void SetupMesh() const;
 
 		void CreateShader();
-
-		void UploadShaderData() const;
 	};
 }

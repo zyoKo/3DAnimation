@@ -19,25 +19,24 @@ namespace Sandbox
 		assetManager = AssetManagerLocator::GetAssetManager();
 
 		//-- Texture Creation --//
-		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse { assetManager->CreateTexture(BACKPACK_DIFFUSE_TEXTURE_FILE_PATH, false) };
+		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse{ assetManager->CreateTexture(BACKPACK_DIFFUSE_TEXTURE_FILE_PATH, false) };
 		modelTextureDiffuse->SetTextureName(TEXTURE_DIFFUSE_1);
 
-		const Memory::WeakPointer<ITexture2D> modelTextureSpecular { assetManager->CreateTexture(BACKPACK_SPECULAR_TEXTURE_FILE_PATH, false) };
+		const Memory::WeakPointer<ITexture2D> modelTextureSpecular{ assetManager->CreateTexture(BACKPACK_SPECULAR_TEXTURE_FILE_PATH, false) };
 		modelTextureSpecular->SetTextureName(TEXTURE_SPECULAR_1);
 
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ assetManager->CreateTexture(FLOOR_DIFFUSE_FILE_PATH) };
-		gridTexturePtr->SetTextureName(GRID_SHADER_REFERENCE_NAME);
+		const Memory::WeakPointer<ITexture2D> floorTexturePtr{ assetManager->CreateTexture(FLOOR_DIFFUSE_FILE_PATH) };
+		floorTexturePtr->SetTextureName(TEXTURE_DIFFUSE_1);
 		//-- !Texture Creation --//
 
 		//-- Shader Creation --//
 		assetManager->CreateShader(BACKPACK_SHADER_NAME, BACKPACK_VERTEX_SHADER_FILE_PATH, BACKPACK_FRAGMENT_SHADER_FILE_PATH);
-		assetManager->CreateShader(GRID_SHADER_NAME, GRID_VERTEX_SHADER_FILE_PATH, GRID_FRAGMENT_SHADER_FILE_PATH);
+		assetManager->CreateShader(QUAD_SHADER_NAME, QUAD_VERTEX_SHADER_FILE_PATH, QUAD_FRAGMENT_SHADER_FILE_PATH);
 		//-- !Shader Creation --//
-
 		//-- ## !ASSET LOADING ## --//
 
 		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
-		gridMesh = std::make_shared<GridMesh>();
+		floor = std::make_shared<Quad>();
 	}
 
 	void SandboxApp::PreUpdate()
@@ -49,7 +48,7 @@ namespace Sandbox
 		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
 
 		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
-		gridMesh->SetGridTexture(gridTexture);
+		floor->SetGridTexture(gridTexture);
 
 		auto* camera = Camera::GetInstance();
 		camera->SetCameraPosition({ 7.0f, 14.0f, 13.0f });
@@ -62,19 +61,19 @@ namespace Sandbox
 		using namespace AnimationEngine;
 
 		const Memory::WeakPointer<IShader> backPackShaderPtr { assetManager->RetrieveShaderFromStorage(BACKPACK_SHADER_NAME) };
-		const Memory::WeakPointer<IShader> gridShaderPtr	 { assetManager->RetrieveShaderFromStorage("GridShader") };
+		const Memory::WeakPointer<IShader> gridShaderPtr	 { assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME) };
 
-		for (unsigned i = 0; i < 9; ++i)
+		for (const auto& location : BACKPACK_LOCATIONS)
 		{
 			for (auto& mesh : backPack->GetMeshes())
 			{
-				mesh.SetLocation(BACKPACK_LOCATIONS[i]);
+				mesh.SetLocation(location);
 			}
 
 			backPack->Draw(backPackShaderPtr.GetShared());
 		}
 
-		//gridMesh->Update(gridShaderPtr.GetShared());
+		floor->Update(gridShaderPtr.GetShared());
 	}
 
 	void SandboxApp::PostUpdate()
@@ -83,7 +82,7 @@ namespace Sandbox
 	void SandboxApp::Shutdown()
 	{
 		backPack.reset();
-		gridMesh.reset();
+		floor.reset();
 	}
 }
 

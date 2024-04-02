@@ -15,10 +15,14 @@
 #include "Graphics/OpenGL/Textures/BufferTexture.h"
 #include "Structures/PipelineInitializer.h"
 #include "Animation/Model.h"
+#include "Components/Camera/Camera.h"
+#include "Core/Utilities/Time.h"
+#include "Core/Utilities/Utilites.h"
 
 namespace AnimationEngine
 {
 	DeferredShading::DeferredShading(const PipelineInitializer* data) noexcept
+		:	globalPointLight(LightType::STATIC, Math::Vec3F(100.0f, 100.0f, 100.0f), Math::Vec3F(1.0f, 1.0f, 1.0f))
 	{
 		ANIM_ASSERT(data != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -29,16 +33,15 @@ namespace AnimationEngine
 	{
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
 
-		shaderGeometryPass	= assetManager->CreateShader(GEOMETRY_PASS_SHADER_NAME, GEOMETRY_PASS_VERTEX_SHADER_PATH, GEOMETRY_PASS_FRAGMENT_SHADER_PATH);
 		globalLightShader	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightBox		= assetManager->CreateShader(LIGHTS_BOX_SHADER_NAME, LIGHTS_BOX_SHADER_VERTEX_PATH, LIGHTS_BOX_SHADER_FRAGMENT_PATH);
-		pointLightShader	= assetManager->CreateShader("PointLightShader", "./assets/shaders/Deferred/point_light.vert", "./assets/shaders/Deferred/point_light.frag");
+		pointLightShader	= assetManager->CreateShader(POINT_LIGHT_SHADER_NAME, POINT_LIGHT_VERTEX_SHADER_PATH, POINT_LIGHT_FRAGMENT_SHADER_PATH);
 
 		frameBuffer = std::make_shared<FrameBuffer>(window);
 		frameBuffer->Bind();
-		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, POSITION_TEXTURE, 16);
-		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, NORMAL_TEXTURE, 16);
-		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, ALBEDO_TEXTURE, 8);
+		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, POSITION_TEXTURE,	16);
+		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, NORMAL_TEXTURE,		16);
+		frameBuffer->CreateAttachment(AttachmentType::COLOR, true, ALBEDO_TEXTURE,		8);
 
 		const auto totalBuffers = static_cast<int>(frameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;
@@ -62,12 +65,32 @@ namespace AnimationEngine
 		screenQuad->SetShader(globalLightShader);
 		screenQuad->SetWindowsWindow(window);
 		screenQuad->Initialize();
-		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
-		{
-			screenQuad->AddTexture(texture);
-		}
 
 		lightBox = std::make_shared<Model>(CUBE_FILE_PATH);
+
+		lightSphere = std::make_shared<Model>(SPHERE_FILE_PATH);
+
+		// Initialize Point Lights
+		pointLights.reserve(TOTAL_POINT_LIGHTS);
+		if (1 == TOTAL_POINT_LIGHTS)
+		{
+			pointLights.emplace_back(PointLight(LightType::STATIC, { 0.0f, 10.0f, 6.0f }, { 1.0f, 1.0f, 1.0f }));
+		}
+		else
+		{
+			for (const auto& lightLocation : POINT_LIGHTS_POSITIONS)
+			{
+				// also calculate random color (between 0.2 and 1.0)
+				Math::Vec3F lightColor{
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f,
+					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100) % 100) / 200.0f) + 0.2f
+				};
+
+				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
+				pointLights.emplace_back(LightType::DYNAMIC, lightLocation, WHITE_LIGHT);
+			}
+		}
 	}
 
 	void DeferredShading::PreUpdateSetup()
@@ -100,58 +123,166 @@ namespace AnimationEngine
 		GraphicsAPI::GetContext()->ClearBuffers();
 		//-- 1. !Geometry Pass --//
 
-		//-- 2. Global Lighting Pass --//
+		//-- 2. Lighting Pass --//
 		GraphicsAPI::GetContext()->EnableBlending(true);
 		GL_CALL(glBlendEquation, GL_FUNC_ADD);
 		GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
-		//GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		screenQuad->Update();
 
 		frameBuffer->BindForReading();
 		GraphicsAPI::GetContext()->ClearColorBuffer();
 
-		screenQuad->Draw();
+		int currentTextureSlot = 0;
+		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
+		{
+			texture->Bind(currentTextureSlot++);
+		}
 
-		//GL_CALL(glBindFramebuffer, GL_READ_FRAMEBUFFER, frameBuffer->GetBufferID());
-		GL_CALL(glBindFramebuffer, GL_DRAW_FRAMEBUFFER, 0);
+		UpdateLights();
+
+		GraphicsAPI::GetContext()->ClearColorBuffer();
+
+		LocalLightingPass();
+
+		GlobalLightingPass();
+
+		screenQuad->Draw();
+		//-- 2 !Lighting Pass --//
+
+		FrameBuffer::BindDefaultFrameBufferForWriting();
 
 		const Memory::WeakPointer<IWindow> windowPtr{ window };
 		const auto width  = static_cast<int>(windowPtr->GetWidth());
 		const auto height = static_cast<int>(windowPtr->GetHeight());
 
 		GL_CALL(glBlitFramebuffer, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
 
-		// TODO: Currently not drawing boxes where light is coming from
+		FrameBuffer::BindDefaultFrameBuffer();
+
+		GraphicsAPI::GetContext()->EnableBlending(false);
+		GraphicsAPI::GetContext()->EnableDepthTest(true);
+		GraphicsAPI::GetContext()->EnableDepthMask(true);
+		GL_CALL(glDepthFunc, GL_LESS);
+
+		//-- LightBoxes for lights: Visualization Purposes --//
 		const Memory::WeakPointer<IShader> shaderLightBoxPtr{ shaderLightBox };
-		
-		const auto& pointLights = screenQuad->GetPointLights();
 		
 		for (const auto& light : pointLights)
 		{
 			for (auto& mesh : lightBox->GetMeshes())
 			{
 				mesh.SetLocation({ light.position.x, light.position.y, light.position.z });
-				mesh.SetScale({ 0.1f, 0.1f, 0.1f });
+				mesh.SetScale(LIGHT_BOX_SCALE);
 			}
 		
 			shaderLightBoxPtr->Bind();
-			shaderLightBoxPtr->SetUniformVector3F(light.color, "lightColor");
+			shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
 			shaderLightBoxPtr->UnBind();
 		
 			lightBox->Draw(shaderLightBoxPtr.GetShared());
 		}
+
+		GraphicsAPI::GetContext()->EnableDepthMask(false);
+		GraphicsAPI::GetContext()->EnableDepthTest(false);
 	}
 
 	void DeferredShading::PostUpdate()
 	{ }
 
 	void DeferredShading::Shutdown()
-	{ }
+	{
+		frameBuffer.reset();
+		pointLights.clear();
+		lightSphere.reset();
+		screenQuad.reset();
+		lightBox.reset();
+	}
 
 	void DeferredShading::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
 	{
 		window = std::move(windowsWindow);
+	}
+
+	void DeferredShading::LocalLightingPass() const
+	{
+		const Memory::WeakPointer<IShader> pointLightShaderPtr{ pointLightShader };
+
+		pointLightShaderPtr->Bind();
+
+		int currentSlot = 0;
+		for (const auto& textureName : G_BUFFER_SHADER_TEXTURE_NAMES)
+		{
+			pointLightShaderPtr->SetUniformInt(currentSlot++, textureName);
+		}
+
+		pointLightShaderPtr->UnBind();
+
+		for (const auto& pointLight : pointLights)
+		{
+			for (auto& mesh : lightSphere->GetMeshes())
+			{
+				mesh.SetLocation({ pointLight.position.x, pointLight.position.y, pointLight.position.z });
+				mesh.SetScale({ pointLight.radius, pointLight.radius, pointLight.radius });
+			}
+
+			pointLightShaderPtr->Bind();
+
+			pointLightShaderPtr->SetUniformVector3F(pointLight.position,		"light.Position");
+			pointLightShaderPtr->SetUniformVector3F(pointLight.color,			"light.Color");
+			pointLightShaderPtr->SetUniformFloat(pointLight.radius,				"light.Radius");
+			pointLightShaderPtr->SetUniformFloat(pointLight.constant,			"light.Constant");
+			pointLightShaderPtr->SetUniformFloat(pointLight.linear,				"light.Linear");
+			pointLightShaderPtr->SetUniformFloat(pointLight.quadratic,			"light.Quadratic");
+			pointLightShaderPtr->SetUniformFloat(pointLight.ambientIntensity,	"light.AmbientIntensity");
+			pointLightShaderPtr->SetUniformFloat(pointLight.lightIntensity,		"light.Intensity");
+
+			const auto* camera = Camera::GetInstance();
+			const Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
+			pointLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
+
+			const Memory::WeakPointer<IWindow> windowPtr{ window };
+			pointLightShaderPtr->SetUniformVector2F({ static_cast<float>(windowPtr->GetWidth()), static_cast<float>(windowPtr->GetHeight()) }, "screenSize");
+
+			GL_CALL(glEnable, GL_CULL_FACE);
+			GL_CALL(glCullFace, GL_FRONT);
+
+			//GraphicsAPI::GetContext()->EnableWireFrameMode(true);
+			lightSphere->Draw(pointLightShaderPtr.GetShared());
+			//GraphicsAPI::GetContext()->EnableWireFrameMode(false);
+
+			GL_CALL(glDisable, GL_CULL_FACE);
+
+			pointLightShaderPtr->UnBind();
+		}
+	}
+
+	void DeferredShading::GlobalLightingPass() const
+	{
+		const Memory::WeakPointer<IShader> globalLightShaderPtr{ globalLightShader };
+
+		globalLightShaderPtr->Bind();
+
+		int currentSlot = 0;
+		for (unsigned i = 0; i < G_BUFFER_SHADER_TEXTURE_NAMES.size(); ++i)
+		{
+			globalLightShaderPtr->SetUniformInt(currentSlot, G_BUFFER_SHADER_TEXTURE_NAMES[currentSlot]);
+			++currentSlot;
+		}
+
+		globalLightShaderPtr->SetUniformVector3F(globalPointLight.position,	"light.Position");
+		globalLightShaderPtr->SetUniformVector3F(globalPointLight.color,	"light.Color");
+
+		const auto* camera = Camera::GetInstance();
+		const Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
+		globalLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
+
+		globalLightShaderPtr->UnBind();
+	}
+
+	void DeferredShading::UpdateLights()
+	{
+		for (auto& light : pointLights)
+		{
+			light.MoveUpAndDown(Time::GetDeltaTime(), LOCAL_POINT_LIGHT_MIN_Y, LOCAL_POINT_LIGHT_MAX_Y);
+		}
 	}
 }

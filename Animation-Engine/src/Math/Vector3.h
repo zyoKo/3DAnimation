@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include "Core/Logger/Log.h"
 
 namespace AnimationEngine::Math
 {

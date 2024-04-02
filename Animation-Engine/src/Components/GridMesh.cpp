@@ -10,7 +10,7 @@
 
 namespace AnimationEngine
 {
-	GridMesh::GridMesh()
+	Quad::Quad()
 		:	vertices(GRID_VERTICES),
 			textureCoordinates(GRID_TEXTURE_COORDINATES),
 			indices(GRID_INDICES),
@@ -26,7 +26,7 @@ namespace AnimationEngine
 		SetupMesh();
 	}
 
-	GridMesh::GridMesh(const std::vector<Math::Vector3F>& vertices,
+	Quad::Quad(const std::vector<Math::Vector3F>& vertices,
 		const std::vector<Math::Vector2F>& textureCoordinates,
 		const std::vector<unsigned>& indices)
 		:	vertices(vertices),
@@ -44,17 +44,17 @@ namespace AnimationEngine
 		SetupMesh();
 	}
 
-	void GridMesh::Bind() const
+	void Quad::Bind() const
 	{
 		vertexArrayObject->Bind();
 	}
 
-	void GridMesh::UnBind() const
+	void Quad::UnBind() const
 	{
 		vertexArrayObject->UnBind();
 	}
 
-	void GridMesh::Update(const std::shared_ptr<IShader>& shader)
+	void Quad::Update(const std::shared_ptr<IShader>& shader)
 	{
 		if (dirtyFlag)
 		{
@@ -94,27 +94,27 @@ namespace AnimationEngine
 		shader->UnBind();
 	}
 
-	void GridMesh::SetVertices(const std::vector<Math::Vector3F>& vertices)
+	void Quad::SetVertices(const std::vector<Math::Vector3F>& vertices)
 	{
 		this->vertices = vertices;
 	}
 
-	void GridMesh::SetTextureCoordinates(const std::vector<Math::Vector2F>& textureCoordinates)
+	void Quad::SetTextureCoordinates(const std::vector<Math::Vector2F>& textureCoordinates)
 	{
 		this->textureCoordinates = textureCoordinates;
 	}
 
-	void GridMesh::SetIndices(const std::vector<unsigned>& indices)
+	void Quad::SetIndices(const std::vector<unsigned>& indices)
 	{
 		this->indices = indices;
 	}
 
-	void GridMesh::SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept
+	void Quad::SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept
 	{
 		gridTexture = std::move(texture);
 	}
 
-	void GridMesh::SetupMesh() const
+	void Quad::SetupMesh() const
 	{
 		indexBuffer->SetSize(sizeof(unsigned) * static_cast<unsigned>(indices.size()));
 		indexBuffer->SetData(indices.data());
@@ -150,7 +150,7 @@ namespace AnimationEngine
 		vertexArrayObject->SetBufferData();
 	}
 
-	void GridMesh::ReSetupMesh() const
+	void Quad::ReSetupMesh() const
 	{
 		// TODO: Find a better strategy
 

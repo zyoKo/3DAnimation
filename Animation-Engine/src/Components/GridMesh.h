@@ -15,16 +15,16 @@ namespace AnimationEngine
 
 namespace AnimationEngine
 {
-	class GridMesh
+	class Quad
 	{
 	public:
-		GridMesh();
+		Quad();
 
-		GridMesh(const std::vector<Math::Vector3F>& vertices, 
+		Quad(const std::vector<Math::Vector3F>& vertices, 
 			const std::vector<Math::Vector2F>& textureCoordinates,
 			const std::vector<unsigned>& indices);
 
-		~GridMesh() = default;
+		~Quad() = default;
 
 		void Bind() const;
 

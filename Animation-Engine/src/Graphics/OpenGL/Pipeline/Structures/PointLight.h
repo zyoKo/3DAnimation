@@ -4,8 +4,16 @@
 
 namespace AnimationEngine
 {
+	enum class LightType
+	{
+		STATIC,
+		DYNAMIC
+	};
+
 	struct PointLight
 	{
+		LightType lightType;
+
 		Math::Vec3F position;
 
 		Math::Vec3F color;
@@ -18,9 +26,17 @@ namespace AnimationEngine
 
 		float quadratic;
 
+		float ambientIntensity;
+
+		float lightIntensity;
+
 		float diffuseIntensity;
 
-		PointLight(const Math::Vec3F& newPosition, const Math::Vec3F& newColor);
+		float moveVelocity;
+
+		PointLight(LightType type, const Math::Vec3F& newPosition, const Math::Vec3F& newColor);
+
+		void MoveUpAndDown(float deltaTime, float minY, float maxY);
 	};
 
 	static float CalculateLightRadius(const PointLight& light);

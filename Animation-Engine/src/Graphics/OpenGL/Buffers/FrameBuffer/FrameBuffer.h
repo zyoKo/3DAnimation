@@ -42,6 +42,12 @@ namespace AnimationEngine
 
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 
+		static void BindDefaultFrameBuffer();
+
+		static void BindDefaultFrameBufferForReading();
+
+		static void BindDefaultFrameBufferForWriting();
+
 	private:
 		unsigned int frameBuffer;
 

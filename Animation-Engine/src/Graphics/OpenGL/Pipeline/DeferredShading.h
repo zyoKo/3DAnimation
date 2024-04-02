@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IPipeline.h"
+#include "Structures/PointLight.h"
 
 namespace AnimationEngine
 {
@@ -39,8 +40,6 @@ namespace AnimationEngine
 		std::shared_ptr<FrameBuffer> frameBuffer;
 
 		//-- Shader --//
-		std::weak_ptr<IShader> shaderGeometryPass;
-
 		std::weak_ptr<IShader> globalLightShader;
 
 		std::weak_ptr<IShader> pointLightShader;
@@ -48,8 +47,22 @@ namespace AnimationEngine
 		std::weak_ptr<IShader> shaderLightBox;
 		//-- !Shader --//
 
+		//-- Lights Data --//
+		PointLight globalPointLight;
+
+		std::vector<PointLight> pointLights;
+
+		std::shared_ptr<Model> lightSphere;
+		//-- !Lights Data --//
+
 		std::shared_ptr<ScreenQuad> screenQuad;
 
 		std::shared_ptr<Model> lightBox;
+
+		void LocalLightingPass() const;
+
+		void GlobalLightingPass() const;
+
+		void UpdateLights();
 	};
 }

@@ -86,9 +86,4 @@ namespace AnimationEngine
 		{ 1.0f, 0.0f },
 		{ 1.0f, 1.0f }
 	};
-
-	//static const std::vector<unsigned> DEFAULT_SCREEN_QUAD_INDICES{
-	//	0, 1, 2,
-	//	2, 1, 3
-	//};
 }
