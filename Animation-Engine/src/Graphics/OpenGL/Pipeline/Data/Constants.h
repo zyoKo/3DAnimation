@@ -34,9 +34,9 @@ namespace AnimationEngine
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
 	static constexpr Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
 
-	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 5000 };	// This should be used to generate 10 random point lights
+	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 10 };	// This should be used to generate 10 random point lights
 	static constexpr float LIGHT_COLOR_START_RANGE{ 0.5f };
-	static constexpr int LIGHT_SPREAD_RANGE{ 100 };
+	static constexpr int LIGHT_SPREAD_RANGE{ 15 };
 
 	static constexpr Math::Vec3F WHITE_LIGHT{ 1.0f, 1.0f, 1.0f };
 	static const std::vector<Math::Vec3F> POINT_LIGHTS_POSITIONS

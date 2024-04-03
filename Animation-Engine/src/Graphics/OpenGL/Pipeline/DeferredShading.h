@@ -18,7 +18,17 @@ namespace AnimationEngine
 	class DeferredShading final : public IPipeline
 	{
 	public:
-		DeferredShading(const PipelineInitializer* data) noexcept;
+		DeferredShading(const PipelineInitializer* info) noexcept;
+
+		explicit DeferredShading(DeferredShading&) = delete;
+
+		explicit DeferredShading(DeferredShading&&) = delete;
+
+		~DeferredShading() override = default;
+
+		DeferredShading& operator=(const DeferredShading&) = delete;
+
+		DeferredShading&& operator=(DeferredShading&&) = delete;
 
 		void Initialize() override;
 

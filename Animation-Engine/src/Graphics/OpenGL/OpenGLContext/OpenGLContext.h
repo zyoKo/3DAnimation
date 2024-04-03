@@ -18,11 +18,7 @@ namespace AnimationEngine
 
 		void SwapBuffer() override;
 
-		void ClearBuffers() override;
-
-		void ClearColorBuffer() override;
-
-		void ClearDepthBuffer() override;
+		void ClearBuffers(BufferType type = BufferType::COLOR_DEPTH) override;
 
 		void ClearColor(Math::Vec4F color) override;
 
@@ -35,6 +31,8 @@ namespace AnimationEngine
 		void EnableDepthMask(bool value) override;
 
 		void EnableBlending(bool value) override;
+
+		void SetFaceCulling(CullType type) override;
 
 	private:
 		GLFWwindow* window;

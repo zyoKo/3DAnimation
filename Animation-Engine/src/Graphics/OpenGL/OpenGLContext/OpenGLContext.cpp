@@ -49,19 +49,22 @@ namespace AnimationEngine
 		glfwSwapBuffers(window);
 	}
 
-	void OpenGLContext::ClearBuffers()
+	void OpenGLContext::ClearBuffers(BufferType type /* = BufferType::COLOR_DEPTH */)
 	{
-		GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
+		switch(type)
+		{
+		case BufferType::COLOR:
+			GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
+			break;
 
-	void OpenGLContext::ClearColorBuffer()
-	{
-		GL_CALL(glClear, GL_COLOR_BUFFER_BIT);
-	}
+		case BufferType::DEPTH:
+			GL_CALL(glClear, GL_DEPTH_BUFFER_BIT);
+			break;
 
-	void OpenGLContext::ClearDepthBuffer()
-	{
-		GL_CALL(glClear, GL_DEPTH_BUFFER_BIT);
+		case BufferType::COLOR_DEPTH:
+			GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			break;
+		}
 	}
 
 	void OpenGLContext::ClearColor(Math::Vec4F color)
@@ -104,9 +107,7 @@ namespace AnimationEngine
 
 	void OpenGLContext::EnableDepthMask(bool value)
 	{
-		const auto dMask = value ? GL_TRUE : GL_FALSE;
-
-		GL_CALL(glDepthMask, dMask);
+		GL_CALL(glDepthMask, value);
 	}
 
 	void OpenGLContext::EnableBlending(bool value)
@@ -118,5 +119,28 @@ namespace AnimationEngine
 		}
 
 		GL_CALL(glDisable, GL_BLEND);
+	}
+
+	void OpenGLContext::SetFaceCulling(CullType type)
+	{
+		type == CullType::NONE ? GL_CALL(glDisable, GL_CULL_FACE) : GL_CALL(glEnable, GL_CULL_FACE);
+
+		switch(type)
+		{
+		case CullType::FRONT_FACE:
+			GL_CALL(glCullFace, GL_FRONT);
+			break;
+
+		case CullType::BACK_FACE:
+			GL_CALL(glCullFace, GL_BACK);
+			break;
+
+		case CullType::FRONT_BACK_FACE:
+			GL_CALL(glCullFace, GL_FRONT_AND_BACK);
+			break;
+
+		case CullType::NONE:
+			return;
+		}
 	}
 }

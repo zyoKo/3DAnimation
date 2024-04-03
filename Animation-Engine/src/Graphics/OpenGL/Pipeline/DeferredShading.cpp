@@ -21,12 +21,12 @@
 
 namespace AnimationEngine
 {
-	DeferredShading::DeferredShading(const PipelineInitializer* data) noexcept
+	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	globalPointLight(LightType::STATIC, Math::Vec3F(100.0f, 100.0f, 100.0f), Math::Vec3F(1.0f, 1.0f, 1.0f))
 	{
-		ANIM_ASSERT(data != nullptr, "Pipeline Initializer is nullptr.");
+		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
-		window = std::move(data->window);
+		window = std::move(info->window);
 	}
 
 	void DeferredShading::Initialize()
@@ -91,8 +91,8 @@ namespace AnimationEngine
 					(static_cast<float>(Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE
 				};
 
-				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
-				pointLights.emplace_back(LightType::DYNAMIC, lightLocation, WHITE_LIGHT);
+				pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
+				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, WHITE_LIGHT);
 			}
 		}
 		else
@@ -122,7 +122,7 @@ namespace AnimationEngine
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		GraphicsAPI::GetContext()->EnableDepthMask(true);
 		GL_CALL(glDepthFunc, GL_LESS);
-		GraphicsAPI::GetContext()->ClearColor(BLACK);
+		GraphicsAPI::GetContext()->ClearColor({ COLOR_BLACK, 1.0f });
 		GraphicsAPI::GetContext()->ClearBuffers();
 		GraphicsAPI::GetContext()->EnableBlending(false);
 
@@ -149,7 +149,7 @@ namespace AnimationEngine
 		GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
 
 		frameBuffer->BindForReading();
-		GraphicsAPI::GetContext()->ClearColorBuffer();
+		GraphicsAPI::GetContext()->ClearBuffers(BufferType::COLOR);
 
 		int currentTextureSlot = 0;
 		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
@@ -159,7 +159,7 @@ namespace AnimationEngine
 
 		UpdateLights();
 
-		GraphicsAPI::GetContext()->ClearColorBuffer();
+		GraphicsAPI::GetContext()->ClearBuffers(BufferType::COLOR);
 
 		LocalLightingPass();
 
@@ -202,6 +202,7 @@ namespace AnimationEngine
 		
 			shaderLightBoxPtr->Bind();
 			shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
+			//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
 			shaderLightBoxPtr->UnBind();
 		
 			lightBox->Draw(shaderLightBoxPtr.GetShared());
@@ -268,14 +269,13 @@ namespace AnimationEngine
 			const Memory::WeakPointer<IWindow> windowPtr{ window };
 			pointLightShaderPtr->SetUniformVector2F({ static_cast<float>(windowPtr->GetWidth()), static_cast<float>(windowPtr->GetHeight()) }, "screenSize");
 
-			GL_CALL(glEnable, GL_CULL_FACE);
-			GL_CALL(glCullFace, GL_FRONT);
+			GraphicsAPI::GetContext()->SetFaceCulling(CullType::FRONT_FACE);
 
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(true);
 			lightSphere->Draw(pointLightShaderPtr.GetShared());
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
-			GL_CALL(glDisable, GL_CULL_FACE);
+			GraphicsAPI::GetContext()->SetFaceCulling(CullType::NONE);
 
 			pointLightShaderPtr->UnBind();
 		}
