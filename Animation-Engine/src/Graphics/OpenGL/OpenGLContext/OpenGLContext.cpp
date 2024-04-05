@@ -50,7 +50,7 @@ namespace AnimationEngine
 		glfwSwapBuffers(window);
 	}
 
-	void OpenGLContext::ClearBuffers(BufferType type /* = BufferType::COLOR_DEPTH */)
+	void OpenGLContext::ClearBuffers(BufferType type /* = BufferType::COLOR_AND_DEPTH */)
 	{
 		switch(type)
 		{
@@ -62,7 +62,7 @@ namespace AnimationEngine
 			GL_CALL(glClear, GL_DEPTH_BUFFER_BIT);
 			break;
 
-		case BufferType::COLOR_DEPTH:
+		case BufferType::COLOR_AND_DEPTH:
 			GL_CALL(glClear, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			break;
 		}
@@ -161,7 +161,7 @@ namespace AnimationEngine
 		GL_CALL(glMemoryBarrier, barrierType);
 	}
 
-	void OpenGLContext::DrawBuffers(unsigned size, const void* data)
+	void OpenGLContext::DrawBuffers(unsigned size, const unsigned* data)
 	{
 		if (size == 0 || data == nullptr)
 		{
@@ -170,6 +170,11 @@ namespace AnimationEngine
 		}
 
 		GL_CALL(glDrawBuffers, size, static_cast<const GLenum*>(data));
+	}
+
+	void OpenGLContext::ReadBuffer(unsigned mode)
+	{
+		GL_CALL(glReadBuffer, mode);
 	}
 
 	void OpenGLContext::DrawArrays(DrawMode drawMode, int offset, int count)

@@ -17,6 +17,7 @@
 #include "Animation/Model.h"
 #include "Components/Camera/Camera.h"
 #include "Core/Utilities/Time.h"
+#include "Core/Application/Interface/IApplication.h"
 #include "Core/Utilities/Utilites.h"
 
 namespace AnimationEngine
@@ -28,6 +29,7 @@ namespace AnimationEngine
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
 		window = std::move(info->window);
+		sandBox = std::move(info->sandBox);
 	}
 
 	void DeferredShading::Initialize()
@@ -118,7 +120,7 @@ namespace AnimationEngine
 		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
 	}
 
-	void DeferredShading::PreFrameRender()
+	void DeferredShading::Update()
 	{
 		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
 
@@ -134,12 +136,8 @@ namespace AnimationEngine
 		GraphicsAPI::GetContext()->ClearBuffers();
 
 		/* [... Start Rendering Scene ...] */
-	}
-
-	void DeferredShading::PostFrameRender()
-	{
-		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
-
+		const Memory::WeakPointer<IApplication> sandBoxPtr{ sandBox };
+		sandBoxPtr->Update();
 		/* [... Finish Rendering Scene ...] */
 
 		frameBuffer->UnBind();
@@ -201,7 +199,7 @@ namespace AnimationEngine
 			for (auto& mesh : lightBox->GetMeshes())
 			{
 				mesh.SetLocation({ light.position.x, light.position.y, light.position.z });
-				mesh.SetScale(LIGHT_BOX_SCALE);
+				mesh.SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
 			}
 		
 			shaderLightBoxPtr->Bind();

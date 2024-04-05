@@ -37,7 +37,7 @@ namespace AnimationEngine
 
 		void SetApplication(const std::shared_ptr<IApplication>& app);
 
-		void Initialize() const;
+		void Initialize();
 
 		void Update() const;
 

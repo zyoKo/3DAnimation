@@ -11,9 +11,7 @@ namespace AnimationEngine
 
 		virtual void PreUpdateSetup() = 0;
 
-		virtual void PreFrameRender() = 0;
-
-		virtual void PostFrameRender() = 0;
+		virtual void Update() = 0;
 
 		virtual void PostUpdate() = 0;
 

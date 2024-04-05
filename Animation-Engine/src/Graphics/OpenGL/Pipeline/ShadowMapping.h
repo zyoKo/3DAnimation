@@ -1,14 +1,17 @@
 #pragma once
 
 #include "IPipeline.h"
+#include "Structures/DirectionalLight.h"
 
 namespace AnimationEngine
 {
-	struct PipelineInitializer;
+	class IWindow;
+	class IApplication;
+	class IShader;
 	class BufferTexture;
 	class ScreenQuad;
-	class IWindow;
-	class IShader;
+	class FrameBuffer;
+	struct PipelineInitializer;
 }
 
 namespace AnimationEngine
@@ -32,9 +35,7 @@ namespace AnimationEngine
 
 		void PreUpdateSetup() override;
 
-		void PreFrameRender() override;
-
-		void PostFrameRender() override;
+		void Update() override;
 
 		void PostUpdate() override;
 
@@ -42,17 +43,25 @@ namespace AnimationEngine
 
 		void SetEnable(bool value) override;
 
+		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
+
+		void SetSandBoxApplication(std::weak_ptr<IApplication> application) noexcept;
+
 	private:
 		bool enableShadowMapping;
 
 		std::weak_ptr<IWindow> window;
 
-		std::weak_ptr<IShader> computeShader;
+		std::weak_ptr<IApplication> sandBox;
 
-		std::weak_ptr<IShader> screenQuadShader;
+		std::shared_ptr<FrameBuffer> shadowFrameBuffer;
 
-		std::shared_ptr<BufferTexture> textureFromCompute;
+		DirectionalLight directionalLight;
+
+		std::weak_ptr<IShader> shadowShader;
 
 		std::shared_ptr<ScreenQuad> screenQuad;
+
+		std::weak_ptr<IShader> screenQuadShader;
 	};
 }

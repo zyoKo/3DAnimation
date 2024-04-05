@@ -37,6 +37,14 @@ namespace AnimationEngine
 		GL_CALL(glDeleteTextures, 1, &textureID);
 	}
 
+	void BufferTexture::SetTextureParameters(const TextureParameters& textureParameters) const
+	{
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_S, textureParameters.sWrap);
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_T, textureParameters.tWrap);
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MIN_FILTER, textureParameters.minFilter);
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MAG_FILTER, textureParameters.magFilter);
+	}
+
 	void BufferTexture::Bind() const
 	{
 		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);

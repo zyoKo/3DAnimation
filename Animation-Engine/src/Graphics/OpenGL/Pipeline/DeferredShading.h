@@ -5,6 +5,7 @@
 
 namespace AnimationEngine
 {
+	class IApplication;
 	struct PipelineInitializer;
 	class ScreenQuad;
 	class IWindow;
@@ -34,9 +35,7 @@ namespace AnimationEngine
 
 		void PreUpdateSetup() override;
 
-		void PreFrameRender() override;
-
-		void PostFrameRender() override;
+		void Update() override;
 
 		void PostUpdate() override;
 
@@ -50,6 +49,8 @@ namespace AnimationEngine
 		bool enableDeferredShading;
 
 		std::weak_ptr<IWindow> window;
+
+		std::weak_ptr<IApplication> sandBox;
 
 		std::shared_ptr<FrameBuffer> frameBuffer;
 

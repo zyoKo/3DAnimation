@@ -41,5 +41,4 @@ void main()
     vec3 specular   = light.Color * spec * Specular;
 
     FragColor = vec4(ambient + diffuse + specular, 1.0);
-    //FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }

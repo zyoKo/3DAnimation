@@ -30,18 +30,6 @@ namespace AnimationEngine
 
 		Camera::GetInstance()->SetWindowsWindow(window);
 
-		// Create Deferred Pipeline
-		const PipelineInitializer deferredPipelineData{
-			.window = this->window
-		};
-		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
-
-		// Create Shadow Pipeline
-		const PipelineInitializer shadowPipelineData{
-			.window = this->window
-		};
-		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
-
 		AssetManagerLocator::Initialize();
 		AnimatorLocator::Initialize();
 
@@ -64,15 +52,26 @@ namespace AnimationEngine
 		application->SetWindowsWindow(window);
 	}
 
-	void CoreEngine::Initialize() const
+	void CoreEngine::Initialize()
 	{
 		Camera::GetInstance()->Initialize();
 
-		// Pipelines Call
-		shadowMappingPipeline->SetEnable(false);
-
-		shadowMappingPipeline->Initialize();
+		// Create Deferred Pipeline
+		const PipelineInitializer deferredPipelineData{
+			.window = this->window,
+			.sandBox = application
+		};
+		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
 		deferredPipeline->Initialize();
+
+		// Create Shadow Pipeline
+		const PipelineInitializer shadowPipelineData{
+			.window = this->window,
+			.sandBox = application
+		};
+		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
+		shadowMappingPipeline->Initialize();
+		shadowMappingPipeline->SetEnable(false);
 
 		// Application Initialize
 		application->Initialize();
@@ -94,14 +93,9 @@ namespace AnimationEngine
 			ProcessInput();
 
 			// Pipelines Call
-			shadowMappingPipeline->PreFrameRender();
-			deferredPipeline->PreFrameRender();
+			shadowMappingPipeline->Update();
 
-			// Application Update
-			application->Update();
-
-			shadowMappingPipeline->PostFrameRender();
-			deferredPipeline->PostFrameRender();
+			deferredPipeline->Update();
 
 			window->Update();
 		}

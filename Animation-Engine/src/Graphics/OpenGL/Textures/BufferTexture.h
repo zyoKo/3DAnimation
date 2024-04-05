@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
+#include "Structures/TextureParameters.h"
 
 namespace AnimationEngine
 {
@@ -15,6 +16,8 @@ namespace AnimationEngine
 		BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int floatingPrecision, int width = 0, int height = 0, int levels = 1);
 
 		~BufferTexture();
+
+		void SetTextureParameters(const TextureParameters& textureParameters) const;
 
 		void Bind() const;
 

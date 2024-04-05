@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Components/Types/DrawMode.h"
+#include "Graphics/OpenGL/OpenGLContext/Types/BufferType.h"
+#include "Graphics/OpenGL/OpenGLContext/Types/CullType.h"
 #include "Math/Math.h"
 
 #define COLOR_WHITE	AnimationEngine::Math::Vec3F{ 1.0f, 1.0f, 1.0f }
@@ -19,21 +21,6 @@
 
 namespace AnimationEngine
 {
-	enum class BufferType
-	{
-		COLOR,
-		DEPTH,
-		COLOR_DEPTH
-	};
-
-	enum class CullType
-	{
-		FRONT_FACE,
-		BACK_FACE,
-		FRONT_BACK_FACE,
-		NONE
-	};
-
 	class IContext
 	{
 	public:
@@ -45,9 +32,9 @@ namespace AnimationEngine
 
 		virtual void SwapBuffer() = 0;
 
-		virtual void ClearBuffers(BufferType type = BufferType::COLOR_DEPTH) = 0;
+		virtual void ClearBuffers(BufferType type = BufferType::COLOR_AND_DEPTH) = 0;
 
-		virtual void ClearColor(Math::Vec4F color = { COLOR_GRAY, 1.0f }) = 0;
+		virtual void ClearColor(Math::Vec4F color = COLOR_GRAY_A) = 0;
 
 		virtual void EnableDepthTest(bool value) = 0;
 
@@ -65,7 +52,9 @@ namespace AnimationEngine
 
 		virtual void CreateMemoryBarrier(unsigned barrierType) = 0;
 
-		virtual void DrawBuffers(unsigned size, const void* data) = 0;
+		virtual void DrawBuffers(unsigned size, const unsigned* data) = 0;
+
+		virtual void ReadBuffer(unsigned mode) = 0;
 
 		virtual void DrawArrays(DrawMode drawMode, int offset, int count) = 0;
 	};

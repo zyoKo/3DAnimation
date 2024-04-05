@@ -1,9 +1,8 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 namespace AnimationEngine
 {
+	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
 	static const std::string POSITION_TEXTURE	{ "positionTexture" };
 	static const std::string NORMAL_TEXTURE		{ "normalTexture"   };
 	static const std::string ALBEDO_TEXTURE		{ "albedoTexture"   };	// (1) both are same use any...
@@ -58,7 +57,7 @@ namespace AnimationEngine
 	static constexpr float LOCAL_POINT_LIGHT_MAX_Y	{  4.0f };
 	static constexpr float LOCAL_POINT_LIGHT_MOVE_VELOCITY { 1.0f };
 
-	static constexpr glm::vec3 LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
+	static constexpr Math::Vec3F LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
 	static const std::string LIGHT_COLOR_UNIFORM_NAME{ "lightColor" };
 	//-- !Lights Data --//
 
@@ -72,4 +71,11 @@ namespace AnimationEngine
 	static const std::string CUBE_FILE_PATH		{ "./assets/models/primitives/cube.obj" };
 	static const std::string SPHERE_FILE_PATH	{ "./assets/models/primitives/sphere_old.obj" };
 	//-- !Light Box--//
+	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
+
+	//---------------------------------------------------------------------------------------------------------------------//
+
+	//-- ## MSM_SHADOW_MAPPING_CONSTANTS ## --//
+
+	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
 }

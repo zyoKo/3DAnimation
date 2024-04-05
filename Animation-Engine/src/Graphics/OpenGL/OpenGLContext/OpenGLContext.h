@@ -18,7 +18,7 @@ namespace AnimationEngine
 
 		void SwapBuffer() override;
 
-		void ClearBuffers(BufferType type = BufferType::COLOR_DEPTH) override;
+		void ClearBuffers(BufferType type = BufferType::COLOR_AND_DEPTH) override;
 
 		void ClearColor(Math::Vec4F color) override;
 
@@ -38,7 +38,9 @@ namespace AnimationEngine
 
 		void CreateMemoryBarrier(unsigned barrierType) override;
 
-		void DrawBuffers(unsigned size, const void* data) override;
+		void DrawBuffers(unsigned size, const unsigned* data) override;
+
+		void ReadBuffer(unsigned mode) override;
 
 		void DrawArrays(DrawMode drawMode, int offset, int count) override;
 
