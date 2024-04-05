@@ -26,6 +26,10 @@ namespace Sandbox
 
 		void Shutdown() override;
 
+		std::weak_ptr<AnimationEngine::Model> GetBackPackModel() const;
+
+		std::weak_ptr<AnimationEngine::Quad> GetQuadModel() const;
+
 	private:
 		bool enableModelMesh{ true };
 

@@ -30,7 +30,7 @@ namespace AnimationEngine
 
 		void UnBind() const;
 
-		void Update(const std::shared_ptr<IShader>& shader);
+		void Draw();
 
 		void SetVertices(const std::vector<Math::Vector3F>& vertices);
 
@@ -39,6 +39,8 @@ namespace AnimationEngine
 		void SetIndices(const std::vector<unsigned>& indices);
 
 		void SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept;
+
+		void SetShader(std::weak_ptr<IShader> shader) noexcept;
 
 	private:
 		std::vector<Math::Vector3F> vertices;
@@ -49,6 +51,8 @@ namespace AnimationEngine
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 		std::shared_ptr<IIndexBuffer> indexBuffer;
+
+		std::weak_ptr<IShader> quadShader;
 
 		std::weak_ptr<ITexture2D> gridTexture;
 

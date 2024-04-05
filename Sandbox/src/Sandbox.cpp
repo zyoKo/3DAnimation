@@ -5,7 +5,7 @@
 #include "AssetManager/Interface/IAssetManager.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Animation/Model.h"
-#include "Components/GridMesh.h"
+#include "Components/Quad.h"
 #include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
 
@@ -32,13 +32,13 @@ namespace Sandbox
 		//-- Shader Creation --//
 		assetManager->AddShaderDescription({
 			.type = ShaderType::VERTEX,
-			.filePath = BACKPACK_VERTEX_SHADER_FILE_PATH
+			.filePath = G_BUFFER_VERTEX_SHADER_FILE_PATH
 		});
 		assetManager->AddShaderDescription({
 			.type = ShaderType::FRAGMENT,
-			.filePath = BACKPACK_FRAGMENT_SHADER_FILE_PATH
+			.filePath = G_BUFFER_FRAGMENT_SHADER_FILE_PATH
 		});
-		assetManager->CreateShaderWithDescription(BACKPACK_SHADER_NAME);
+		assetManager->CreateShaderWithDescription(G_BUFFER_SHADER_NAME);
 
 		assetManager->AddShaderDescription({
 			.type = ShaderType::VERTEX,
@@ -60,12 +60,17 @@ namespace Sandbox
 	{
 		using namespace AnimationEngine;
 
+		const auto backPackShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
+		const auto quadShader = assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME);
+
 		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
 		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
 		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
+		backPack->SetShader(backPackShader);
 
 		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
 		floor->SetGridTexture(gridTexture);
+		floor->SetShader(quadShader);
 
 		auto* camera = Camera::GetInstance();
 		camera->SetCameraPosition({ 7.0f, 14.0f, 13.0f });
@@ -77,20 +82,14 @@ namespace Sandbox
 	{
 		using namespace AnimationEngine;
 
-		const Memory::WeakPointer<IShader> backPackShaderPtr { assetManager->RetrieveShaderFromStorage(BACKPACK_SHADER_NAME) };
-		const Memory::WeakPointer<IShader> gridShaderPtr	 { assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME) };
-
 		for (const auto& location : BACKPACK_LOCATIONS)
 		{
-			for (auto& mesh : backPack->GetMeshes())
-			{
-				mesh.SetLocation(location);
-			}
+			backPack->SetLocation(location);
 
-			backPack->Draw(backPackShaderPtr.GetShared());
+			backPack->Draw();
 		}
 
-		floor->Update(gridShaderPtr.GetShared());
+		floor->Draw();
 	}
 
 	void SandboxApp::PostUpdate()
@@ -100,6 +99,16 @@ namespace Sandbox
 	{
 		backPack.reset();
 		floor.reset();
+	}
+
+	std::weak_ptr<AnimationEngine::Model> SandboxApp::GetBackPackModel() const
+	{
+		return backPack;
+	}
+
+	std::weak_ptr<AnimationEngine::Quad> SandboxApp::GetQuadModel() const
+	{
+		return floor;
 	}
 }
 

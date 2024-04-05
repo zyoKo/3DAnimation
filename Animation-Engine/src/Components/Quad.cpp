@@ -1,6 +1,6 @@
 #include <AnimationPch.h>
 
-#include "GridMesh.h"
+#include "Quad.h"
 
 #include "Camera/Camera.h"
 #include "Core/Logger/GLDebug.h"
@@ -54,7 +54,7 @@ namespace AnimationEngine
 		vertexArrayObject->UnBind();
 	}
 
-	void Quad::Update(const std::shared_ptr<IShader>& shader)
+	void Quad::Draw()
 	{
 		if (dirtyFlag)
 		{
@@ -63,7 +63,15 @@ namespace AnimationEngine
 			dirtyFlag = false;
 		}
 
-		shader->Bind();
+		if (quadShader.expired())
+		{
+			LOG_WARN("Cannot draw quad shader as the shader is null.");
+			return;
+		}
+
+		const Memory::WeakPointer<IShader> quadShaderPtr{ quadShader };
+
+		quadShaderPtr->Bind();
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
@@ -75,14 +83,14 @@ namespace AnimationEngine
 		const glm::mat4 projection	= camera->GetProjectionMatrix();
 		const glm::mat4 view		= camera->GetViewMatrix();
 
-		shader->SetUniformMatrix4F(projection, "projection");
-		shader->SetUniformMatrix4F(view, "view");
-		shader->SetUniformMatrix4F(model, "model");
+		quadShaderPtr->SetUniformMatrix4F(projection, "projection");
+		quadShaderPtr->SetUniformMatrix4F(view, "view");
+		quadShaderPtr->SetUniformMatrix4F(model, "model");
 
 		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ gridTexture };
 
 		gridTexturePtr->Bind(0);
-		shader->SetUniformInt(0, gridTexturePtr->GetTextureName());
+		quadShaderPtr->SetUniformInt(0, gridTexturePtr->GetTextureName());
 
 		// Draw Call
 		Bind();
@@ -91,7 +99,7 @@ namespace AnimationEngine
 
 		gridTexturePtr->UnBind();
 
-		shader->UnBind();
+		quadShaderPtr->UnBind();
 	}
 
 	void Quad::SetVertices(const std::vector<Math::Vector3F>& vertices)
@@ -112,6 +120,11 @@ namespace AnimationEngine
 	void Quad::SetGridTexture(std::weak_ptr<ITexture2D> texture) noexcept
 	{
 		gridTexture = std::move(texture);
+	}
+
+	void Quad::SetShader(std::weak_ptr<IShader> shader) noexcept
+	{
+		quadShader = std::move(shader);
 	}
 
 	void Quad::SetupMesh() const

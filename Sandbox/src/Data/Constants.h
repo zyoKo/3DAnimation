@@ -33,9 +33,9 @@ namespace Sandbox
 	static const std::string BACKPACK_AO_TEXTURE_FILE_NAME			{ "backpack_ao" };
 	static const std::string BACKPACK_AO_TEXTURE_FILE_PATH			{ "./assets/models/backpack/backpack_ao.jpg" };
 
-	static const std::string BACKPACK_SHADER_NAME					{ "BackpackShader" };
-	static const std::string BACKPACK_VERTEX_SHADER_FILE_PATH		{ "./assets/shaders/backpack/backpack.vert" };
-	static const std::string BACKPACK_FRAGMENT_SHADER_FILE_PATH		{ "./assets/shaders/backpack/backpack.frag" };
+	static const std::string G_BUFFER_SHADER_NAME					{ "gBufferShader" };
+	static const std::string G_BUFFER_VERTEX_SHADER_FILE_PATH		{ "./assets/shaders/Deferred/gBuffer.vert" };
+	static const std::string G_BUFFER_FRAGMENT_SHADER_FILE_PATH		{ "./assets/shaders/Deferred/gBuffer.frag" };
 
 	static std::vector<glm::vec3> BACKPACK_LOCATIONS
 	{
@@ -55,7 +55,7 @@ namespace Sandbox
 	static const std::string GRID_DIFFUSE_TEXTURE_FILE_NAME	{ "grid" };
 	static const std::string GRID_DIFFUSE_TEXTURE_FILE_PATH	{ "./assets/grid.png" };
 
-	static const std::string QUAD_SHADER_NAME				{ "GridShader" };
+	static const std::string QUAD_SHADER_NAME				{ "QuadShader" };
 	static const std::string QUAD_VERTEX_SHADER_FILE_PATH	{ "./assets/shaders/quad.vert" };
 	static const std::string QUAD_FRAGMENT_SHADER_FILE_PATH	{ "./assets/shaders/quad.frag" };
 	//-- !GRID --//

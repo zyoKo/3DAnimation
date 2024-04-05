@@ -25,7 +25,7 @@ namespace AnimationEngine
 
 		explicit Model(Model&& model) = delete;
 
-		void Draw(const std::shared_ptr<IShader>& shader) const;
+		void Draw() const;
 
 		const std::vector<Mesh>& GetMeshes() const;
 
@@ -35,12 +35,30 @@ namespace AnimationEngine
 
 		int& GetBoneCount();
 
-		void SetTextures(const std::vector<std::shared_ptr<ITexture2D>>& textures);
+		void SetShader(std::weak_ptr<IShader> shader) noexcept;
 
-		void SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures);
+		void SetLocation(const glm::vec3& newLocation);
+
+		void SetScale(const glm::vec3& newScale);
+
+		const std::vector<std::weak_ptr<ITexture2D>>& GetTextures() const;
+
+		void SetTextures(std::vector<std::weak_ptr<ITexture2D>> textures);
+
+		void AddTexture(std::weak_ptr<ITexture2D> texture) noexcept;
+
+		void ClearTextures();
 
 	private:
 		std::vector<Mesh> meshes;
+
+		glm::vec3 location;
+
+		glm::vec3 scale;
+
+		std::weak_ptr<IShader> modelShader;
+
+		std::vector<std::weak_ptr<ITexture2D>> textures;
 
 		std::map<std::string, BoneInfo> boneInfoMap;
 
@@ -55,5 +73,7 @@ namespace AnimationEngine
 		void ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize);
 
 		void GetBoneLines(aiNode* node, const aiNode* parentNode, std::vector<Math::Vector3F>& boneLines);
+
+		glm::mat4 GetModelMatrix() const;
 	};
 }

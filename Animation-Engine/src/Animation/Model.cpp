@@ -5,22 +5,68 @@
 #include <assimp/postprocess.h>
 
 #include "AssetManager/AssetManager.h"
+#include "Components/Camera/Camera.h"
+#include "Core/Memory/WeakPointer.h"
 #include "Core/Utilities/Utilites.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 
 namespace AnimationEngine
 {
 	Model::Model(const std::string& path)
+		:	location(0.0f, 0.0f, 0.0f),
+			scale(1.0f, 1.0f, 1.0f)
 	{
 		LoadModel(path);
 	}
 
-	void Model::Draw(const std::shared_ptr<IShader>& shader) const
+	void Model::Draw() const
 	{
+		if (modelShader.expired())
+		{
+			LOG_WARN("Failed to render model as shader is null.");
+			return;
+		}
+
+		const Memory::WeakPointer<IShader> modelShaderPtr{ modelShader };
+
+		modelShaderPtr->Bind();
+
+		for (int i = 0; i < static_cast<int>(textures.size()); ++i)
+		{
+			const Memory::WeakPointer<ITexture2D> texturePtr{ textures[i] };
+
+			texturePtr->Bind(i);
+
+			modelShaderPtr->SetUniformInt(i, texturePtr->GetTextureName());
+		}
+
+		const auto* camera = Camera::GetInstance();
+
+		const glm::mat4 projection	= camera->GetProjectionMatrix();
+		const glm::mat4 view		= camera->GetViewMatrix();
+		const glm::mat4 model		= GetModelMatrix();
+
+		modelShaderPtr->SetUniformMatrix4F(projection, "projection");
+		modelShaderPtr->SetUniformMatrix4F(view, "view");
+		modelShaderPtr->SetUniformMatrix4F(model, "model");
+
 		for (const auto& mesh : meshes)
 		{
-			mesh.Draw(shader);
+			mesh.Bind();
+
+			GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<GLsizei>(mesh.GetIndices().size()), GL_UNSIGNED_INT, nullptr);
+
+			mesh.Unbind();
 		}
+
+		for (const auto& texture : textures)
+		{
+			const Memory::WeakPointer<ITexture2D> texturePtr{ texture };
+
+			texturePtr->UnBind();
+		}
+
+		modelShaderPtr->UnBind();
 	}
 
 	const std::vector<Mesh>& Model::GetMeshes() const
@@ -31,14 +77,6 @@ namespace AnimationEngine
 	std::vector<Mesh>& Model::GetMeshes()
 	{
 		return meshes;
-	}
-
-	void Model::SetDiffuseTextureForMeshes(const std::shared_ptr<ITexture2D>& textures)
-	{
-		for (auto& mesh : meshes)
-		{
-			mesh.AddTexture(textures);
-		}
 	}
 
 	void Model::LoadModel(const std::string& path)
@@ -113,7 +151,10 @@ namespace AnimationEngine
 			}
 		}
 
-		boneData.resize(vertices.size());
+		if (aiMesh->mNumBones > 0)
+		{
+			boneData.resize(vertices.size());
+		}
 
 		ExtractBoneWeightForVertices(boneData, aiMesh, aiScene, static_cast<unsigned>(vertices.size()));
 
@@ -130,15 +171,39 @@ namespace AnimationEngine
 		return boneCounter;
 	}
 
-	void Model::SetTextures(const std::vector<std::shared_ptr<ITexture2D>>& textures)
+	void Model::SetShader(std::weak_ptr<IShader> shader) noexcept
 	{
-		for (auto& mesh : meshes)
-		{
-			for (auto& texture : textures)
-			{
-				mesh.AddTexture(texture);
-			}
-		}
+		modelShader = std::move(shader);
+	}
+
+	void Model::SetLocation(const glm::vec3& newLocation)
+	{
+		location = newLocation;
+	}
+
+	void Model::SetScale(const glm::vec3& newScale)
+	{
+		scale = newScale;
+	}
+
+	const std::vector<std::weak_ptr<ITexture2D>>& Model::GetTextures() const
+	{
+		return textures;
+	}
+	
+	void Model::SetTextures(std::vector<std::weak_ptr<ITexture2D>> textures)
+	{
+		this->textures = std::move(textures);
+	}
+
+	void Model::AddTexture(std::weak_ptr<ITexture2D> texture) noexcept
+	{
+		textures.push_back(std::move(texture));
+	}
+
+	void Model::ClearTextures()
+	{
+		textures.clear();
 	}
 
 	void Model::ExtractBoneWeightForVertices(std::vector<BoneData>& boneData, const aiMesh* aiMesh, const aiScene* aiScene, unsigned verticesSize)
@@ -194,5 +259,14 @@ namespace AnimationEngine
 		{
 		    GetBoneLines(node->mChildren[i], node, boneLines);
 		}
+	}
+
+	glm::mat4 Model::GetModelMatrix() const
+	{
+		glm::mat4 modelMatrix = glm::mat4(1.0f);
+		modelMatrix = glm::translate(modelMatrix, location);
+		modelMatrix = glm::scale(modelMatrix, scale);
+
+		return modelMatrix;
 	}
 }

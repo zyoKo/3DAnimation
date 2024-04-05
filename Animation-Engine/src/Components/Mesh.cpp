@@ -14,8 +14,6 @@
 namespace AnimationEngine
 {
 	Mesh::Mesh()
-		:	location(0.0f, 0.0f, 0.0f),
-			scale(1.0f, 1.0f, 1.0f)
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -39,9 +37,7 @@ namespace AnimationEngine
 			tangents(std::move(tangents)),
 			biTangents(std::move(biTangents)),
 			boneData(std::move(boneData)),
-			indices(std::move(indices)),
-			location(0.0f, 0.0f, 0.0f),
-			scale(1.0f, 1.0f, 1.0f)
+			indices(std::move(indices))
 	{
 		vertexArrayObject = GraphicsAPI::CreateVertexArray();
 		vertexBuffer = GraphicsAPI::CreateVertexBuffer();
@@ -131,69 +127,6 @@ namespace AnimationEngine
 	void Mesh::SetIndices(std::vector<unsigned> indexList) noexcept
 	{
 		this->indices = std::move(indexList);
-	}
-
-	const ITexturesList& Mesh::GetTextures() const
-	{
-		return textures;
-	}
-	
-	void Mesh::SetTextures(ITexturesList textures)
-	{
-		this->textures = std::move(textures);
-	}
-
-	void Mesh::AddTexture(const std::shared_ptr<ITexture2D>& texture)
-	{
-		if (texture != nullptr)
-		{
-			textures.push_back(texture);
-		}
-	}
-
-	void Mesh::SetLocation(const glm::vec3& newLocation)
-	{
-		location = newLocation;
-	}
-
-	void Mesh::SetScale(const glm::vec3& newScale)
-	{
-		scale = newScale;
-	}
-
-	void Mesh::Draw(const std::shared_ptr<IShader>& shader) const
-	{
-		shader->Bind();
-		for (int i = 0; i < static_cast<int>(textures.size()); ++i)
-		{
-			textures[i]->Bind(i);
-
-			shader->SetUniformInt(i, textures[i]->GetTextureName());
-		}
-
-		const auto* camera = Camera::GetInstance();
-
-		const glm::mat4 projection	= camera->GetProjectionMatrix();
-		const glm::mat4 view		= camera->GetViewMatrix();
-
-		glm::mat4 model	= glm::mat4(1.0f);
-		model = glm::translate(model, location);
-		model = glm::scale(model, scale);
-
-		shader->SetUniformMatrix4F(projection, "projection");
-		shader->SetUniformMatrix4F(view, "view");
-		shader->SetUniformMatrix4F(model, "model");
-
-		Bind();
-		GL_CALL(glDrawElements, GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, nullptr);
-		Unbind();
-
-		for (const auto& texture : textures)
-		{
-			texture->UnBind();
-		}
-
-		shader->UnBind();
 	}
 
 	void Mesh::SetupMesh() const
@@ -290,7 +223,7 @@ namespace AnimationEngine
 			vertexBuffer->OverwriteVertexBufferData(layoutLocation++, bufferPointerStart, totalBufferSize);
 		}
 
-		if (boneData.has_value())
+		if (!boneData->empty() && boneData.has_value())
 		{
 			const auto totalBufferSize = 
 				(GetSizeofCustomType(VertexDataType::Vector4I) + GetSizeofCustomType(VertexDataType::Vector4F)) * static_cast<unsigned>(boneData.value().size());

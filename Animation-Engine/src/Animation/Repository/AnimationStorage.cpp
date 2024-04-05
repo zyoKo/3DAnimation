@@ -17,9 +17,9 @@ namespace AnimationEngine
 		const auto model = std::make_shared<Model>(filename);
 		if (!textures.empty())
 		{
-			model->SetTextures(textures);
 			for (auto& texture : textures)
 			{
+				model->AddTexture(texture);
 				auto textureName = texture->GetTextureName();
 
 				size_t foundTextureType = textureName.find("diffuse");
@@ -47,7 +47,7 @@ namespace AnimationEngine
 		const auto model = std::make_shared<Model>(filename);
 		if (textureDiffuse)
 		{
-			model->SetDiffuseTextureForMeshes(textureDiffuse);
+			model->AddTexture(textureDiffuse);
 			diffuseTextures.push_back(textureDiffuse);
 		}
 		modelList.push_back(model);

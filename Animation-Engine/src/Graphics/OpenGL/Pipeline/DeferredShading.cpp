@@ -69,8 +69,10 @@ namespace AnimationEngine
 		screenQuad = std::make_shared<ScreenQuad>();
 
 		lightBox = std::make_shared<Model>(CUBE_FILE_PATH);
+		lightBox->SetShader(shaderLightBox);
 
 		lightSphere = std::make_shared<Model>(SPHERE_FILE_PATH);
+		lightSphere->SetShader(pointLightShader);
 
 		// Initialize Point Lights
 		constexpr bool doRandomLights = true;
@@ -196,18 +198,15 @@ namespace AnimationEngine
 		
 		for (const auto& light : pointLights)
 		{
-			for (auto& mesh : lightBox->GetMeshes())
-			{
-				mesh.SetLocation({ light.position.x, light.position.y, light.position.z });
-				mesh.SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
-			}
+			lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
+			lightBox->SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
 		
 			shaderLightBoxPtr->Bind();
 			shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
 			//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
 			shaderLightBoxPtr->UnBind();
 		
-			lightBox->Draw(shaderLightBoxPtr.GetShared());
+			lightBox->Draw();
 		}
 
 		GraphicsAPI::GetContext()->EnableDepthMask(false);
@@ -256,11 +255,8 @@ namespace AnimationEngine
 
 		for (const auto& pointLight : pointLights)
 		{
-			for (auto& mesh : lightSphere->GetMeshes())
-			{
-				mesh.SetLocation({ pointLight.position.x, pointLight.position.y, pointLight.position.z });
-				mesh.SetScale({ pointLight.radius, pointLight.radius, pointLight.radius });
-			}
+			lightSphere->SetLocation({ pointLight.position.x, pointLight.position.y, pointLight.position.z });
+			lightSphere->SetScale({ pointLight.radius, pointLight.radius, pointLight.radius });
 
 			pointLightShaderPtr->Bind();
 
@@ -283,7 +279,7 @@ namespace AnimationEngine
 			GraphicsAPI::GetContext()->SetFaceCulling(CullType::FRONT_FACE);
 
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(true);
-			lightSphere->Draw(pointLightShaderPtr.GetShared());
+			lightSphere->Draw();
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
 			GraphicsAPI::GetContext()->SetFaceCulling(CullType::NONE);
