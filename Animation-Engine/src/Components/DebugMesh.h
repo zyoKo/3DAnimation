@@ -6,7 +6,7 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/GraphicsAPI.h"
-#include "Types/DebugDrawMode.h"
+#include "Types/DrawMode.h"
 
 namespace AnimationEngine
 {
@@ -23,7 +23,7 @@ namespace AnimationEngine
 
 		void Update();
 
-		void Draw(DebugDrawMode mode) const;
+		void Draw(DrawMode mode) const;
 
 		void OverwriteJointsPosition(const std::vector<Math::Vector3F>& jointsPosition);
 

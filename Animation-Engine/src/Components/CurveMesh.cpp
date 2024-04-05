@@ -8,7 +8,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
-#include "Types/DebugDrawMode.h"
+#include "Types/DrawMode.h"
 
 namespace AnimationEngine
 {
@@ -89,7 +89,7 @@ namespace AnimationEngine
 		splineShaderPtr->SetUniformMatrix4F(view, "view");
 
 		BindSplineVAO();
-		GL_CALL(glDrawArrays, DrawModeToGLEnum(DebugDrawMode::LineStrip), 0, static_cast<int>(splinePoints.size()));
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(DrawMode::LineStrip), 0, static_cast<int>(splinePoints.size()));
 		UnBindSplineVAO();
 
 		splineShaderPtr->UnBind();
@@ -109,7 +109,7 @@ namespace AnimationEngine
 		controlPointsShaderPtr->SetUniformMatrix4F(view, "view");
 
 		BindControlPointsVAO();
-		GL_CALL(glDrawArrays, DrawModeToGLEnum(DebugDrawMode::Points), 0, static_cast<int>(spline->GetControlPoints().size()));
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(DrawMode::Points), 0, static_cast<int>(spline->GetControlPoints().size()));
 		UnBindControlPointsVAO();
 
 		controlPointsShaderPtr->UnBind();

@@ -26,6 +26,8 @@ namespace AnimationEngine
 
 		GL_CALL(glTextureStorage2D, textureID, levels, internalFormat, bufferWidth, bufferHeight);
 
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
@@ -44,6 +46,11 @@ namespace AnimationEngine
 	{
 		GL_CALL(glActiveTexture, GL_TEXTURE0 + slot);
 		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
+	}
+
+	void BufferTexture::BindImageTexture() const
+	{
+		GL_CALL(glBindImageTexture, 0, textureID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
 	}
 
 	void BufferTexture::UnBind() const
@@ -82,7 +89,6 @@ namespace AnimationEngine
 	{
 		name = std::move(newName);
 	}
-
 
 	void BufferTexture::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
 	{

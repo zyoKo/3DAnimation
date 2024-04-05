@@ -9,6 +9,8 @@ namespace AnimationEngine
 
 		static float GetDeltaTime();
 
+		static float GetLastFrame();
+
 	private:
 		inline static float lastFrame { 0.0f };
 

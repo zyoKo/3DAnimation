@@ -54,7 +54,9 @@ namespace AnimationEngine
 
 		std::shared_ptr<AnimationStorage> animationStorage;
 
-		std::shared_ptr<IPipeline> graphicsPipeline;
+		std::shared_ptr<IPipeline> deferredPipeline;
+
+		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
 		bool running = true;
 		

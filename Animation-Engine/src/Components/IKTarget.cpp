@@ -38,7 +38,7 @@ namespace AnimationEngine
 
 	void IKTarget::Update()
 	{
-		Draw(DebugDrawMode::Points);
+		Draw(DrawMode::Points);
 
 		if (!ikManager)
 		{
@@ -157,7 +157,7 @@ namespace AnimationEngine
 			std::string(IK_TARGET_FRAGMENT_SHADER_PATH));
 	}
 
-	void IKTarget::Draw(DebugDrawMode mode) const
+	void IKTarget::Draw(DrawMode mode) const
 	{
 		const auto* camera = Camera::GetInstance();
 		const auto viewMatrix = camera->GetViewMatrix();

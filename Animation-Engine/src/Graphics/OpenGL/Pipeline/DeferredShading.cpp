@@ -22,7 +22,8 @@
 namespace AnimationEngine
 {
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
-		:	globalPointLight(LightType::STATIC, Math::Vec3F(100.0f, 100.0f, 100.0f), Math::Vec3F(1.0f, 1.0f, 1.0f))
+		:	enableDeferredShading(true),
+			globalPointLight(LightType::STATIC, Math::Vec3F(100.0f, 100.0f, 100.0f), Math::Vec3F(1.0f, 1.0f, 1.0f))
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -31,6 +32,8 @@ namespace AnimationEngine
 
 	void DeferredShading::Initialize()
 	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+
 		auto* assetManager = AssetManagerLocator::GetAssetManager();
 
 		globalLightShader	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
@@ -56,15 +59,12 @@ namespace AnimationEngine
 
 		frameBuffer->CreateAttachment(AttachmentType::DEPTH, false);
 
-		GL_CALL(glDrawBuffers, totalBuffers, usedOpenGLColorAttachments.data());
+		GraphicsAPI::GetContext()->DrawBuffers(totalBuffers, usedOpenGLColorAttachments.data());
 
 		frameBuffer->IsValid();
 		frameBuffer->UnBind();
 
 		screenQuad = std::make_shared<ScreenQuad>();
-		screenQuad->SetShader(globalLightShader);
-		screenQuad->SetWindowsWindow(window);
-		screenQuad->Initialize();
 
 		lightBox = std::make_shared<Model>(CUBE_FILE_PATH);
 
@@ -114,10 +114,14 @@ namespace AnimationEngine
 	}
 
 	void DeferredShading::PreUpdateSetup()
-	{ }
+	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+	}
 
 	void DeferredShading::PreFrameRender()
 	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+
 		//-- 1. Geometry Pass --//
 		GraphicsAPI::GetContext()->EnableDepthTest(true);
 		GraphicsAPI::GetContext()->EnableDepthMask(true);
@@ -134,6 +138,8 @@ namespace AnimationEngine
 
 	void DeferredShading::PostFrameRender()
 	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+
 		/* [... Finish Rendering Scene ...] */
 
 		frameBuffer->UnBind();
@@ -164,8 +170,6 @@ namespace AnimationEngine
 		LocalLightingPass();
 
 		GlobalLightingPass();
-
-		screenQuad->Draw();
 		//-- 2 !Lighting Pass --//
 
 		FrameBuffer::BindDefaultFrameBufferForWriting();
@@ -213,15 +217,24 @@ namespace AnimationEngine
 	}
 
 	void DeferredShading::PostUpdate()
-	{ }
+	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+	}
 
 	void DeferredShading::Shutdown()
 	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+
 		frameBuffer.reset();
 		pointLights.clear();
 		lightSphere.reset();
 		screenQuad.reset();
 		lightBox.reset();
+	}
+
+	void DeferredShading::SetEnable(bool value)
+	{
+		enableDeferredShading = value;
 	}
 
 	void DeferredShading::SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept
@@ -300,6 +313,8 @@ namespace AnimationEngine
 		const auto* camera = Camera::GetInstance();
 		const Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
 		globalLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
+
+		screenQuad->Draw();
 
 		globalLightShaderPtr->UnBind();
 	}

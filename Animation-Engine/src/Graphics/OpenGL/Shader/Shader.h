@@ -1,30 +1,22 @@
 #pragma once
 
-#include <unordered_map>
-
-#include "glad/glad.h"
+#include <glm/mat3x3.hpp>
 
 #include "Interface/IShader.h"
-
-#include <glm/mat3x3.hpp>
+#include "Structures/ShaderDescription.h"
 
 namespace AnimationEngine
 {
-	enum class ShaderErrorType
-	{
-		NONE = -1,
-
-		COMPILER = 0,
-
-		LINKER = 1
-	};
-
 	class Shader : public IShader
 	{
 	public:
+		Shader(const std::string& shaderName, const std::vector<ShaderDescription>& shaderDescription);
+
 		Shader(const std::string& shaderName, const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
 
 		~Shader() override;
+
+		ShaderDescription CreateShaderDescription(ShaderDescription description = {});
 
 		void Bind() const override;
 
@@ -57,10 +49,10 @@ namespace AnimationEngine
 
 		std::unordered_map<std::string, int> uniformLocationCache;
 
-		unsigned int CompileShaderSource(const std::string& shaderSource, GLenum shaderType);
-
-		void ShaderErrorChecker(unsigned int shaderId, ShaderErrorType errorType);
-
 		int GetUniformLocation(const std::string& uniformName);
+
+		void AttachShader(const std::vector<unsigned>& shaderIds) const;
+
+		void DeleteShader(const std::vector<unsigned>& shaderIds) const;
 	};
 }

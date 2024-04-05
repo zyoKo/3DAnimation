@@ -5,8 +5,9 @@
 
 namespace AnimationEngine
 {
-	class DeferredShading;
 	class IPipeline;
+	class DeferredShading;
+	class ShadowMapping;
 }
 
 namespace AnimationEngine
@@ -19,4 +20,7 @@ namespace AnimationEngine
 
 	template <>
 	std::shared_ptr<IPipeline> CreatePipeline<DeferredShading>(const PipelineInitializer* info) noexcept;
+
+	template <>
+	std::shared_ptr<IPipeline> CreatePipeline<ShadowMapping>(const PipelineInitializer* info) noexcept;
 }

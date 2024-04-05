@@ -30,8 +30,25 @@ namespace Sandbox
 		//-- !Texture Creation --//
 
 		//-- Shader Creation --//
-		assetManager->CreateShader(BACKPACK_SHADER_NAME, BACKPACK_VERTEX_SHADER_FILE_PATH, BACKPACK_FRAGMENT_SHADER_FILE_PATH);
-		assetManager->CreateShader(QUAD_SHADER_NAME, QUAD_VERTEX_SHADER_FILE_PATH, QUAD_FRAGMENT_SHADER_FILE_PATH);
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = BACKPACK_VERTEX_SHADER_FILE_PATH
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = BACKPACK_FRAGMENT_SHADER_FILE_PATH
+		});
+		assetManager->CreateShaderWithDescription(BACKPACK_SHADER_NAME);
+
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = QUAD_VERTEX_SHADER_FILE_PATH
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = QUAD_FRAGMENT_SHADER_FILE_PATH
+		});
+		assetManager->CreateShaderWithDescription(QUAD_SHADER_NAME);
 		//-- !Shader Creation --//
 		//-- ## !ASSET LOADING ## --//
 

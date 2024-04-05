@@ -34,7 +34,17 @@ namespace AnimationEngine
 
 		void SetFaceCulling(CullType type) override;
 
+		void DispatchCompute(unsigned numGroupsX, unsigned numGroupsY, unsigned numGroupsZ) override;
+
+		void CreateMemoryBarrier(unsigned barrierType) override;
+
+		void DrawBuffers(unsigned size, const void* data) override;
+
+		void DrawArrays(DrawMode drawMode, int offset, int count) override;
+
 	private:
 		GLFWwindow* window;
+
+		bool isFaceCullingEnabled;
 	};
 }

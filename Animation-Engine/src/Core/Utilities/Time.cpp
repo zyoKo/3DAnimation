@@ -17,4 +17,9 @@ namespace AnimationEngine
 	{
 		return deltaTime;
 	}
+
+	float Time::GetLastFrame()
+	{
+		return lastFrame;
+	}
 }

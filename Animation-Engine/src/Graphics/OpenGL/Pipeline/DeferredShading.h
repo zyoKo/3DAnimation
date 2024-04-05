@@ -42,9 +42,13 @@ namespace AnimationEngine
 
 		void Shutdown() override;
 
+		void SetEnable(bool value) override;
+
 		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
 
 	private:
+		bool enableDeferredShading;
+
 		std::weak_ptr<IWindow> window;
 
 		std::shared_ptr<FrameBuffer> frameBuffer;

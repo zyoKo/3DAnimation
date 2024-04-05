@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Components/Types/DrawMode.h"
 #include "Math/Math.h"
 
 #define COLOR_WHITE	AnimationEngine::Math::Vec3F{ 1.0f, 1.0f, 1.0f }
@@ -59,5 +60,13 @@ namespace AnimationEngine
 		virtual void EnableBlending(bool value) = 0;
 
 		virtual void SetFaceCulling(CullType type) = 0;
+
+		virtual void DispatchCompute(unsigned numGroupsX, unsigned numGroupsY, unsigned numGroupsZ) = 0;
+
+		virtual void CreateMemoryBarrier(unsigned barrierType) = 0;
+
+		virtual void DrawBuffers(unsigned size, const void* data) = 0;
+
+		virtual void DrawArrays(DrawMode drawMode, int offset, int count) = 0;
 	};
 }

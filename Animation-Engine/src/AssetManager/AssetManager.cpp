@@ -24,6 +24,36 @@ namespace AnimationEngine
 		return texture2D;
 	}
 
+	std::weak_ptr<IShader> AssetManager::CreateShaderWithDescription(const std::string& shaderName)
+	{
+		auto retrievedShader = shaderStore.RetrieveFromStorage(shaderName);
+		if (!retrievedShader.expired())
+		{
+			return retrievedShader;
+		}
+
+		if (shaderDescriptions.empty())
+		{
+			LOG_WARN("Cannot Create Shader! Shader Descriptions are empty.");
+			return {};
+		}
+
+		ShaderTypeValidator(shaderDescriptions);
+
+		for (auto& [shaderType, shaderFilePath, shaderSource] : shaderDescriptions)
+		{
+			shaderSource = ReadShaderFile(shaderFilePath);
+		}
+
+		auto shader = std::make_shared<Shader>(shaderName, shaderDescriptions);
+
+		shaderStore.AddToStorage(shaderName, shader);
+
+		shaderDescriptions.clear();
+
+		return shader;
+	}
+
 	std::weak_ptr<IShader> AssetManager::CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath)
 	{
 		auto retrievedShader = shaderStore.RetrieveFromStorage(shaderName);
@@ -50,6 +80,13 @@ namespace AnimationEngine
 	std::weak_ptr<IShader> AssetManager::RetrieveShaderFromStorage(const std::string& shaderName) const
 	{
 		return shaderStore.RetrieveFromStorage(shaderName);
+	}
+
+	IAssetManager* AssetManager::AddShaderDescription(ShaderDescription shaderDescription /* = {} */)
+	{
+		shaderDescriptions.emplace_back(shaderDescription);
+
+		return this;
 	}
 
 	void AssetManager::ClearStores()

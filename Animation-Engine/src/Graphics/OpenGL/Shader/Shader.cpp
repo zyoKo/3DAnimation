@@ -1,18 +1,63 @@
 #include <AnimationPch.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Shader.h"
 
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "Graphics/OpenGL/Utilities/Utilities.h"
 
 namespace AnimationEngine
 {
+	Shader::Shader(const std::string& shaderName, const std::vector<ShaderDescription>& shaderDescription)
+		:	shaderName(shaderName)
+	{
+		std::vector<unsigned> vertexShaderIds;
+		std::vector<unsigned> fragmentShaderIds;
+		std::vector<unsigned> computeShaderIds;
+
+		for (auto& [shaderType, shaderFilePath, shaderSource] : shaderDescription)
+		{
+			ANIM_ASSERT(!shaderSource.empty(), "Shader source failed to parse.");
+
+			switch(shaderType)
+			{
+			case ShaderType::VERTEX:
+				vertexShaderIds.push_back(CompileShaderSource(shaderSource, GL_VERTEX_SHADER));
+				break;
+
+			case ShaderType::FRAGMENT:
+				fragmentShaderIds.push_back(CompileShaderSource(shaderSource, GL_FRAGMENT_SHADER));
+				break;
+
+			case ShaderType::COMPUTE:
+				computeShaderIds.push_back(CompileShaderSource(shaderSource, GL_COMPUTE_SHADER));
+				break;
+
+			case ShaderType::NONE:
+				ANIM_ASSERT(false, "Provide a shader type!");
+				return;
+			}
+		}
+
+		shaderID = GL_CALL(glCreateProgram);
+
+		AttachShader(vertexShaderIds);
+		AttachShader(fragmentShaderIds);
+		AttachShader(computeShaderIds);
+
+		GL_CALL(glLinkProgram, shaderID);
+
+		ShaderErrorChecker(shaderID, ShaderErrorType::LINKER);
+
+		DeleteShader(vertexShaderIds);
+		DeleteShader(fragmentShaderIds);
+		DeleteShader(computeShaderIds);
+	}
+
 	Shader::Shader(const std::string& shaderName, const std::string& vertexShaderSource, const std::string& fragmentShaderSource)
-		:	shaderID(0),
-			shaderName(shaderName)
+		:	shaderName(shaderName)
 	{
 		const unsigned int vertexShaderId	= CompileShaderSource(vertexShaderSource,	GL_VERTEX_SHADER);
 		const unsigned int fragmentShaderId = CompileShaderSource(fragmentShaderSource, GL_FRAGMENT_SHADER);
@@ -34,6 +79,11 @@ namespace AnimationEngine
 		GL_CALL(glUseProgram, 0);
 
 		GL_CALL(glDeleteProgram, shaderID);
+	}
+
+	ShaderDescription Shader::CreateShaderDescription(ShaderDescription description)
+	{
+		return description;
 	}
 
 	void Shader::Bind() const
@@ -96,57 +146,6 @@ namespace AnimationEngine
 		GL_CALL(glUniform1f, GetUniformLocation(uniformName), value);
 	}
 
-	unsigned Shader::CompileShaderSource(const std::string& shaderSource, GLenum shaderType)
-	{
-		const char* rawShaderSource = shaderSource.c_str();
-		const unsigned int shaderId = GL_CALL(glCreateShader, shaderType);
-		GL_CALL(glShaderSource, shaderId, 1, &rawShaderSource, nullptr);
-		GL_CALL(glCompileShader, shaderId);
-
-		ShaderErrorChecker(shaderId, ShaderErrorType::COMPILER);
-
-		return shaderId;
-	}
-
-	void Shader::ShaderErrorChecker(unsigned int shaderId, ShaderErrorType errorType)
-	{
-		int compilationSuccessful;
-		switch(errorType)
-		{
-		case ShaderErrorType::COMPILER:
-			GL_CALL(glGetShaderiv, shaderId, GL_COMPILE_STATUS, &compilationSuccessful);
-			if (!compilationSuccessful)
-			{
-				// Two step process to get log message
-				int errorBufferLength;
-				GL_CALL(glGetShaderiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
-				std::vector<char> errorMessage(errorBufferLength);
-				GL_CALL(glGetShaderInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
-
-				LOG_ERROR(errorMessage.data());
-			}
-			break;
-
-		case ShaderErrorType::LINKER:
-			GL_CALL(glGetProgramiv, shaderId, GL_LINK_STATUS, &compilationSuccessful);
-			if (!compilationSuccessful)
-			{
-				// Two step process to get log message
-				int errorBufferLength;
-				GL_CALL(glGetProgramiv, shaderId, GL_INFO_LOG_LENGTH, &errorBufferLength);
-				std::vector<char> errorMessage(errorBufferLength);
-				GL_CALL(glGetProgramInfoLog, shaderId, errorBufferLength, nullptr, errorMessage.data());
-
-				LOG_ERROR(errorMessage.data());
-			}
-			break;
-
-		case ShaderErrorType::NONE:
-			LOG_INFO("Please specify Shader Error Type for the shader error checking");
-			return;
-		}
-	}
-
 	int Shader::GetUniformLocation(const std::string& uniformName)
 	{
 		// Better Optimization
@@ -162,5 +161,21 @@ namespace AnimationEngine
 
 		uniformLocationCache[uniformName] = location;
 		return location;
+	}
+
+	void Shader::AttachShader(const std::vector<unsigned>& shaderIds) const
+	{
+		for (const auto ID : shaderIds)
+		{
+			GL_CALL(glAttachShader, shaderID, ID);
+		}
+	}
+
+	void Shader::DeleteShader(const std::vector<unsigned>& shaderIds) const
+	{
+		for (const auto ID : shaderIds)
+		{
+			GL_CALL(glDeleteShader, ID);
+		}
 	}
 }

@@ -18,5 +18,7 @@ namespace AnimationEngine
 		virtual void PostUpdate() = 0;
 
 		virtual void Shutdown() = 0;
+
+		virtual void SetEnable(bool value) = 0;
 	};
 }

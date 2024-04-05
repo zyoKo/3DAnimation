@@ -4,7 +4,7 @@
 
 namespace AnimationEngine
 {
-	enum class DebugDrawMode
+	enum class DrawMode
 	{
 		Points,
 		Lines,
@@ -15,29 +15,29 @@ namespace AnimationEngine
 		TriangleFan
 	};
 
-	static int DrawModeToGLEnum(DebugDrawMode drawMode)
+	static int DrawModeToGLEnum(DrawMode drawMode)
 	{
 		switch(drawMode)
 		{
-		case DebugDrawMode::Points:
+		case DrawMode::Points:
 			return GL_POINTS;
 
-		case DebugDrawMode::Lines:
+		case DrawMode::Lines:
 			return GL_LINES;
 
-		case DebugDrawMode::LineStrip:
+		case DrawMode::LineStrip:
 			return GL_LINE_STRIP;
 
-		case DebugDrawMode::LineLoop:
+		case DrawMode::LineLoop:
 			return GL_LINE_LOOP;
 
-		case DebugDrawMode::Triangles:
+		case DrawMode::Triangles:
 			return GL_TRIANGLES;
 
-		case DebugDrawMode::TriangleStrip:
+		case DrawMode::TriangleStrip:
 			return GL_TRIANGLE_STRIP;
 
-		case DebugDrawMode::TriangleFan:
+		case DrawMode::TriangleFan:
 			return GL_TRIANGLE_FAN;
 		}
 

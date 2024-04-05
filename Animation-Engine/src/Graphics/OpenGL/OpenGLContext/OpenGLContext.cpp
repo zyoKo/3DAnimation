@@ -8,7 +8,8 @@
 namespace AnimationEngine
 {
 	OpenGLContext::OpenGLContext(GLFWwindow* window)
-		:	window(window)
+		:	window(window),
+			isFaceCullingEnabled(false)
 	{
 		glfwMakeContextCurrent(window);
 
@@ -123,7 +124,11 @@ namespace AnimationEngine
 
 	void OpenGLContext::SetFaceCulling(CullType type)
 	{
-		type == CullType::NONE ? GL_CALL(glDisable, GL_CULL_FACE) : GL_CALL(glEnable, GL_CULL_FACE);
+		if (!isFaceCullingEnabled && (type != CullType::NONE))
+		{
+			GL_CALL(glEnable, GL_CULL_FACE);
+			isFaceCullingEnabled = true;
+		}
 
 		switch(type)
 		{
@@ -140,7 +145,35 @@ namespace AnimationEngine
 			break;
 
 		case CullType::NONE:
+			GL_CALL(glDisable, GL_CULL_FACE);
+			isFaceCullingEnabled = false;
 			return;
 		}
+	}
+
+	void OpenGLContext::DispatchCompute(unsigned numGroupsX, unsigned numGroupsY, unsigned numGroupsZ)
+	{
+		GL_CALL(glDispatchCompute, numGroupsX, numGroupsY, numGroupsZ);
+	}
+
+	void OpenGLContext::CreateMemoryBarrier(unsigned barrierType)
+	{
+		GL_CALL(glMemoryBarrier, barrierType);
+	}
+
+	void OpenGLContext::DrawBuffers(unsigned size, const void* data)
+	{
+		if (size == 0 || data == nullptr)
+		{
+			GL_CALL(glDrawBuffer, GL_NONE);
+			return;
+		}
+
+		GL_CALL(glDrawBuffers, size, static_cast<const GLenum*>(data));
+	}
+
+	void OpenGLContext::DrawArrays(DrawMode drawMode, int offset, int count)
+	{
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(drawMode), offset, count);
 	}
 }

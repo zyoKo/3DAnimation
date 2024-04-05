@@ -20,6 +20,8 @@ namespace AnimationEngine
 
 		void Bind(unsigned slot) const;
 
+		void BindImageTexture() const;
+
 		void UnBind() const;
 
 		unsigned GetTextureID() const;

@@ -30,12 +30,17 @@ namespace AnimationEngine
 
 		Camera::GetInstance()->SetWindowsWindow(window);
 
-		// Create Pipeline
-		const PipelineInitializer pipelineData{
+		// Create Deferred Pipeline
+		const PipelineInitializer deferredPipelineData{
 			.window = this->window
 		};
+		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
 
-		graphicsPipeline = CreatePipeline<DeferredShading>(&pipelineData);
+		// Create Shadow Pipeline
+		const PipelineInitializer shadowPipelineData{
+			.window = this->window
+		};
+		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
 
 		AssetManagerLocator::Initialize();
 		AnimatorLocator::Initialize();
@@ -63,7 +68,11 @@ namespace AnimationEngine
 	{
 		Camera::GetInstance()->Initialize();
 
-		graphicsPipeline->Initialize();
+		// Pipelines Call
+		shadowMappingPipeline->SetEnable(false);
+
+		shadowMappingPipeline->Initialize();
+		deferredPipeline->Initialize();
 
 		// Application Initialize
 		application->Initialize();
@@ -74,7 +83,9 @@ namespace AnimationEngine
 		// Application Pre-Update
 		application->PreUpdate();
 
-		graphicsPipeline->PreUpdateSetup();
+		// Pipelines Call
+		shadowMappingPipeline->PreUpdateSetup();
+		deferredPipeline->PreUpdateSetup();
 
 		while (running && !window->WindowShouldClose())
 		{
@@ -82,17 +93,22 @@ namespace AnimationEngine
 
 			ProcessInput();
 
-			graphicsPipeline->PreFrameRender();
+			// Pipelines Call
+			shadowMappingPipeline->PreFrameRender();
+			deferredPipeline->PreFrameRender();
 
 			// Application Update
 			application->Update();
 
-			graphicsPipeline->PostFrameRender();
+			shadowMappingPipeline->PostFrameRender();
+			deferredPipeline->PostFrameRender();
 
 			window->Update();
 		}
 
-		graphicsPipeline->PostUpdate();
+		// Pipelines Call
+		shadowMappingPipeline->PostUpdate();
+		deferredPipeline->PostUpdate();
 
 		// Application PostUpdate
 		application->PostUpdate();
@@ -102,7 +118,9 @@ namespace AnimationEngine
 
 	bool CoreEngine::Shutdown()
 	{
-		graphicsPipeline->Shutdown();
+		// Pipelines Call
+		shadowMappingPipeline->Shutdown();
+		deferredPipeline->Shutdown();
 
 		application->Shutdown();
 
