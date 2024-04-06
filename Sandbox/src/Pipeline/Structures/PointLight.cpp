@@ -2,11 +2,11 @@
 
 #include "PointLight.h"
 
-#include "Graphics/OpenGL/Pipeline/Data/Constants.h"
+#include "Pipeline/Data/Constants.h"
 
-namespace AnimationEngine
+namespace Sandbox
 {
-	PointLight::PointLight(LightType type, const Math::Vec3F& newPosition, const Math::Vec3F& newColor)
+	PointLight::PointLight(LightType type, const AnimationEngine::Math::Vec3F& newPosition, const AnimationEngine::Math::Vec3F& newColor)
 		:	lightType{ type },
 			position{ newPosition },
 			color{ newColor },

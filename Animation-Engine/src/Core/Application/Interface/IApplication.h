@@ -22,7 +22,9 @@ namespace AnimationEngine
 
 		virtual void Shutdown() = 0;
 
-		virtual void SetWindowsWindow(std::weak_ptr<IWindow> window) noexcept { windowsWindow = std::move(window); }
+		std::weak_ptr<IWindow> GetWindowsWindow() const { return windowsWindow; }
+
+		void SetWindowsWindow(std::weak_ptr<IWindow> window) noexcept { windowsWindow = std::move(window); }
 
 	private:
 		std::weak_ptr<IWindow> windowsWindow;

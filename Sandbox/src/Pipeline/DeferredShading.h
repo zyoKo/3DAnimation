@@ -3,10 +3,15 @@
 #include "IPipeline.h"
 #include "Structures/PointLight.h"
 
+namespace Sandbox
+{
+	class SandboxApp;
+	struct PipelineInitializer;
+}
+
 namespace AnimationEngine
 {
 	class IApplication;
-	struct PipelineInitializer;
 	class ScreenQuad;
 	class IWindow;
 	class IShader;
@@ -14,7 +19,7 @@ namespace AnimationEngine
 	class Model;
 }
 
-namespace AnimationEngine
+namespace Sandbox
 {
 	class DeferredShading final : public IPipeline
 	{
@@ -43,23 +48,23 @@ namespace AnimationEngine
 
 		void SetEnable(bool value) override;
 
-		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
+		void SetWindowsWindow(std::weak_ptr<AnimationEngine::IWindow> windowsWindow) noexcept;
 
 	private:
 		bool enableDeferredShading;
 
-		std::weak_ptr<IWindow> window;
+		std::weak_ptr<AnimationEngine::IWindow> window;
 
-		std::weak_ptr<IApplication> sandBox;
+		SandboxApp* sandBox;
 
-		std::shared_ptr<FrameBuffer> frameBuffer;
+		std::shared_ptr<AnimationEngine::FrameBuffer> frameBuffer;
 
 		//-- Shader --//
-		std::weak_ptr<IShader> globalLightShader;
+		std::weak_ptr<AnimationEngine::IShader> globalLightShader;
 
-		std::weak_ptr<IShader> pointLightShader;
+		std::weak_ptr<AnimationEngine::IShader> pointLightShader;
 
-		std::weak_ptr<IShader> shaderLightBox;
+		std::weak_ptr<AnimationEngine::IShader> shaderLightBox;
 		//-- !Shader --//
 
 		//-- Lights Data --//
@@ -67,12 +72,12 @@ namespace AnimationEngine
 
 		std::vector<PointLight> pointLights;
 
-		std::shared_ptr<Model> lightSphere;
+		std::shared_ptr<AnimationEngine::Model> lightSphere;
 		//-- !Lights Data --//
 
-		std::shared_ptr<ScreenQuad> screenQuad;
+		std::shared_ptr<AnimationEngine::ScreenQuad> screenQuad;
 
-		std::shared_ptr<Model> lightBox;
+		std::shared_ptr<AnimationEngine::Model> lightBox;
 
 		void LocalLightingPass() const;
 

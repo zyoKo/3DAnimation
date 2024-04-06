@@ -8,12 +8,32 @@
 #include "Components/Quad.h"
 #include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
+#include "Pipeline/IPipeline.h"
+#include "Pipeline/Fixed/CreatePipeline.h"
+#include "Pipeline/Structures/PipelineInitializer.h"
 
 namespace Sandbox
 {
 	void SandboxApp::Initialize()
 	{
 		using namespace AnimationEngine;
+
+		// Create Deferred Pipeline
+		const PipelineInitializer deferredPipelineData{
+			.window = GetWindowsWindow(),
+			.sandBox = this
+		};
+		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
+		deferredPipeline->Initialize();
+
+		// Create Shadow Pipeline
+		const PipelineInitializer shadowPipelineData{
+			.window = GetWindowsWindow(),
+			.sandBox = this
+		};
+		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
+		shadowMappingPipeline->SetEnable(false);
+		shadowMappingPipeline->Initialize();
 
 		//-- ## ASSET LOADING ## --//
 		assetManager = AssetManagerLocator::GetAssetManager();
@@ -60,6 +80,10 @@ namespace Sandbox
 	{
 		using namespace AnimationEngine;
 
+		// Pipelines Call
+		shadowMappingPipeline->PreUpdateSetup();
+		deferredPipeline->PreUpdateSetup();
+
 		const auto backPackShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
 		const auto quadShader = assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME);
 
@@ -82,21 +106,25 @@ namespace Sandbox
 	{
 		using namespace AnimationEngine;
 
-		for (const auto& location : BACKPACK_LOCATIONS)
-		{
-			backPack->SetLocation(location);
+		// Pipelines Call
+		shadowMappingPipeline->Update();
 
-			backPack->Draw();
-		}
-
-		floor->Draw();
+		deferredPipeline->Update();
 	}
 
 	void SandboxApp::PostUpdate()
-	{ }
+	{
+		// Pipelines Call
+		shadowMappingPipeline->PostUpdate();
+		deferredPipeline->PostUpdate();
+	}
 
 	void SandboxApp::Shutdown()
 	{
+		// Pipelines Call
+		shadowMappingPipeline->Shutdown();
+		deferredPipeline->Shutdown();
+
 		backPack.reset();
 		floor.reset();
 	}

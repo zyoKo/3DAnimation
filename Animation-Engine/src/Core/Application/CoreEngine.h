@@ -6,11 +6,6 @@
 
 namespace AnimationEngine
 {
-	class IPipeline;
-}
-
-namespace AnimationEngine
-{
 	class ScreenQuad;
 	class FrameBuffer;
 	class IApplication;
@@ -37,7 +32,7 @@ namespace AnimationEngine
 
 		void SetApplication(const std::shared_ptr<IApplication>& app);
 
-		void Initialize();
+		void Initialize() const;
 
 		void Update() const;
 
@@ -53,10 +48,6 @@ namespace AnimationEngine
 		std::shared_ptr<IAnimator> animator;
 
 		std::shared_ptr<AnimationStorage> animationStorage;
-
-		std::shared_ptr<IPipeline> deferredPipeline;
-
-		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
 		bool running = true;
 		

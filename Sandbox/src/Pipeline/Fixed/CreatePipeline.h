@@ -1,16 +1,18 @@
 #pragma once
 
-#include "Core/Logger/Log.h"
-#include "Graphics/OpenGL/Pipeline/Structures/PipelineInitializer.h"
+#include <memory>
 
-namespace AnimationEngine
+#include "Core/Logger/Log.h"
+
+namespace Sandbox
 {
-	class IPipeline;
 	class DeferredShading;
 	class ShadowMapping;
+	class IPipeline;
+	struct PipelineInitializer;
 }
 
-namespace AnimationEngine
+namespace Sandbox
 {
 	template <typename T>
 	std::shared_ptr<IPipeline> CreatePipeline(const PipelineInitializer* info) noexcept

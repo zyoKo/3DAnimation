@@ -14,8 +14,6 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
-#include "Graphics/OpenGL/Pipeline/DeferredShading.h"
-#include "Graphics/OpenGL/Pipeline/Fixed/CreatePipeline.h"
 
 namespace AnimationEngine
 {
@@ -52,26 +50,9 @@ namespace AnimationEngine
 		application->SetWindowsWindow(window);
 	}
 
-	void CoreEngine::Initialize()
+	void CoreEngine::Initialize() const
 	{
 		Camera::GetInstance()->Initialize();
-
-		// Create Deferred Pipeline
-		const PipelineInitializer deferredPipelineData{
-			.window = this->window,
-			.sandBox = application
-		};
-		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
-		deferredPipeline->Initialize();
-
-		// Create Shadow Pipeline
-		const PipelineInitializer shadowPipelineData{
-			.window = this->window,
-			.sandBox = application
-		};
-		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
-		shadowMappingPipeline->Initialize();
-		shadowMappingPipeline->SetEnable(false);
 
 		// Application Initialize
 		application->Initialize();
@@ -82,27 +63,16 @@ namespace AnimationEngine
 		// Application Pre-Update
 		application->PreUpdate();
 
-		// Pipelines Call
-		shadowMappingPipeline->PreUpdateSetup();
-		deferredPipeline->PreUpdateSetup();
-
 		while (running && !window->WindowShouldClose())
 		{
 			Time::Update();
 
 			ProcessInput();
 
-			// Pipelines Call
-			shadowMappingPipeline->Update();
-
-			deferredPipeline->Update();
+			application->Update();
 
 			window->Update();
 		}
-
-		// Pipelines Call
-		shadowMappingPipeline->PostUpdate();
-		deferredPipeline->PostUpdate();
 
 		// Application PostUpdate
 		application->PostUpdate();
@@ -112,10 +82,6 @@ namespace AnimationEngine
 
 	bool CoreEngine::Shutdown()
 	{
-		// Pipelines Call
-		shadowMappingPipeline->Shutdown();
-		deferredPipeline->Shutdown();
-
 		application->Shutdown();
 
 		running = false;

@@ -4,8 +4,15 @@
 
 #include "Core/Application/Interface/IApplication.h"
 
+namespace Sandbox
+{
+	class IPipeline;
+}
+
 namespace AnimationEngine
 {
+	class ShadowMapping;
+	class DeferredShading;
 	class Quad;
 	class Model;
 	class IAssetManager;
@@ -35,8 +42,16 @@ namespace Sandbox
 
 		AnimationEngine::IAssetManager* assetManager{ nullptr };
 
+		std::shared_ptr<IPipeline> deferredPipeline;
+
+		std::shared_ptr<IPipeline> shadowMappingPipeline;
+
 		std::shared_ptr<AnimationEngine::Model> backPack;
 
 		std::shared_ptr<AnimationEngine::Quad> floor;
+
+		friend class DeferredShading;
+
+		friend class ShadowMapping;
 	};
 }

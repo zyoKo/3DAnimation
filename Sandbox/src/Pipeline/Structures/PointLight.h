@@ -2,7 +2,7 @@
 
 #include "Math/Vector3.h"
 
-namespace AnimationEngine
+namespace Sandbox
 {
 	enum class LightType
 	{
@@ -14,9 +14,9 @@ namespace AnimationEngine
 	{
 		LightType lightType;
 
-		Math::Vec3F position;
+		AnimationEngine::Math::Vec3F position;
 
-		Math::Vec3F color;
+		AnimationEngine::Math::Vec3F color;
 
 		float radius;
 
@@ -34,7 +34,7 @@ namespace AnimationEngine
 
 		float moveVelocity;
 
-		PointLight(LightType type, const Math::Vec3F& newPosition, const Math::Vec3F& newColor);
+		PointLight(LightType type, const AnimationEngine::Math::Vec3F& newPosition, const AnimationEngine::Math::Vec3F& newColor);
 
 		void MoveUpAndDown(float deltaTime, float minY, float maxY);
 	};

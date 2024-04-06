@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace Sandbox
 {
 	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
 	static const std::string POSITION_TEXTURE	{ "positionTexture" };
@@ -31,14 +31,14 @@ namespace AnimationEngine
 
 	//-- Lights Data --//
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
-	static constexpr Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
+	static constexpr AnimationEngine::Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
 
 	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 10 };	// This should be used to generate 10 random point lights
 	static constexpr float LIGHT_COLOR_START_RANGE{ 0.5f };
 	static constexpr int LIGHT_SPREAD_RANGE{ 15 };
 
-	static constexpr Math::Vec3F WHITE_LIGHT{ 1.0f, 1.0f, 1.0f };
-	static const std::vector<Math::Vec3F> POINT_LIGHTS_POSITIONS
+	static constexpr AnimationEngine::Math::Vec3F WHITE_LIGHT{ 1.0f, 1.0f, 1.0f };
+	static const std::vector<AnimationEngine::Math::Vec3F> POINT_LIGHTS_POSITIONS
 	{
 		{ -2.0f, 2.0f, -2.5f },
 		{ -2.5f, 3.0f,  3.5f },
@@ -57,7 +57,7 @@ namespace AnimationEngine
 	static constexpr float LOCAL_POINT_LIGHT_MAX_Y	{  4.0f };
 	static constexpr float LOCAL_POINT_LIGHT_MOVE_VELOCITY { 1.0f };
 
-	static constexpr Math::Vec3F LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
+	static constexpr AnimationEngine::Math::Vec3F LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
 	static const std::string LIGHT_COLOR_UNIFORM_NAME{ "lightColor" };
 	//-- !Lights Data --//
 

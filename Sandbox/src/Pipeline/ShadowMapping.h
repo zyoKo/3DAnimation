@@ -3,6 +3,12 @@
 #include "IPipeline.h"
 #include "Structures/DirectionalLight.h"
 
+namespace Sandbox
+{
+	class SandboxApp;
+	struct PipelineInitializer;
+}
+
 namespace AnimationEngine
 {
 	class IWindow;
@@ -11,10 +17,9 @@ namespace AnimationEngine
 	class BufferTexture;
 	class ScreenQuad;
 	class FrameBuffer;
-	struct PipelineInitializer;
 }
 
-namespace AnimationEngine
+namespace Sandbox
 {
 	class ShadowMapping final : public IPipeline
 	{
@@ -43,25 +48,25 @@ namespace AnimationEngine
 
 		void SetEnable(bool value) override;
 
-		void SetWindowsWindow(std::weak_ptr<IWindow> windowsWindow) noexcept;
+		void SetWindowsWindow(std::weak_ptr<AnimationEngine::IWindow> windowsWindow) noexcept;
 
-		void SetSandBoxApplication(std::weak_ptr<IApplication> application) noexcept;
+		void SetSandBoxApplication(SandboxApp* application) noexcept;
 
 	private:
 		bool enableShadowMapping;
 
-		std::weak_ptr<IWindow> window;
+		std::weak_ptr<AnimationEngine::IWindow> window;
 
-		std::weak_ptr<IApplication> sandBox;
+		SandboxApp* sandBox;
 
-		std::shared_ptr<FrameBuffer> shadowFrameBuffer;
+		std::shared_ptr<AnimationEngine::FrameBuffer> shadowFrameBuffer;
 
-		DirectionalLight directionalLight;
+		AnimationEngine::DirectionalLight directionalLight;
 
-		std::weak_ptr<IShader> shadowShader;
+		std::weak_ptr<AnimationEngine::IShader> shadowShader;
 
-		std::shared_ptr<ScreenQuad> screenQuad;
+		std::shared_ptr<AnimationEngine::ScreenQuad> screenQuad;
 
-		std::weak_ptr<IShader> screenQuadShader;
+		std::weak_ptr<AnimationEngine::IShader> screenQuadShader;
 	};
 }
