@@ -2,7 +2,7 @@
 
 #include "AssetManagerLocator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	void AssetManagerLocator::Initialize()
 	{

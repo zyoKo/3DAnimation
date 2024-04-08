@@ -4,14 +4,16 @@
 #include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
+	class ScreenQuad;
+	class FrameBuffer;
 	class IApplication;
 	class IAnimator;
 	class IAssetManager;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class CoreEngine
 	{

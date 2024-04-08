@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static constexpr float CAMERA_YAW = -90.0f;
 

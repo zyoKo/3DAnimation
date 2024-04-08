@@ -10,10 +10,10 @@
 #include "Core/Memory/WeakPointer.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Graphics/OpenGL/Shader/Interface/IShader.h"
+#include "Graphics/OpenGL/Textures/ITexture2D.h"
 #include "Animation/Repository/AnimationStorage.h"
-#include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Animator::Animator()
 		:	currentAnimation(nullptr),
@@ -51,7 +51,8 @@ namespace AnimationEngine
 
 	void Animator::UpdateAnimation()
 	{
-		if (currentAnimation)
+		static bool playAnimation = true;
+		if (playAnimation && currentAnimation)
 		{
 			currentTime += currentAnimation->GetTicksPerSecond() * Time::GetDeltaTime() * animationSpeedFactor;
 			currentTime = std::fmod(currentTime, currentAnimation->GetDuration());
@@ -59,16 +60,16 @@ namespace AnimationEngine
 		}
 
 		const auto* animationStorage = AnimationStorageLocator::GetAnimationStorage();
-		const auto* animator = AnimatorLocator::GetAnimator();
 
 		const Memory::WeakPointer<IShader> animationShaderPtr{ animationShader };
 
 		animationShaderPtr->Bind();
 		animationShaderPtr->SetUniformInt(0, animationStorage->GetDiffuseTextureFromCurrentlyBoundIndex()->GetTextureName());
-		for (unsigned i = 0; i < animator->GetFinalBoneMatrices().size(); ++i)
+		animationShaderPtr->SetUniformInt(1, animationStorage->GetSpecularTextureFromCurrentlyBoundIndex()->GetTextureName());
+		for (unsigned i = 0; i < finalBoneMatrices.size(); ++i)
 		{
 			std::string uniformName = "finalBonesMatrices[" + std::to_string(i) + "]";
-			animationShaderPtr->SetUniformMatrix4F(animator->GetFinalBoneMatrices()[i], uniformName);
+			animationShaderPtr->SetUniformMatrix4F(finalBoneMatrices[i], uniformName);
 		}
 		animationShaderPtr->UnBind();
 	}

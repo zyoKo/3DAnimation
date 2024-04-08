@@ -1,20 +1,22 @@
 #pragma once
 
-#include <optional>
-
 #include "Animation/DataTypes/BoneData.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IIndexBuffer.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexArray.h"
-#include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
-#include "Graphics/GraphicsAPI.h"
 
-namespace AnimationEngine
+namespace SculptorGL
+{
+	class IIndexBuffer;
+	class IVertexBuffer;
+	class IVertexArray;
+	class IShader;
+	class ITexture2D;
+}
+
+namespace SculptorGL
 {
 	using Vertices_V3F			= std::vector<Math::Vector3F>;
 	using Colors_V3F			= std::vector<Math::Vector3F>;
 	using TexCoordinates_V2F	= std::vector<Math::Vector2F>;
 	using Normal_V3F			= std::vector<Math::Vector3F>;
-	using ITexturesList			= std::vector<std::shared_ptr<ITexture2D>>;
 	using Tangents_V3F			= std::vector<Math::Vector3F>;
 	using BiTangents_V3F		= std::vector<Math::Vector3F>;
 
@@ -38,8 +40,6 @@ namespace AnimationEngine
 
 		~Mesh() = default;
 
-		void Draw(const std::shared_ptr<IShader>& shader) const;
-
 		const Vertices_V3F& GetVertices() const;
 		void SetVertices(Vertices_V3F vertexList) noexcept;
 
@@ -61,10 +61,6 @@ namespace AnimationEngine
 		const std::vector<unsigned>& GetIndices() const;
 		void SetIndices(std::vector<unsigned> indexList) noexcept;
 
-		const ITexturesList& GetTextures() const;
-		void SetTextures(ITexturesList textures);
-		void AddTexture(const std::shared_ptr<ITexture2D>& texture);
-
 	private:
 		Vertices_V3F vertices;
 		Colors_V3F colors;
@@ -77,9 +73,7 @@ namespace AnimationEngine
 
 		std::vector<unsigned> indices;
 
-		ITexturesList textures;
-
-		// Buffers
+		// VAO and Buffers
 		std::shared_ptr<IVertexArray> vertexArrayObject;
 		std::shared_ptr<IVertexBuffer> vertexBuffer;
 		std::shared_ptr<IIndexBuffer> indexBuffer;

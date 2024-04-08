@@ -7,7 +7,7 @@
 #include "glad/glad.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static bool isGLFWInitialized = false;
 

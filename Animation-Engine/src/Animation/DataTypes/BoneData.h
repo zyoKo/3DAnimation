@@ -7,7 +7,7 @@
 
 #include "Math/Math.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static constexpr unsigned MAX_BONE_INFLUENCE = 4;
 

@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	struct CameraProperties
 	{

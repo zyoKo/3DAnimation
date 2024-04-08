@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class CustomSplineData
 	{

@@ -2,18 +2,22 @@
 
 #include "Interface/IAssetManager.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class NullAssetManager : public IAssetManager
 	{
 	public:
-		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath) override
+		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad) override
 		{
 			return {};
 		}
 
-		std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath,
-		                                   const std::string& fragmentFilepath) override
+		std::weak_ptr<IShader> CreateShaderWithDescription(const std::string& shaderName) override
+		{
+			return {};
+		}
+
+		std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override
 		{
 			return {};
 		}
@@ -28,8 +32,12 @@ namespace AnimationEngine
 			return {};
 		}
 
-		void ClearStores() override
+		IAssetManager* AddShaderDescription(ShaderDescription shaderDescription = {}) override
 		{
+			return this;
 		}
+
+		void ClearStores() override
+		{ }
 	};
 }

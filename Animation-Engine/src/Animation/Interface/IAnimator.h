@@ -1,13 +1,13 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	struct AssimpNodeData;
 	class Animation;
 	class IShader;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IAnimator
 	{

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	// Distance, Time, Acceleration, Velocity
 	class Kinematics

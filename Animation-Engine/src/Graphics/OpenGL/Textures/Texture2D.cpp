@@ -5,7 +5,7 @@
 #include "Core/Logger/GLDebug.h"
 #include "glad/glad.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Texture2D::Texture2D(const void* pixels, int width, int height, int depth)
 		:	textureID(0),

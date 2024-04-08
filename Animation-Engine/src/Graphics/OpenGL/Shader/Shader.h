@@ -1,30 +1,22 @@
 #pragma once
 
-#include <unordered_map>
-
-#include "glad/glad.h"
-
-#include "Interface/IShader.h"
-
 #include <glm/mat3x3.hpp>
 
-namespace AnimationEngine
+#include "Interface/IShader.h"
+#include "Structures/ShaderDescription.h"
+
+namespace SculptorGL
 {
-	enum class ShaderErrorType
-	{
-		NONE = -1,
-
-		COMPILER = 0,
-
-		LINKER = 1
-	};
-
 	class Shader : public IShader
 	{
 	public:
+		Shader(const std::string& shaderName, const std::vector<ShaderDescription>& shaderDescription);
+
 		Shader(const std::string& shaderName, const std::string& vertexShaderSource, const std::string& fragmentShaderSource);
 
 		~Shader() override;
+
+		ShaderDescription CreateShaderDescription(ShaderDescription description = {});
 
 		void Bind() const override;
 
@@ -50,6 +42,8 @@ namespace AnimationEngine
 
 		void SetUniformFloat(float value, const std::string& uniformName) override;
 
+		void SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName) override;
+
 	private:
 		unsigned int shaderID;
 
@@ -57,10 +51,10 @@ namespace AnimationEngine
 
 		std::unordered_map<std::string, int> uniformLocationCache;
 
-		unsigned int CompileShaderSource(const std::string& shaderSource, GLenum shaderType);
-
-		void ShaderErrorChecker(unsigned int shaderId, ShaderErrorType errorType);
-
 		int GetUniformLocation(const std::string& uniformName);
+
+		void AttachShader(const std::vector<unsigned>& shaderIds) const;
+
+		void DeleteShader(const std::vector<unsigned>& shaderIds) const;
 	};
 }

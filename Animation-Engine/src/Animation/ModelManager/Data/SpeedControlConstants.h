@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static constexpr float INITIAL_MOVE_SPEED = 0.0f;
 

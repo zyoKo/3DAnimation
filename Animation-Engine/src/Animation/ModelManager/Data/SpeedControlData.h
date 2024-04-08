@@ -1,7 +1,7 @@
 #pragma once
 #include "SpeedControlConstants.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class SpeedControlData
 	{

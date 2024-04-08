@@ -6,7 +6,7 @@
 
 #include "Structures/WindowData.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class WindowsWindow : public IWindow
 	{

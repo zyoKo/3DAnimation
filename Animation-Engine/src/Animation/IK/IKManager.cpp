@@ -9,14 +9,14 @@
 #include "Animation/Animation.h"
 #include "Animation/IK/TargetFinder.h"
 #include "Components/Camera/Camera.h"
-#include "Components/Types/DebugDrawMode.h"
+#include "Components/Types/DrawMode.h"
 #include "Components/Camera/Constants/CameraConstants.h"
 #include "Core/Logger/GLDebug.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	IKManager::IKManager()
 		:	targetFinder(nullptr),
@@ -353,7 +353,7 @@ namespace AnimationEngine
 
 		vertexArrayObject->Bind();
 		GraphicsAPI::GetContext()->EnablePointSize(true);
-		GL_CALL(glDrawArrays, DrawModeToGLEnum(DebugDrawMode::Points), 0, static_cast<unsigned>(jointPositions.size()));
+		GL_CALL(glDrawArrays, DrawModeToGLEnum(DrawMode::Points), 0, static_cast<unsigned>(jointPositions.size()));
 		GraphicsAPI::GetContext()->EnablePointSize(false);
 		vertexArrayObject->UnBind();
 

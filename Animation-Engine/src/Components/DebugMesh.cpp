@@ -7,7 +7,7 @@
 #include "Camera/Camera.h"
 #include "Camera/Constants/CameraConstants.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader)
 		:	shader(debugShader)
@@ -37,10 +37,10 @@ namespace AnimationEngine
 		OverwriteDataInVertexBuffer();
 
 		SetupShader();
-		//Draw(DebugDrawMode::Lines);
+		//Draw(DrawMode::Lines);
 	}
 
-	void DebugMesh::Draw(DebugDrawMode mode) const
+	void DebugMesh::Draw(DrawMode mode) const
 	{
 		Bind();
 
@@ -98,7 +98,7 @@ namespace AnimationEngine
 		shader->Bind();
 		shader->SetUniformMatrix4F(projection, "projection");
 		shader->SetUniformMatrix4F(view, "view");
-		Draw(DebugDrawMode::Lines);
+		Draw(DrawMode::Lines);
 		shader->UnBind();
 	}
 }

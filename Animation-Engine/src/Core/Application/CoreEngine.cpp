@@ -3,12 +3,10 @@
 #include "CoreEngine.h"
 
 #include <GLFW/glfw3.h>
-#include <execution>
 
 #include "Interface/IApplication.h"
 #include "Core/Logger/Log.h"
 #include "Core/Utilities/Time.h"
-#include "Graphics/GraphicsAPI.h"
 #include "AssetManager/AssetManager.h"
 #include "Components/Camera/Camera.h"
 #include "Animation/Animator.h"
@@ -17,7 +15,7 @@
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
 		:	assetManager(std::make_shared<AssetManager>()),
@@ -29,8 +27,6 @@ namespace AnimationEngine
 		window = std::shared_ptr<IWindow>(IWindow::Create({name, width, height}));
 
 		Camera::GetInstance()->SetWindowsWindow(window);
-
-		// Bind Event Callback here
 
 		AssetManagerLocator::Initialize();
 		AnimatorLocator::Initialize();
@@ -50,27 +46,25 @@ namespace AnimationEngine
 	void CoreEngine::SetApplication(const std::shared_ptr<IApplication>& app)
 	{
 		this->application = app;
+
+		application->SetWindowsWindow(window);
 	}
 
 	void CoreEngine::Initialize() const
 	{
 		Camera::GetInstance()->Initialize();
 
+		// Application Initialize
 		application->Initialize();
 	}
 
 	void CoreEngine::Update() const
 	{
+		// Application Pre-Update
 		application->PreUpdate();
-
-		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
 		while (running && !window->WindowShouldClose())
 		{
-			GraphicsAPI::GetContext()->ClearColor();
-			GraphicsAPI::GetContext()->ClearBuffer();
-
 			Time::Update();
 
 			ProcessInput();
@@ -80,6 +74,7 @@ namespace AnimationEngine
 			window->Update();
 		}
 
+		// Application PostUpdate
 		application->PostUpdate();
 
 		assetManager->ClearStores();

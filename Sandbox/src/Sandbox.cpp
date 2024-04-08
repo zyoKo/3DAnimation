@@ -1,115 +1,159 @@
 #include "Sandbox.h"
 
-#include "Components/GridMesh.h"
 #include "Core/Application/CoreEngine.h"
 #include "Core/Memory/WeakPointer.h"
-#include "Core/ServiceLocators/Animation/AnimatorLocator.h"
-#include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
+#include "AssetManager/Interface/IAssetManager.h"
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
+#include "Animation/Model.h"
+#include "Components/Quad.h"
+#include "Components/Camera/Camera.h"
+#include "Data/Constants.h"
+#include "Pipeline/IPipeline.h"
+#include "Pipeline/Fixed/CreatePipeline.h"
+#include "Pipeline/Structures/PipelineInitializer.h"
 
 namespace Sandbox
 {
 	void SandboxApp::Initialize()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
-		auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
-		auto* assetManager		= AssetManagerLocator::GetAssetManager();
+		// Create Deferred Pipeline
+		const PipelineInitializer deferredPipelineData{
+			.window = GetWindowsWindow(),
+			.sandBox = this
+		};
+		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
+		deferredPipeline->Initialize();
 
-		//-- Texture Paths --//
-		const std::string dreyarDiffuseTextureFile	= "./assets/dreyar/textures/Dreyar_diffuse.png";
-		const std::string gridTextureFile			= "./assets/grid.png";
+		// Create Shadow Pipeline
+		const PipelineInitializer shadowPipelineData{
+			.window = GetWindowsWindow(),
+			.sandBox = this
+		};
+		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
+		//shadowMappingPipeline->SetEnable(false);
+		shadowMappingPipeline->Initialize();
 
-		//-- Shader Paths --//
-		const std::string vertexShaderFile			= "./assets/shaders/anim_model.vert";
-		const std::string fragmentShaderFile		= "./assets/shaders/anim_model.frag";
-		const std::string gridVertexShaderFile		= "./assets/shaders/inf_grid.vert";
-		const std::string gridFragmentShaderFile	= "./assets/shaders/inf_grid.frag";
+		//-- ## ASSET LOADING ## --//
+		assetManager = AssetManagerLocator::GetAssetManager();
 
-		//-- Model/Animation Path --//
-		//const std::string dreyar1ColladaFile		= "./assets/dreyar/Capoeira.dae";
-		const std::string dreyar2ColladaFile		= "./assets/dreyar/Walking.dae";
-		const std::string dreyar3ColladaFile		= "./assets/dreyar/Running.dae";
+		//-- Texture Creation --//
+		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse{ assetManager->CreateTexture(BACKPACK_DIFFUSE_TEXTURE_FILE_PATH, false) };
+		modelTextureDiffuse->SetTextureName(TEXTURE_DIFFUSE_1);
 
-		const Memory::WeakPointer<ITexture2D> modelTextureDiffuse { assetManager->CreateTexture(dreyarDiffuseTextureFile) };
-		modelTextureDiffuse->SetTextureName("texture_diffuse1");
+		const Memory::WeakPointer<ITexture2D> modelTextureSpecular{ assetManager->CreateTexture(BACKPACK_SPECULAR_TEXTURE_FILE_PATH, false) };
+		modelTextureSpecular->SetTextureName(TEXTURE_SPECULAR_1);
 
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr{ assetManager->CreateTexture(gridTextureFile) };
-		gridTexturePtr->SetTextureName("gridTexture");
+		const Memory::WeakPointer<ITexture2D> floorTexturePtr{ assetManager->CreateTexture(FLOOR_DIFFUSE_FILE_PATH) };
+		floorTexturePtr->SetTextureName(TEXTURE_DIFFUSE_1);
+		//-- !Texture Creation --//
 
-		assetManager->CreateShader("AnimationShader", vertexShaderFile, fragmentShaderFile);
-		assetManager->CreateShader("GridShader", gridVertexShaderFile, gridFragmentShaderFile);
+		//-- Shader Creation --//
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = G_BUFFER_VERTEX_SHADER_FILE_PATH
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = G_BUFFER_FRAGMENT_SHADER_FILE_PATH
+		});
+		assetManager->CreateShaderWithDescription(G_BUFFER_SHADER_NAME);
 
-		// Adding Model And Animation to Storage
-		//animationStorage.AddAssetToStorage(dreyar1ColladaFile, dreyarTextureDiffuse);
-		animationStorage->AddAssetToStorage(dreyar2ColladaFile, modelTextureDiffuse.GetShared());
-		animationStorage->AddAssetToStorage(dreyar3ColladaFile, modelTextureDiffuse.GetShared());
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = QUAD_VERTEX_SHADER_FILE_PATH
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = QUAD_FRAGMENT_SHADER_FILE_PATH
+		});
+		assetManager->CreateShaderWithDescription(QUAD_SHADER_NAME);
+		//-- !Shader Creation --//
+		//-- ## !ASSET LOADING ## --//
 
-		gridMesh = std::make_unique<GridMesh>();
+		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
+		floor = std::make_shared<Quad>();
 	}
 
 	void SandboxApp::PreUpdate()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
-		const auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
-		const auto* assetManager		= AssetManagerLocator::GetAssetManager();
-		auto* animator					= AnimatorLocator::GetAnimator();
+		// Pipelines Call
+		shadowMappingPipeline->PreUpdateSetup();
+		deferredPipeline->PreUpdateSetup();
 
-		const Memory::WeakPointer<IShader> animationShaderPtr	{ assetManager->RetrieveShaderFromStorage("AnimationShader") };
-		const Memory::WeakPointer<IShader> gridShaderPtr		{ assetManager->RetrieveShaderFromStorage("GridShader") };
+		const auto backPackShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
+		const auto quadShader = assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME);
 
-		const Memory::WeakPointer<ITexture2D> textureDiffusePtr	{ assetManager->RetrieveTextureFromStorage("Dreyar_diffuse") };
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr	{ assetManager->RetrieveTextureFromStorage("grid") };
+		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
+		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
+		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
+		backPack->SetShader(backPackShader);
 
-		animator->ChangeAnimation(animationStorage->GetAnimationForCurrentlyBoundIndex());
-		animator->SetShader(animationShaderPtr.GetWeakPointer());
+		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
+		floor->SetGridTexture(gridTexture);
+		floor->SetShader(quadShader);
 
-		gridMesh->SetGridTexture(gridTexturePtr.GetWeakPointer());
+		auto* camera = Camera::GetInstance();
+		camera->SetCameraPosition({ 7.0f, 14.0f, 13.0f });
+		camera->SetPitch(-21.0f);
+		camera->SetYaw(-120.0f);
 	}
 
 	void SandboxApp::Update()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
-		const auto* assetManager		= AssetManagerLocator::GetAssetManager();
-		const auto* animationStorage	= AnimationStorageLocator::GetAnimationStorage();
+		// Pipelines Call
+		shadowMappingPipeline->Update();
 
-		auto* animator	= AnimatorLocator::GetAnimator();
-		
-		const Memory::WeakPointer<IShader> animationShaderPtr	{ assetManager->RetrieveShaderFromStorage("AnimationShader") };
-		const Memory::WeakPointer<IShader> gridShaderPtr		{ assetManager->RetrieveShaderFromStorage("GridShader") };
+		deferredPipeline->Update();
 
-		const Memory::WeakPointer<ITexture2D> textureDiffusePtr	{ assetManager->RetrieveTextureFromStorage("Dreyar_diffuse") };
-		const Memory::WeakPointer<ITexture2D> gridTexturePtr	{ assetManager->RetrieveTextureFromStorage("grid") };
-
-		animator->UpdateAnimation();
-		//animator->ResetAnimation();
-
-		animationStorage->GetModelForCurrentlyBoundIndex()->Draw(animationShaderPtr.GetShared());
-		
-		gridMesh->Update(gridShaderPtr.GetShared());
+		//deferredPipeline->GlobalLightingPass();
+		//
+		//deferredPipeline->LocalLightingPass();
 	}
 
 	void SandboxApp::PostUpdate()
-	{ }
+	{
+		// Pipelines Call
+		shadowMappingPipeline->PostUpdate();
+		deferredPipeline->PostUpdate();
+	}
 
 	void SandboxApp::Shutdown()
 	{
-		gridMesh.reset();
+		// Pipelines Call
+		shadowMappingPipeline->Shutdown();
+		deferredPipeline->Shutdown();
+
+		backPack.reset();
+		floor.reset();
+	}
+
+	std::weak_ptr<SculptorGL::Model> SandboxApp::GetBackPackModel() const
+	{
+		return backPack;
+	}
+
+	std::weak_ptr<SculptorGL::Quad> SandboxApp::GetQuadModel() const
+	{
+		return floor;
 	}
 }
 
-std::shared_ptr<AnimationEngine::IApplication> AnimationEngine::CreateApplication()
+std::shared_ptr<SculptorGL::IApplication> SculptorGL::CreateApplication()
 {
 	return std::make_shared<Sandbox::SandboxApp>();
 }
 
 int main()
 {
-	AnimationEngine::CoreEngine app;
+	SculptorGL::CoreEngine app;
 
-	app.SetApplication(AnimationEngine::CreateApplication());
+	app.SetApplication(SculptorGL::CreateApplication());
 
 	app.Initialize();
 

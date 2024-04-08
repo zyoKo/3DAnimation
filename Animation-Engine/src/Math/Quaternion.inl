@@ -7,7 +7,7 @@
 #include "Vector3.h"
 #include "Vector4.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template <typename T>
 	constexpr Quaternion<T>::Quaternion() noexcept

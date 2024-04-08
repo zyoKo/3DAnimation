@@ -4,7 +4,7 @@
 
 #include "Core/Logger/GLDebug.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	VertexBuffer::VertexBuffer()
 		:	vertexBufferDataSize(0)

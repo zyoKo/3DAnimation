@@ -1,11 +1,11 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class AnimationStorage;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class AnimationStorageLocator
 	{

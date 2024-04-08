@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	// Curve Path Data
 	static const std::vector<Vector3F> DEFAULT_CONTROL_POINTS =

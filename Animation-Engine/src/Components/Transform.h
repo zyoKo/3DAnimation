@@ -2,7 +2,7 @@
 
 #include "Math/Math.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	enum class TransformSpace
 	{

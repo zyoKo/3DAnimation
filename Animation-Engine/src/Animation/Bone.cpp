@@ -7,7 +7,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Bone::Bone(std::string name, int boneID, const aiNodeAnim* channel)
 		:	name(std::move(name)),

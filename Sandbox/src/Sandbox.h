@@ -1,11 +1,26 @@
 #pragma once
 
-#include "Components/GridMesh.h"
+#include <memory>
+
 #include "Core/Application/Interface/IApplication.h"
 
 namespace Sandbox
 {
-	class SandboxApp : public AnimationEngine::IApplication
+	class IPipeline;
+}
+
+namespace SculptorGL
+{
+	class ShadowMapping;
+	class DeferredShading;
+	class Quad;
+	class Model;
+	class IAssetManager;
+}
+
+namespace Sandbox
+{
+	class SandboxApp : public SculptorGL::IApplication
 	{
 	public:
 		void Initialize() override;
@@ -18,9 +33,25 @@ namespace Sandbox
 
 		void Shutdown() override;
 
+		std::weak_ptr<SculptorGL::Model> GetBackPackModel() const;
+
+		std::weak_ptr<SculptorGL::Quad> GetQuadModel() const;
+
 	private:
 		bool enableModelMesh{ true };
 
-		std::unique_ptr<AnimationEngine::GridMesh> gridMesh;
+		SculptorGL::IAssetManager* assetManager{ nullptr };
+
+		std::shared_ptr<IPipeline> deferredPipeline;
+
+		std::shared_ptr<IPipeline> shadowMappingPipeline;
+
+		std::shared_ptr<SculptorGL::Model> backPack;
+
+		std::shared_ptr<SculptorGL::Quad> floor;
+
+		friend class DeferredShading;
+
+		friend class ShadowMapping;
 	};
 }

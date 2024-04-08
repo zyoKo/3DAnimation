@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static constexpr uint32_t WINDOW_WIDTH = 1280;
 

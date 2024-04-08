@@ -1,9 +1,11 @@
 #include "AnimationPch.h"
 
-#include "Log.h"
+#include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 
-namespace AnimationEngine
+#include "Log.h"
+
+namespace SculptorGL
 {
 	std::shared_ptr<spdlog::logger> Log::logger;
 

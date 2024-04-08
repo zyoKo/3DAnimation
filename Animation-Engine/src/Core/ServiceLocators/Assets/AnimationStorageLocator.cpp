@@ -4,7 +4,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	AnimationStorage* AnimationStorageLocator::GetAnimationStorage()
 	{

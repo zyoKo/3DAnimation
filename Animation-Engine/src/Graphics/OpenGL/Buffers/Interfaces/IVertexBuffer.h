@@ -2,7 +2,7 @@
 
 #include "Graphics/OpenGL/Buffers/Structure/VertexBufferLayout.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IVertexBuffer
 	{

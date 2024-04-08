@@ -5,7 +5,7 @@
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
 
-namespace AnimationEngine::Utils
+namespace SculptorGL::Utils
 {
 	static std::string RetrieveFilenameFromFilepath(const std::string& filepath)
 	{
@@ -154,5 +154,17 @@ namespace AnimationEngine::Utils
 	bool IsInBounds(const T& value, const T& low, const T& high)
 	{
 		return !(value < low) && (value < high);
+	}
+
+	static int GenerateRandomIntInRange(int minRange, int maxRange)
+	{
+		// Create a random number engine
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		
+		// Define a distribution
+		std::uniform_int_distribution<> dis(minRange, maxRange);
+
+		return dis(gen);
 	}
 }

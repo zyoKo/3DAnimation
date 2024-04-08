@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	static constexpr float MATH_EPSILON = 0.000001f;
 

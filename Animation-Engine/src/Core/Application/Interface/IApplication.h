@@ -1,8 +1,11 @@
 #pragma once
 
-#include <memory>
+namespace SculptorGL
+{
+	class IWindow;
+}
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IApplication
 	{
@@ -18,6 +21,13 @@ namespace AnimationEngine
 		virtual void PostUpdate() = 0;
 
 		virtual void Shutdown() = 0;
+
+		std::weak_ptr<IWindow> GetWindowsWindow() const { return windowsWindow; }
+
+		void SetWindowsWindow(std::weak_ptr<IWindow> window) noexcept { windowsWindow = std::move(window); }
+
+	private:
+		std::weak_ptr<IWindow> windowsWindow;
 	};
 
 	std::shared_ptr<IApplication> CreateApplication();

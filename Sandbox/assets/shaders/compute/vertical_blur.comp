@@ -1,0 +1,44 @@
+#version 460 core
+
+layout (local_size_x = 1, local_size_y = 128, local_size_z = 1) in;
+
+layout (binding = 0) uniform blurKernel
+{ 
+	float weights[101];
+};
+
+layout (rgba32f, binding = 1) uniform readonly image2D sourceImage;
+layout (rgba32f, binding = 2) uniform writeonly image2D destinationImage;
+
+//uniform int halfSize; // half-size of kernel
+
+// Variable shared with other threads in the 128x1 thread group
+shared vec4 v[128 + 101];
+
+void main()
+{
+	int halfSize = 50;
+
+	// Combo of groupID, groupSize and localID
+	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+
+	// Local thread id in the 128x1 thread groups128x1
+	uint i = gl_LocalInvocationID.y;
+
+	v[i] = imageLoad(sourceImage, texelCoord + ivec2(0, -halfSize));
+	
+	if (i < (2 * halfSize))
+	{
+		v[i + 128] = imageLoad(sourceImage, texelCoord + ivec2(0, 128 - halfSize));
+	}
+
+	barrier();
+
+	vec4 sum = vec4(0);
+	for(int j = 0; j < (2 * halfSize + 1); j++)
+	{
+		sum += weights[j] * v[i + j];
+	}
+
+	imageStore(destinationImage, texelCoord, sum);
+}

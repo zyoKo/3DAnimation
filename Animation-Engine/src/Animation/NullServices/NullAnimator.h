@@ -4,12 +4,12 @@
 
 #include "Animation/Interface/IAnimator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IShader;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class NullAnimator : public IAnimator
 	{

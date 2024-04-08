@@ -5,7 +5,7 @@
 #include "Math/Math.h"
 #include "Math/Spline/HermiteSpline.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class ModelManager
 	{

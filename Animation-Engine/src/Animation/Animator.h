@@ -6,7 +6,7 @@
 
 #include "Interface/IAnimator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IShader;
 	class IKManager;
@@ -14,7 +14,7 @@ namespace AnimationEngine
 	class Animation;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Animator : public IAnimator
 	{

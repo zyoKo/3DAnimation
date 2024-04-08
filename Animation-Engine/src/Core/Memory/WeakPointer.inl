@@ -3,7 +3,7 @@
 #include "WeakPointer.h"
 #include "Core/Logger/Log.h"
 
-namespace AnimationEngine::Memory
+namespace SculptorGL::Memory
 {
 	template <typename T>
 	WeakPointer<T>::WeakPointer()

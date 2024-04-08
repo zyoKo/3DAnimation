@@ -4,7 +4,7 @@
 
 #include "Vector3.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template<typename T>
 	constexpr Matrix3x3<T>::Matrix3x3() noexcept

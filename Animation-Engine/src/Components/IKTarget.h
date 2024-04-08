@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Data/Constants.h"
-#include "Types/DebugDrawMode.h"
+#include "Types/DrawMode.h"
 #include "Types/MovementType.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IKManager;
 
@@ -17,7 +17,7 @@ namespace AnimationEngine
 	class CurveMesh;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IKTarget
 	{
@@ -61,7 +61,7 @@ namespace AnimationEngine
 		void SetupMesh();
 		void OverwriteMeshData() const;
 		void CreateShader();
-		void Draw(DebugDrawMode mode) const;
+		void Draw(DrawMode mode) const;
 
 		void SetNewControlPoints();
 

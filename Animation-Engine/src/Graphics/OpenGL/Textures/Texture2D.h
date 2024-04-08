@@ -2,7 +2,7 @@
 
 #include "ITexture2D.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Texture2D : public ITexture2D
 	{

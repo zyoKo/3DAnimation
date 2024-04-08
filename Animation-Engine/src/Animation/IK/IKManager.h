@@ -3,7 +3,7 @@
 #include "Animation/DataTypes/AssimpNodeData.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class TargetFinder;
 
@@ -16,7 +16,7 @@ namespace AnimationEngine
 	class IShader;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IKManager
 	{

@@ -4,7 +4,7 @@
 
 #include <Math/Math.h>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow;
 

@@ -7,7 +7,7 @@
 #include "Core/Logger/GLDebug.h"
 #include "Core/Logger/Log.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	IndexBuffer::IndexBuffer()
 		:	bufferDataSize(0)

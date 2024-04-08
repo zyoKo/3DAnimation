@@ -14,7 +14,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Math/KinematicEquations/Kinematics.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	ModelManager::ModelManager()
 		:	timeInSeconds(0.0f),

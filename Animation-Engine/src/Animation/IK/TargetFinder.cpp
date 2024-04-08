@@ -4,7 +4,7 @@
 
 #include "IKManager.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	TargetFinder::TargetFinder()
 		:	maxChainLength(0.0f),

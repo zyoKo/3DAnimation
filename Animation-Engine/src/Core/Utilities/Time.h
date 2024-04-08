@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Time
 	{
@@ -8,6 +8,8 @@ namespace AnimationEngine
 		static void Update();
 
 		static float GetDeltaTime();
+
+		static float GetLastFrame();
 
 	private:
 		inline static float lastFrame { 0.0f };

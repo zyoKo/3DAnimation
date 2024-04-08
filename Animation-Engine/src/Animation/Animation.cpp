@@ -8,7 +8,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Animation::Animation(const std::string& animationPath, Model* model)
 	{

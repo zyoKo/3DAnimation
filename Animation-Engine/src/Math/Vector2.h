@@ -2,7 +2,7 @@
 
 #include <ostream>
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template <typename T>
 	class Vector2

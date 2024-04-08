@@ -2,7 +2,7 @@
 
 #include "Math/Math.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	using ControlPoints = std::pair<Vector3F, Vector3F>;
 	using Tangents = std::pair<Vector3F, Vector3F>;

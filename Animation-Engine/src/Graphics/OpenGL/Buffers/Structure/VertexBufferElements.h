@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	enum class VertexDataType
 	{
@@ -29,8 +29,8 @@ namespace AnimationEngine
 
 		unsigned int offset = 0;
 
-		unsigned int count;
+		unsigned int count = 0;
 
-		unsigned char normalized;
+		unsigned char normalized = 0;
 	};
 }

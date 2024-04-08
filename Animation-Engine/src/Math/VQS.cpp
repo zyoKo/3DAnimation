@@ -4,7 +4,7 @@
 
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	VQS::VQS()
 		:	translationVector(),

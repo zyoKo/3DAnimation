@@ -4,7 +4,7 @@
 
 #include "GLFW/glfw3.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	void Time::Update()
 	{
@@ -16,5 +16,10 @@ namespace AnimationEngine
 	float Time::GetDeltaTime()
 	{
 		return deltaTime;
+	}
+
+	float Time::GetLastFrame()
+	{
+		return lastFrame;
 	}
 }
