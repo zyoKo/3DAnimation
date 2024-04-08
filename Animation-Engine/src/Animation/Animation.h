@@ -6,7 +6,7 @@
 
 #include <map>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Animation
 	{

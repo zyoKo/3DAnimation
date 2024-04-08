@@ -2,7 +2,7 @@
 
 #include "Math/Spline/HermiteSpline.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IVertexArray;
 	class IVertexBuffer;

@@ -8,7 +8,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Types/DrawMode.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class DebugMesh
 	{

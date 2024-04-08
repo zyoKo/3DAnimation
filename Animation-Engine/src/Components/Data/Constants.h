@@ -2,7 +2,7 @@
 
 #include "Math/Math.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static const std::vector<Math::Vector3F> DEFAULT_VERTICES_DATA = 
 	{

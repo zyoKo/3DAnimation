@@ -5,7 +5,7 @@
 #include "AssetStore/AssetStore.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	using stbi_uc = unsigned char;
 

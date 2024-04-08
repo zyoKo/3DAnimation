@@ -1,11 +1,11 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IApplication
 	{

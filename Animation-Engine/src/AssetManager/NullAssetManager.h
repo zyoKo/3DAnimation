@@ -2,7 +2,7 @@
 
 #include "Interface/IAssetManager.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class NullAssetManager : public IAssetManager
 	{

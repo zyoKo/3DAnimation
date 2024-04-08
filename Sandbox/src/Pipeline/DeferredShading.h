@@ -9,7 +9,7 @@ namespace Sandbox
 	struct PipelineInitializer;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IApplication;
 	class ScreenQuad;
@@ -40,6 +40,12 @@ namespace Sandbox
 
 		void PreUpdateSetup() override;
 
+		void GeometryPass() const;
+
+		void LocalLightingPass() const;
+
+		void GlobalLightingPass() const;
+
 		void Update() override;
 
 		void PostUpdate() override;
@@ -48,23 +54,23 @@ namespace Sandbox
 
 		void SetEnable(bool value) override;
 
-		void SetWindowsWindow(std::weak_ptr<AnimationEngine::IWindow> windowsWindow) noexcept;
+		void SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept;
 
 	private:
 		bool enableDeferredShading;
 
-		std::weak_ptr<AnimationEngine::IWindow> window;
+		std::weak_ptr<SculptorGL::IWindow> window;
 
 		SandboxApp* sandBox;
 
-		std::shared_ptr<AnimationEngine::FrameBuffer> frameBuffer;
+		std::shared_ptr<SculptorGL::FrameBuffer> frameBuffer;
 
 		//-- Shader --//
-		std::weak_ptr<AnimationEngine::IShader> globalLightShader;
+		std::weak_ptr<SculptorGL::IShader> globalLightShader;
 
-		std::weak_ptr<AnimationEngine::IShader> pointLightShader;
+		std::weak_ptr<SculptorGL::IShader> pointLightShader;
 
-		std::weak_ptr<AnimationEngine::IShader> shaderLightBox;
+		std::weak_ptr<SculptorGL::IShader> shaderLightBox;
 		//-- !Shader --//
 
 		//-- Lights Data --//
@@ -72,16 +78,12 @@ namespace Sandbox
 
 		std::vector<PointLight> pointLights;
 
-		std::shared_ptr<AnimationEngine::Model> lightSphere;
+		std::shared_ptr<SculptorGL::Model> lightSphere;
 		//-- !Lights Data --//
 
-		std::shared_ptr<AnimationEngine::ScreenQuad> screenQuad;
+		std::shared_ptr<SculptorGL::ScreenQuad> screenQuad;
 
-		std::shared_ptr<AnimationEngine::Model> lightBox;
-
-		void LocalLightingPass() const;
-
-		void GlobalLightingPass() const;
+		std::shared_ptr<SculptorGL::Model> lightBox;
 
 		void UpdateLights();
 	};

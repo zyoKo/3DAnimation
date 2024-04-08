@@ -5,7 +5,7 @@
 
 #include "Log.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	std::shared_ptr<spdlog::logger> Log::logger;
 

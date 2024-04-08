@@ -4,7 +4,7 @@
 
 #include "DataTypes/BoneData.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Bone
 	{

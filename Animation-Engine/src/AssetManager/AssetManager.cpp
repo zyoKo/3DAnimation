@@ -5,7 +5,7 @@
 #include "AssetManager.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	std::weak_ptr<ITexture2D> AssetManager::CreateTexture(const std::string& filepath, bool flipOnLoad /* = true */)
 	{

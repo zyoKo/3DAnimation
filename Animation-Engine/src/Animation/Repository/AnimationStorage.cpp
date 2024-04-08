@@ -6,7 +6,7 @@
 #include "Animation/Model.h"
 #include "Animation/Animation.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	AnimationStorage::AnimationStorage()
 		:	currentIndex(0)

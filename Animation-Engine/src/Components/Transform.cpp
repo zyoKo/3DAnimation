@@ -2,7 +2,7 @@
 
 #include "Transform.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Transform::Transform()
 		:	localPosition{ 0.0f },

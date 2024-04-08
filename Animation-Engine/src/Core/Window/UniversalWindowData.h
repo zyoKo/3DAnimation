@@ -4,7 +4,7 @@
 
 #include "UniversalWindowConstants.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	struct UniversalWindowData
 	{

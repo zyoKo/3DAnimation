@@ -2,13 +2,14 @@
 
 #include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
 #include "Structures/TextureParameters.h"
+#include "Types/BufferAccess.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class BufferTexture
 	{
@@ -23,15 +24,19 @@ namespace AnimationEngine
 
 		void Bind(unsigned slot) const;
 
-		void BindImageTexture() const;
+		void BindImageTexture(BufferAccess bufferAccess, unsigned bindingPoint) const;
 
 		void UnBind() const;
 
 		unsigned GetTextureID() const;
 
+		const std::string& GetName() const;
+
 		AttachmentType GetAttachmentType() const;
 
-		const std::string& GetName() const;
+		int GetWidth() const;
+
+		int GetHeight() const;
 
 		void SetName(std::string newName) noexcept;
 
@@ -47,5 +52,9 @@ namespace AnimationEngine
 		std::weak_ptr<IWindow> window;
 
 		AttachmentType attachmentType;
+
+		int textureWidth;
+
+		int textureHeight;
 	};
 }

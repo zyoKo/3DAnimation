@@ -15,7 +15,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Animation/IK/IKManager.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	IKTarget::IKTarget(CurveMesh* curveMesh, IKManager* ikManager, const Math::Vector3F& initialTargetLocation)
 		:	curveMesh(curveMesh),

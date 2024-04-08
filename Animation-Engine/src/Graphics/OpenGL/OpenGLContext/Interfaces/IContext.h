@@ -5,21 +5,21 @@
 #include "Graphics/OpenGL/OpenGLContext/Types/CullType.h"
 #include "Math/Math.h"
 
-#define COLOR_WHITE	AnimationEngine::Math::Vec3F{ 1.0f, 1.0f, 1.0f }
-#define COLOR_BLACK	AnimationEngine::Math::Vec3F{ 0.0f, 0.0f, 0.0f }
-#define COLOR_GRAY	AnimationEngine::Math::Vec3F{ 0.1f, 0.1f, 0.1f }
-#define COLOR_RED	AnimationEngine::Math::Vec3F{ 1.0f, 0.0f, 0.0f }
-#define COLOR_GREEN	AnimationEngine::Math::Vec3F{ 0.0f, 1.0f, 0.0f }
-#define COLOR_BLUE	AnimationEngine::Math::Vec3F{ 0.0f, 0.0f, 1.0f }
+#define COLOR_WHITE	SculptorGL::Math::Vec3F{ 1.0f, 1.0f, 1.0f }
+#define COLOR_BLACK	SculptorGL::Math::Vec3F{ 0.0f, 0.0f, 0.0f }
+#define COLOR_GRAY	SculptorGL::Math::Vec3F{ 0.1f, 0.1f, 0.1f }
+#define COLOR_RED	SculptorGL::Math::Vec3F{ 1.0f, 0.0f, 0.0f }
+#define COLOR_GREEN	SculptorGL::Math::Vec3F{ 0.0f, 1.0f, 0.0f }
+#define COLOR_BLUE	SculptorGL::Math::Vec3F{ 0.0f, 0.0f, 1.0f }
 
-#define COLOR_WHITE_A AnimationEngine::Math::Vec4F{ 1.0f, 1.0f, 1.0f, 1.0f }
-#define COLOR_BLACK_A AnimationEngine::Math::Vec4F{ 0.0f, 0.0f, 0.0f, 1.0f }
-#define COLOR_GRAY_A  AnimationEngine::Math::Vec4F{ 0.1f, 0.1f, 0.1f, 1.0f }
-#define COLOR_RED_A	  AnimationEngine::Math::Vec4F{ 1.0f, 0.0f, 0.0f, 1.0f }
-#define COLOR_GREEN_A AnimationEngine::Math::Vec4F{ 0.0f, 1.0f, 0.0f, 1.0f }
-#define COLOR_BLUE_A  AnimationEngine::Math::Vec4F{ 0.0f, 0.0f, 1.0f, 1.0f }
+#define COLOR_WHITE_A SculptorGL::Math::Vec4F{ 1.0f, 1.0f, 1.0f, 1.0f }
+#define COLOR_BLACK_A SculptorGL::Math::Vec4F{ 0.0f, 0.0f, 0.0f, 1.0f }
+#define COLOR_GRAY_A  SculptorGL::Math::Vec4F{ 0.1f, 0.1f, 0.1f, 1.0f }
+#define COLOR_RED_A	  SculptorGL::Math::Vec4F{ 1.0f, 0.0f, 0.0f, 1.0f }
+#define COLOR_GREEN_A SculptorGL::Math::Vec4F{ 0.0f, 1.0f, 0.0f, 1.0f }
+#define COLOR_BLUE_A  SculptorGL::Math::Vec4F{ 0.0f, 0.0f, 1.0f, 1.0f }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IContext
 	{
@@ -57,5 +57,7 @@ namespace AnimationEngine
 		virtual void ReadBuffer(unsigned mode) = 0;
 
 		virtual void DrawArrays(DrawMode drawMode, int offset, int count) = 0;
+
+		virtual void SetViewPort(int x, int y, int screenWidth, int screenHeight) = 0;
 	};
 }

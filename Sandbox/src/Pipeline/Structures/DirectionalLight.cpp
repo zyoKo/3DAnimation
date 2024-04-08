@@ -2,7 +2,7 @@
 
 #include "DirectionalLight.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	
 }

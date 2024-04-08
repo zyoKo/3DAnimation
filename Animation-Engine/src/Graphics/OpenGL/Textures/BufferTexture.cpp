@@ -7,7 +7,7 @@
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 #include "Platform/Windows/WindowsWindow.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	BufferTexture::BufferTexture(std::weak_ptr<IWindow> windowsWindow, AttachmentType type, int floatingPrecision, int width /* = 0 */, int height /* = 0 */, int levels /* = 0 */)
 		:	name("Texture"),
@@ -19,12 +19,12 @@ namespace AnimationEngine
 
 		const Memory::WeakPointer<IWindow> windowPtr{ window };
 
-		const int bufferWidth  = width  > 0 ? width  : static_cast<int>(windowPtr->GetWidth());
-		const int bufferHeight = height > 0 ? height : static_cast<int>(windowPtr->GetHeight());
+		textureWidth  = width  > 0 ? width  : static_cast<int>(windowPtr->GetWidth());
+		textureHeight = height > 0 ? height : static_cast<int>(windowPtr->GetHeight());
 
 		const int internalFormat = AttachmentTypeToInternalFormat(type, floatingPrecision);
 
-		GL_CALL(glTextureStorage2D, textureID, levels, internalFormat, bufferWidth, bufferHeight);
+		GL_CALL(glTextureStorage2D, textureID, levels, internalFormat, textureWidth, textureHeight);
 
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		GL_CALL(glTextureParameteri, textureID, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -56,9 +56,9 @@ namespace AnimationEngine
 		GL_CALL(glBindTexture, GL_TEXTURE_2D, textureID);
 	}
 
-	void BufferTexture::BindImageTexture() const
+	void BufferTexture::BindImageTexture(BufferAccess access, unsigned bindingPoint) const
 	{
-		GL_CALL(glBindImageTexture, 0, textureID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA32F);
+		GL_CALL(glBindImageTexture, bindingPoint, textureID, 0, GL_FALSE, 0, BufferAccessToOpenGLType(access), GL_RGBA32F);
 	}
 
 	void BufferTexture::UnBind() const
@@ -86,6 +86,16 @@ namespace AnimationEngine
 	AttachmentType BufferTexture::GetAttachmentType() const
 	{
 		return attachmentType;
+	}
+
+	int BufferTexture::GetWidth() const
+	{
+		return textureWidth;
+	}
+
+	int BufferTexture::GetHeight() const
+	{
+		return textureHeight;
 	}
 
 	const std::string& BufferTexture::GetName() const

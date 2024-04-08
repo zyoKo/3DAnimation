@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow;
 }
@@ -14,7 +14,7 @@ namespace Sandbox
 {
 	struct PipelineInitializer
 	{
-		mutable std::weak_ptr<AnimationEngine::IWindow> window;
+		mutable std::weak_ptr<SculptorGL::IWindow> window;
 
 		mutable SandboxApp* sandBox;
 	};

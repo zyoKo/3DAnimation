@@ -27,7 +27,7 @@ namespace Sandbox
 {
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	enableDeferredShading(true),
-			globalPointLight(LightType::STATIC, AnimationEngine::Math::Vec3F(100.0f, 100.0f, 100.0f), AnimationEngine::Math::Vec3F(1.0f, 1.0f, 1.0f))
+			globalPointLight(LightType::STATIC, SculptorGL::Math::Vec3F(100.0f, 100.0f, 100.0f), SculptorGL::Math::Vec3F(1.0f, 1.0f, 1.0f))
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -39,17 +39,17 @@ namespace Sandbox
 	{
 		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
 
-		auto* assetManager = AnimationEngine::AssetManagerLocator::GetAssetManager();
+		auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
 
 		globalLightShader	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightBox		= assetManager->CreateShader(LIGHTS_BOX_SHADER_NAME, LIGHTS_BOX_SHADER_VERTEX_PATH, LIGHTS_BOX_SHADER_FRAGMENT_PATH);
 		pointLightShader	= assetManager->CreateShader(POINT_LIGHT_SHADER_NAME, POINT_LIGHT_VERTEX_SHADER_PATH, POINT_LIGHT_FRAGMENT_SHADER_PATH);
 
-		frameBuffer = std::make_shared<AnimationEngine::FrameBuffer>(window);
+		frameBuffer = std::make_shared<SculptorGL::FrameBuffer>(window);
 		frameBuffer->Bind();
-		frameBuffer->CreateAttachment(AnimationEngine::AttachmentType::COLOR, true, POSITION_TEXTURE,	16);
-		frameBuffer->CreateAttachment(AnimationEngine::AttachmentType::COLOR, true, NORMAL_TEXTURE,		16);
-		frameBuffer->CreateAttachment(AnimationEngine::AttachmentType::COLOR, true, ALBEDO_TEXTURE,		8);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, POSITION_TEXTURE,	16);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, NORMAL_TEXTURE,		16);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, ALBEDO_TEXTURE,		8);
 
 		const auto totalBuffers = static_cast<int>(frameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;
@@ -58,23 +58,23 @@ namespace Sandbox
 		int currentAttachment = 0;
 		while(currentAttachment < totalBuffers)
 		{
-			usedOpenGLColorAttachments.emplace_back(AnimationEngine::InternalAttachmentToOpenGLColorAttachment(AnimationEngine::ColorAttachment::Attachment0 + currentAttachment));
+			usedOpenGLColorAttachments.emplace_back(SculptorGL::InternalAttachmentToOpenGLColorAttachment(SculptorGL::ColorAttachment::Attachment0 + currentAttachment));
 			++currentAttachment;
 		}
 
-		frameBuffer->CreateAttachment(AnimationEngine::AttachmentType::DEPTH, false);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::DEPTH, false);
 
-		AnimationEngine::GraphicsAPI::GetContext()->DrawBuffers(totalBuffers, usedOpenGLColorAttachments.data());
+		SculptorGL::GraphicsAPI::GetContext()->DrawBuffers(totalBuffers, usedOpenGLColorAttachments.data());
 
 		frameBuffer->IsValid();
 		frameBuffer->UnBind();
 
-		screenQuad = std::make_shared<AnimationEngine::ScreenQuad>();
+		screenQuad = std::make_shared<SculptorGL::ScreenQuad>();
 
-		lightBox = std::make_shared<AnimationEngine::Model>(CUBE_FILE_PATH);
+		lightBox = std::make_shared<SculptorGL::Model>(CUBE_FILE_PATH);
 		lightBox->SetShader(shaderLightBox);
 
-		lightSphere = std::make_shared<AnimationEngine::Model>(SPHERE_FILE_PATH);
+		lightSphere = std::make_shared<SculptorGL::Model>(SPHERE_FILE_PATH);
 		lightSphere->SetShader(pointLightShader);
 
 		// Initialize Point Lights
@@ -86,16 +86,16 @@ namespace Sandbox
 			for (unsigned i = 0; i < TOTAL_RANDOM_POINT_LIGHTS; ++i)
 			{
 				// random lights
-				AnimationEngine::Math::Vec3F lightLocation{
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * AnimationEngine::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * AnimationEngine::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * AnimationEngine::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE)
+				SculptorGL::Math::Vec3F lightLocation{
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * SculptorGL::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * SculptorGL::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE),
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(-LIGHT_SPREAD_RANGE, LIGHT_SPREAD_RANGE) * SculptorGL::Utils::GenerateRandomIntInRange(0, LIGHT_SPREAD_RANGE))) / static_cast<float>(LIGHT_SPREAD_RANGE)
 				};
 
-				AnimationEngine::Math::Vec3F lightColor{
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE
+				SculptorGL::Math::Vec3F lightColor{
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE,
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + LIGHT_COLOR_START_RANGE
 				};
 
 				pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
@@ -108,10 +108,10 @@ namespace Sandbox
 			for (const auto& lightLocation : POINT_LIGHTS_POSITIONS)
 			{
 				// also calculate random color (between 0.2 and 1.0)
-				AnimationEngine::Math::Vec3F lightColor{
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
-					(static_cast<float>(AnimationEngine::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f
+				SculptorGL::Math::Vec3F lightColor{
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f,
+					(static_cast<float>(SculptorGL::Utils::GenerateRandomIntInRange(0, 100)) / 200.0f) + 0.2f
 				};
 
 				//pointLights.emplace_back(LightType::DYNAMIC, lightLocation, lightColor);
@@ -125,22 +125,25 @@ namespace Sandbox
 		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
 	}
 
-	void DeferredShading::Update()
+	void DeferredShading::GeometryPass() const
 	{
-		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
-
 		//-- 1. Geometry Pass --//
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthTest(true);
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthMask(true);
+		SculptorGL::GraphicsAPI::GetContext()->EnableDepthTest(true);
+		SculptorGL::GraphicsAPI::GetContext()->EnableDepthMask(true);
 		GL_CALL(glDepthFunc, GL_LESS);
-		AnimationEngine::GraphicsAPI::GetContext()->ClearColor({ COLOR_BLACK, 1.0f });
-		AnimationEngine::GraphicsAPI::GetContext()->ClearBuffers();
-		AnimationEngine::GraphicsAPI::GetContext()->EnableBlending(false);
+		SculptorGL::GraphicsAPI::GetContext()->ClearColor({ COLOR_BLACK, 1.0f });
+		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
+		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(false);
 
 		frameBuffer->BindForWriting();
-		AnimationEngine::GraphicsAPI::GetContext()->ClearBuffers();
+		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
 
 		/*----- [... Start Rendering Scene ...] -----*/
+		const auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
+
+		sandBox->backPack->SetShader(assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME));
+		sandBox->floor->SetShader(assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME));
+
 		for (auto& location : BACKPACK_LOCATIONS)
 		{
 			sandBox->backPack->SetLocation(location);
@@ -149,62 +152,11 @@ namespace Sandbox
 		}
 
 		sandBox->floor->Draw();
-		/*----- [... Finish Rendering Scene ...] ----*/
-
-		frameBuffer->UnBind();
-
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthMask(false);
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthTest(false);
-		AnimationEngine::GraphicsAPI::GetContext()->ClearBuffers();
-		//-- 1. !Geometry Pass --//
-
-		//-- 2. Lighting Pass --//
-		AnimationEngine::GraphicsAPI::GetContext()->EnableBlending(true);
-		GL_CALL(glBlendEquation, GL_FUNC_ADD);
-		GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
-
-		frameBuffer->BindForReading();
-		AnimationEngine::GraphicsAPI::GetContext()->ClearBuffers(AnimationEngine::BufferType::COLOR);
-
-		int currentTextureSlot = 0;
-		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
-		{
-			texture->Bind(currentTextureSlot++);
-		}
-
-		UpdateLights();
-
-		AnimationEngine::GraphicsAPI::GetContext()->ClearBuffers(AnimationEngine::BufferType::COLOR);
-
-		LocalLightingPass();
-
-		GlobalLightingPass();
-		//-- 2 !Lighting Pass --//
-
-		AnimationEngine::FrameBuffer::BindDefaultFrameBufferForWriting();
-
-		const AnimationEngine::Memory::WeakPointer windowPtr{ window };
-		const auto width  = static_cast<int>(windowPtr->GetWidth());
-		const auto height = static_cast<int>(windowPtr->GetHeight());
-
-		GL_CALL(glBlitFramebuffer, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-		AnimationEngine::FrameBuffer::BindDefaultFrameBuffer();
-
-		AnimationEngine::GraphicsAPI::GetContext()->EnableBlending(false);
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthTest(true);
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthMask(true);
-		GL_CALL(glDepthFunc, GL_LESS);
 
 		//-- LightBoxes for lights: Visualization Purposes --//
-		constexpr bool renderLightBoxes = true;
-		if (!renderLightBoxes)
-		{
-			return;
-		}
 
-		const AnimationEngine::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
-		
+		const SculptorGL::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
+
 		for (const auto& light : pointLights)
 		{
 			lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
@@ -217,9 +169,45 @@ namespace Sandbox
 		
 			lightBox->Draw();
 		}
+		/*----- [... Finish Rendering Scene ...] ----*/
 
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthMask(false);
-		AnimationEngine::GraphicsAPI::GetContext()->EnableDepthTest(false);
+		frameBuffer->UnBind();
+
+		SculptorGL::GraphicsAPI::GetContext()->EnableDepthMask(false);
+		SculptorGL::GraphicsAPI::GetContext()->EnableDepthTest(false);
+		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers(); 
+		//-- 1. !Geometry Pass --//
+	}
+
+	void DeferredShading::Update()
+	{
+		if (!enableDeferredShading) { return; }	// Enable/Disable Deferred-Shading Pipeline
+
+		UpdateLights();
+
+		GeometryPass();
+
+		//-- 2. Lighting Pass --//
+		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(true);
+
+		frameBuffer->BindForReading();
+
+		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers(SculptorGL::BufferType::COLOR);
+
+		int currentTextureSlot = 0;
+		for (const auto& texture : frameBuffer->GetFrameBufferTextures())
+		{
+			texture->Bind(currentTextureSlot++);
+		}
+
+		GlobalLightingPass();
+
+		LocalLightingPass();
+		//-- 2 !Lighting Pass --//
+
+		frameBuffer->UnBind();
+
+		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(false);
 	}
 
 	void DeferredShading::PostUpdate()
@@ -243,14 +231,14 @@ namespace Sandbox
 		enableDeferredShading = value;
 	}
 
-	void DeferredShading::SetWindowsWindow(std::weak_ptr<AnimationEngine::IWindow> windowsWindow) noexcept
+	void DeferredShading::SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept
 	{
 		window = std::move(windowsWindow);
 	}
 
 	void DeferredShading::LocalLightingPass() const
 	{
-		const AnimationEngine::Memory::WeakPointer pointLightShaderPtr{ pointLightShader };
+		const SculptorGL::Memory::WeakPointer pointLightShaderPtr{ pointLightShader };
 
 		pointLightShaderPtr->Bind();
 
@@ -278,20 +266,20 @@ namespace Sandbox
 			pointLightShaderPtr->SetUniformFloat(pointLight.ambientIntensity,	"light.AmbientIntensity");
 			pointLightShaderPtr->SetUniformFloat(pointLight.lightIntensity,		"light.Intensity");
 
-			const auto* camera = AnimationEngine::Camera::GetInstance();
-			const AnimationEngine::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
+			const auto* camera = SculptorGL::Camera::GetInstance();
+			const SculptorGL::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
 			pointLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
 
-			const AnimationEngine::Memory::WeakPointer<AnimationEngine::IWindow> windowPtr{ window };
+			const SculptorGL::Memory::WeakPointer<SculptorGL::IWindow> windowPtr{ window };
 			pointLightShaderPtr->SetUniformVector2F({ static_cast<float>(windowPtr->GetWidth()), static_cast<float>(windowPtr->GetHeight()) }, "screenSize");
 
-			AnimationEngine::GraphicsAPI::GetContext()->SetFaceCulling(AnimationEngine::CullType::FRONT_FACE);
+			SculptorGL::GraphicsAPI::GetContext()->SetFaceCulling(SculptorGL::CullType::FRONT_FACE);
 
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(true);
 			lightSphere->Draw();
 			//GraphicsAPI::GetContext()->EnableWireFrameMode(false);
 
-			AnimationEngine::GraphicsAPI::GetContext()->SetFaceCulling(AnimationEngine::CullType::NONE);
+			SculptorGL::GraphicsAPI::GetContext()->SetFaceCulling(SculptorGL::CullType::NONE);
 
 			pointLightShaderPtr->UnBind();
 		}
@@ -299,7 +287,7 @@ namespace Sandbox
 
 	void DeferredShading::GlobalLightingPass() const
 	{
-		const AnimationEngine::Memory::WeakPointer globalLightShaderPtr{ globalLightShader };
+		const SculptorGL::Memory::WeakPointer globalLightShaderPtr{ globalLightShader };
 
 		globalLightShaderPtr->Bind();
 
@@ -313,8 +301,8 @@ namespace Sandbox
 		globalLightShaderPtr->SetUniformVector3F(globalPointLight.position,	"light.Position");
 		globalLightShaderPtr->SetUniformVector3F(globalPointLight.color,	"light.Color");
 
-		const auto* camera = AnimationEngine::Camera::GetInstance();
-		const AnimationEngine::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
+		const auto* camera = SculptorGL::Camera::GetInstance();
+		const SculptorGL::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
 		globalLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
 
 		screenQuad->Draw();
@@ -326,7 +314,7 @@ namespace Sandbox
 	{
 		for (auto& light : pointLights)
 		{
-			light.MoveUpAndDown(AnimationEngine::Time::GetDeltaTime(), LOCAL_POINT_LIGHT_MIN_Y, LOCAL_POINT_LIGHT_MAX_Y);
+			light.Move(SculptorGL::Time::GetDeltaTime(), LOCAL_POINT_LIGHT_MIN_Y, LOCAL_POINT_LIGHT_MAX_Y);
 		}
 	}
 }

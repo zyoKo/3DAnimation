@@ -2,7 +2,7 @@
 
 #include "Core/Logger/Log.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	template <typename T>
 	class AssetStore

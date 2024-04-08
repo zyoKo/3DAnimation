@@ -2,7 +2,7 @@
 
 #include "Animation/DataTypes/BoneData.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IIndexBuffer;
 	class IVertexBuffer;
@@ -11,7 +11,7 @@ namespace AnimationEngine
 	class ITexture2D;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	using Vertices_V3F			= std::vector<Math::Vector3F>;
 	using Colors_V3F			= std::vector<Math::Vector3F>;

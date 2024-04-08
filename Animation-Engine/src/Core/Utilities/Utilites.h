@@ -5,7 +5,7 @@
 #include <assimp/matrix4x4.h>
 #include <assimp/quaternion.h>
 
-namespace AnimationEngine::Utils
+namespace SculptorGL::Utils
 {
 	static std::string RetrieveFilenameFromFilepath(const std::string& filepath)
 	{

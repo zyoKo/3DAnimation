@@ -5,7 +5,7 @@
 #include "Core/Logger/Log.h"
 #include "Core/Logger/GLDebug.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	OpenGLContext::OpenGLContext(GLFWwindow* window)
 		:	window(window),
@@ -116,6 +116,8 @@ namespace AnimationEngine
 		if (value)
 		{
 			GL_CALL(glEnable, GL_BLEND);
+			GL_CALL(glBlendEquation, GL_FUNC_ADD);
+			GL_CALL(glBlendFunc, GL_ONE, GL_ONE);
 			return;
 		}
 
@@ -180,5 +182,10 @@ namespace AnimationEngine
 	void OpenGLContext::DrawArrays(DrawMode drawMode, int offset, int count)
 	{
 		GL_CALL(glDrawArrays, DrawModeToGLEnum(drawMode), offset, count);
+	}
+
+	void OpenGLContext::SetViewPort(int x, int y, int screenWidth, int screenHeight)
+	{
+		GL_CALL(glViewport, x, y, screenWidth, screenHeight);
 	}
 }

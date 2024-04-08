@@ -4,7 +4,7 @@
 
 #include "UniversalWindowData.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow
 	{

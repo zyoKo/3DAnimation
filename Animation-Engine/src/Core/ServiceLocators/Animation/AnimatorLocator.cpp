@@ -4,7 +4,7 @@
 
 #include "Animation/Animator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	void AnimatorLocator::Initialize()
 	{

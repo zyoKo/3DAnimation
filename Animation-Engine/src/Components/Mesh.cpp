@@ -11,7 +11,7 @@
 #include "Graphics/GraphicsAPI.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Mesh::Mesh()
 	{

@@ -15,7 +15,7 @@
 #include "Core/ServiceLocators/Animation/AnimatorLocator.h"
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	CoreEngine::CoreEngine(const std::string& name, uint32_t width, uint32_t height)
 		:	assetManager(std::make_shared<AssetManager>()),

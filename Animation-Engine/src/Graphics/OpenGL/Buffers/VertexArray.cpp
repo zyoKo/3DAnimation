@@ -6,7 +6,7 @@
 
 #include "Core/Logger/GLDebug.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	VertexArray::VertexArray()
 	{

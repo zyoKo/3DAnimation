@@ -4,8 +4,12 @@
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
 
-namespace AnimationEngine
+#include "Math/Math.h"
+
+namespace SculptorGL
 {
+	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_LIGHT_POSITION{ 10.0f, 4.0f, -1.0f };
+
 	struct DirectionalLight
 	{
 		float left;
@@ -22,7 +26,8 @@ namespace AnimationEngine
 
 		float bias;
 
-		glm::vec3 position{ -2.0f, 4.0f, -1.0f };
+		// -2.0f, 4.0f, -1.0f
+		glm::vec3 position{ DIRECTIONAL_LIGHT_POSITION.x, DIRECTIONAL_LIGHT_POSITION.y, DIRECTIONAL_LIGHT_POSITION.z };
 
 		glm::mat4 GetLightProjection() const
 		{

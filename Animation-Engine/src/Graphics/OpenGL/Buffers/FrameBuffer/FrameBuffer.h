@@ -3,7 +3,7 @@
 #include "Types/AttachmentType.h"
 #include "Types/ColorAttachment.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class RenderBuffer;
 	class IWindow;
@@ -11,7 +11,7 @@ namespace AnimationEngine
 	class ITexture2D;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class FrameBuffer
 	{

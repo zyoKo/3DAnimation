@@ -7,7 +7,7 @@
 #include "Camera/Camera.h"
 #include "Camera/Constants/CameraConstants.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	DebugMesh::DebugMesh(const std::shared_ptr<Shader>& debugShader)
 		:	shader(debugShader)

@@ -9,7 +9,7 @@
 #include "Core/Memory/WeakPointer.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	RenderBuffer::RenderBuffer(std::weak_ptr<IWindow> windowsWindow, AttachmentType type)
 		:	window(std::move(windowsWindow))

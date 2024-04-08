@@ -1,6 +1,6 @@
 #pragma once
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static constexpr std::string_view BASE_BONE_NAME = "mixamorig_Spine2";	// mixamorig_LeftShoulder
 

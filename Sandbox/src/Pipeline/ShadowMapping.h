@@ -9,8 +9,9 @@ namespace Sandbox
 	struct PipelineInitializer;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
+	class UniformBuffer;
 	class IWindow;
 	class IApplication;
 	class IShader;
@@ -48,25 +49,33 @@ namespace Sandbox
 
 		void SetEnable(bool value) override;
 
-		void SetWindowsWindow(std::weak_ptr<AnimationEngine::IWindow> windowsWindow) noexcept;
+		void SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept;
 
 		void SetSandBoxApplication(SandboxApp* application) noexcept;
 
 	private:
 		bool enableShadowMapping;
 
-		std::weak_ptr<AnimationEngine::IWindow> window;
+		std::weak_ptr<SculptorGL::IWindow> window;
 
 		SandboxApp* sandBox;
 
-		std::shared_ptr<AnimationEngine::FrameBuffer> shadowFrameBuffer;
+		std::shared_ptr<SculptorGL::FrameBuffer> shadowFrameBuffer;
 
-		AnimationEngine::DirectionalLight directionalLight;
+		SculptorGL::DirectionalLight directionalLight;
 
-		std::weak_ptr<AnimationEngine::IShader> shadowShader;
+		std::weak_ptr<SculptorGL::IShader> shadowShader;
 
-		std::shared_ptr<AnimationEngine::ScreenQuad> screenQuad;
+		std::shared_ptr<SculptorGL::ScreenQuad> screenQuad;
 
-		std::weak_ptr<AnimationEngine::IShader> screenQuadShader;
+		std::weak_ptr<SculptorGL::IShader> screenQuadShader;
+
+		std::weak_ptr<SculptorGL::IShader> horizontalBlurShader;
+
+		std::weak_ptr<SculptorGL::IShader> verticalBlurShader;
+
+		std::shared_ptr<SculptorGL::UniformBuffer> blurWeightsUBO;
+
+		void ConvolutionBlur() const;
 	};
 }

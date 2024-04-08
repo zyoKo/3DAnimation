@@ -4,7 +4,7 @@
 
 #include <glm/glm.hpp>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IShader
 	{
@@ -32,6 +32,8 @@ namespace AnimationEngine
 		virtual void SetUniformInt(int value, const std::string& uniformName) = 0;
 
 		virtual void SetUniformFloat(float value, const std::string& uniformName) = 0;
+
+		virtual void SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName) = 0;
 
 		virtual void SetShaderName(const std::string& shaderName) = 0;
 	};

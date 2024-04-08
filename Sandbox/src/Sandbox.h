@@ -9,7 +9,7 @@ namespace Sandbox
 	class IPipeline;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class ShadowMapping;
 	class DeferredShading;
@@ -20,7 +20,7 @@ namespace AnimationEngine
 
 namespace Sandbox
 {
-	class SandboxApp : public AnimationEngine::IApplication
+	class SandboxApp : public SculptorGL::IApplication
 	{
 	public:
 		void Initialize() override;
@@ -33,22 +33,22 @@ namespace Sandbox
 
 		void Shutdown() override;
 
-		std::weak_ptr<AnimationEngine::Model> GetBackPackModel() const;
+		std::weak_ptr<SculptorGL::Model> GetBackPackModel() const;
 
-		std::weak_ptr<AnimationEngine::Quad> GetQuadModel() const;
+		std::weak_ptr<SculptorGL::Quad> GetQuadModel() const;
 
 	private:
 		bool enableModelMesh{ true };
 
-		AnimationEngine::IAssetManager* assetManager{ nullptr };
+		SculptorGL::IAssetManager* assetManager{ nullptr };
 
 		std::shared_ptr<IPipeline> deferredPipeline;
 
 		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
-		std::shared_ptr<AnimationEngine::Model> backPack;
+		std::shared_ptr<SculptorGL::Model> backPack;
 
-		std::shared_ptr<AnimationEngine::Quad> floor;
+		std::shared_ptr<SculptorGL::Quad> floor;
 
 		friend class DeferredShading;
 

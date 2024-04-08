@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template <typename T>
 	class Vector3;

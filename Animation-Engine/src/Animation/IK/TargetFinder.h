@@ -2,12 +2,12 @@
 
 #include <Math/Math.h>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IKManager;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class TargetFinder
 	{

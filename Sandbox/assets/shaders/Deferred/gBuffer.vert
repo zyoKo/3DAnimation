@@ -12,9 +12,6 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform mat4 lightProjection;
-uniform mat4 lightView;
-
 void main()
 {
     vec4 worldPos = model * vec4(position, 1.0);

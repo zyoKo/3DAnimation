@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	enum class DrawMode
 	{

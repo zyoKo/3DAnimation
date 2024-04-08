@@ -9,7 +9,7 @@
 #include "Graphics/OpenGL/Shader/Structures/ShaderDescription.h"
 #include "Graphics/OpenGL/Shader/Type/ShaderErrorType.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	static unsigned int GetSizeofCustomType(VertexDataType customType)
 	{

@@ -5,7 +5,7 @@
 #include "Core/Utilities/Utilites.h"
 #include "glad/glad.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	int InternalAttachmentToOpenGLColorAttachment(ColorAttachment attachment)
 	{

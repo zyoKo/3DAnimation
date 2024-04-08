@@ -4,7 +4,7 @@
 
 #include "GLFW/glfw3.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	void Time::Update()
 	{

@@ -2,7 +2,7 @@
 
 #include "Graphics/OpenGL/Shader/Type/ShaderType.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	struct ShaderDescription
 	{

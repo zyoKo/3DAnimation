@@ -3,7 +3,7 @@
 #include "Interfaces/IIndexBuffer.h"
 #include "Interfaces/IVertexArray.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class VertexArray : public IVertexArray
 	{

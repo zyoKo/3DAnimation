@@ -8,7 +8,7 @@
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Quad::Quad()
 		:	vertices(GRID_VERTICES),
@@ -75,7 +75,7 @@ namespace AnimationEngine
 
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
 		model = glm::rotate(glm::mat4(1.0f), glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 		const auto* camera = Camera::GetInstance();

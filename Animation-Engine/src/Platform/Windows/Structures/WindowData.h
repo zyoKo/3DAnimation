@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	struct WindowData
 	{

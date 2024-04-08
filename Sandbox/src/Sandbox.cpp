@@ -16,7 +16,7 @@ namespace Sandbox
 {
 	void SandboxApp::Initialize()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
 		// Create Deferred Pipeline
 		const PipelineInitializer deferredPipelineData{
@@ -32,7 +32,7 @@ namespace Sandbox
 			.sandBox = this
 		};
 		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
-		shadowMappingPipeline->SetEnable(false);
+		//shadowMappingPipeline->SetEnable(false);
 		shadowMappingPipeline->Initialize();
 
 		//-- ## ASSET LOADING ## --//
@@ -78,7 +78,7 @@ namespace Sandbox
 
 	void SandboxApp::PreUpdate()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
 		// Pipelines Call
 		shadowMappingPipeline->PreUpdateSetup();
@@ -104,12 +104,16 @@ namespace Sandbox
 
 	void SandboxApp::Update()
 	{
-		using namespace AnimationEngine;
+		using namespace SculptorGL;
 
 		// Pipelines Call
 		shadowMappingPipeline->Update();
 
 		deferredPipeline->Update();
+
+		//deferredPipeline->GlobalLightingPass();
+		//
+		//deferredPipeline->LocalLightingPass();
 	}
 
 	void SandboxApp::PostUpdate()
@@ -129,27 +133,27 @@ namespace Sandbox
 		floor.reset();
 	}
 
-	std::weak_ptr<AnimationEngine::Model> SandboxApp::GetBackPackModel() const
+	std::weak_ptr<SculptorGL::Model> SandboxApp::GetBackPackModel() const
 	{
 		return backPack;
 	}
 
-	std::weak_ptr<AnimationEngine::Quad> SandboxApp::GetQuadModel() const
+	std::weak_ptr<SculptorGL::Quad> SandboxApp::GetQuadModel() const
 	{
 		return floor;
 	}
 }
 
-std::shared_ptr<AnimationEngine::IApplication> AnimationEngine::CreateApplication()
+std::shared_ptr<SculptorGL::IApplication> SculptorGL::CreateApplication()
 {
 	return std::make_shared<Sandbox::SandboxApp>();
 }
 
 int main()
 {
-	AnimationEngine::CoreEngine app;
+	SculptorGL::CoreEngine app;
 
-	app.SetApplication(AnimationEngine::CreateApplication());
+	app.SetApplication(SculptorGL::CreateApplication());
 
 	app.Initialize();
 

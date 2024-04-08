@@ -4,7 +4,7 @@
 
 #include "Constants/SplineConstants.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	HermiteSpline::HermiteSpline()
 		:	controlPoints(DEFAULT_CONTROL_POINTS)

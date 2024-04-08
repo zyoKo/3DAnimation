@@ -5,7 +5,7 @@
 #include "Core/Logger/Log.h"
 #include "Math/Constants.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template <typename T>
 	constexpr Vector3<T>::Vector3() noexcept

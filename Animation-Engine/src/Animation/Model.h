@@ -8,13 +8,13 @@
 #include "Components/Mesh.h"
 #include "Animation/DataTypes/BoneInfo.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IShader;
 	class ITexture2D;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Model
 	{

@@ -3,7 +3,7 @@
 #include "NullAnimator.h"
 #include "Graphics/OpenGL/Shader/Interface/IShader.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	void NullAnimator::ChangeAnimation(Animation* animation)
 	{ }

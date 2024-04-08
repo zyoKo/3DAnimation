@@ -3,7 +3,7 @@
 #include <array>
 #include "Core/Logger/Log.h"
 
-namespace AnimationEngine::Math
+namespace SculptorGL::Math
 {
 	template <typename T>
 	class Vector3

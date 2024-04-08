@@ -2,12 +2,12 @@
 
 #include "Graphics/OpenGL/Buffers/FrameBuffer/Types/AttachmentType.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IWindow;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class RenderBuffer
 	{

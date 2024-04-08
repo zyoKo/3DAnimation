@@ -14,9 +14,9 @@ namespace Sandbox
 	{
 		LightType lightType;
 
-		AnimationEngine::Math::Vec3F position;
+		SculptorGL::Math::Vec3F position;
 
-		AnimationEngine::Math::Vec3F color;
+		SculptorGL::Math::Vec3F color;
 
 		float radius;
 
@@ -34,9 +34,9 @@ namespace Sandbox
 
 		float moveVelocity;
 
-		PointLight(LightType type, const AnimationEngine::Math::Vec3F& newPosition, const AnimationEngine::Math::Vec3F& newColor);
+		PointLight(LightType type, const SculptorGL::Math::Vec3F& newPosition, const SculptorGL::Math::Vec3F& newColor);
 
-		void MoveUpAndDown(float deltaTime, float minY, float maxY);
+		void Move(float deltaTime, float minY, float maxY);
 	};
 
 	static float CalculateLightRadius(const PointLight& light);

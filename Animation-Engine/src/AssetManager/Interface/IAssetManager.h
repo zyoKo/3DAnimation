@@ -1,13 +1,13 @@
 #pragma once
 #include "Graphics/OpenGL/Shader/Structures/ShaderDescription.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class ITexture2D;
 	class IShader;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IAssetManager
 	{

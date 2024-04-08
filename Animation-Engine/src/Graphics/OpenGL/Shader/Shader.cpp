@@ -8,7 +8,7 @@
 #include "Core/Logger/GLDebug.h"
 #include "Graphics/OpenGL/Utilities/Utilities.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Shader::Shader(const std::string& shaderName, const std::vector<ShaderDescription>& shaderDescription)
 		:	shaderName(shaderName)
@@ -144,6 +144,12 @@ namespace AnimationEngine
 	void Shader::SetUniformFloat(float value, const std::string& uniformName)
 	{
 		GL_CALL(glUniform1f, GetUniformLocation(uniformName), value);
+	}
+
+	void Shader::SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName)
+	{
+		const unsigned blockIndex = GL_CALL(glGetUniformBlockIndex, shaderID, blockName.c_str());
+		GL_CALL(glUniformBlockBinding, shaderID, blockIndex, bindingPoint);
 	}
 
 	int Shader::GetUniformLocation(const std::string& uniformName)

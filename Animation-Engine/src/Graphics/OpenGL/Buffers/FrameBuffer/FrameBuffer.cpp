@@ -10,7 +10,7 @@
 #include "Graphics/OpenGL/Textures/BufferTexture.h"
 #include "Graphics/OpenGL/Buffers/RenderBuffer/RenderBuffer.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	FrameBuffer::FrameBuffer() noexcept
 		:	lastColorAttachment(ColorAttachment::None)
@@ -97,7 +97,7 @@ namespace AnimationEngine
 
 	void FrameBuffer::UnBind() const
 	{
-		GL_CALL(glBindFramebuffer, GL_FRAMEBUFFER, 0);
+		BindDefaultFrameBuffer();
 	}
 
 	unsigned FrameBuffer::GetBufferID() const

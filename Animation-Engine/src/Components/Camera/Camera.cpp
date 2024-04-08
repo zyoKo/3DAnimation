@@ -9,7 +9,7 @@
 #include "Core/Utilities/Time.h"
 #include "Core/Window/IWindow.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Camera Camera::instance;
 

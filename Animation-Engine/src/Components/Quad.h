@@ -5,7 +5,7 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IShader;
 	class ITexture2D;
@@ -13,7 +13,7 @@ namespace AnimationEngine
 	class IIndexBuffer;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Quad
 	{

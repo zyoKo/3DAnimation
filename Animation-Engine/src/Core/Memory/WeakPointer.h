@@ -33,7 +33,7 @@
 	* --------------------------------------------------------------------
 */
 
-namespace AnimationEngine::Memory
+namespace SculptorGL::Memory
 {
 	template <typename T>
 	class WeakPointer

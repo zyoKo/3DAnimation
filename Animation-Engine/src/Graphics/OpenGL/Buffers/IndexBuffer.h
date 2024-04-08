@@ -2,7 +2,7 @@
 
 #include "Interfaces/IIndexBuffer.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IndexBuffer : public IIndexBuffer
 	{

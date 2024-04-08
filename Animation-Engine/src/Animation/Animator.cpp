@@ -13,7 +13,7 @@
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 #include "Animation/Repository/AnimationStorage.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Animator::Animator()
 		:	currentAnimation(nullptr),

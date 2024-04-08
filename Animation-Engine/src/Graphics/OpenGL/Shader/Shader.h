@@ -5,7 +5,7 @@
 #include "Interface/IShader.h"
 #include "Structures/ShaderDescription.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class Shader : public IShader
 	{
@@ -41,6 +41,8 @@ namespace AnimationEngine
 		void SetUniformInt(int value, const std::string& uniformName) override;
 
 		void SetUniformFloat(float value, const std::string& uniformName) override;
+
+		void SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName) override;
 
 	private:
 		unsigned int shaderID;

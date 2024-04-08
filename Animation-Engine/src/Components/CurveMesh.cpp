@@ -10,7 +10,7 @@
 #include "Graphics/OpenGL/Buffers/Interfaces/IVertexBuffer.h"
 #include "Types/DrawMode.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	CurveMesh::CurveMesh()
 		:	spline(std::make_shared<Math::HermiteSpline>())

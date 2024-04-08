@@ -4,7 +4,7 @@
 #include "Animation/Repository/AnimationStorage.h"
 #include "Core/Window/IWindow.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class ScreenQuad;
 	class FrameBuffer;
@@ -13,7 +13,7 @@ namespace AnimationEngine
 	class IAssetManager;
 }
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class CoreEngine
 	{

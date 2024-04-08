@@ -2,7 +2,7 @@
 
 #include "AssetStore.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	template <typename T>
 	void AssetStore<T>::AddToStorage(const std::string& assetName, const std::shared_ptr<T> assetData, bool forceReplace)

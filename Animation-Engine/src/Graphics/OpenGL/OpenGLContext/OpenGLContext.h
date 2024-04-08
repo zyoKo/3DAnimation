@@ -5,7 +5,7 @@
 #include "Interfaces/IContext.h"
 #include "Math/Vector4.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class OpenGLContext : public IContext
 	{
@@ -43,6 +43,8 @@ namespace AnimationEngine
 		void ReadBuffer(unsigned mode) override;
 
 		void DrawArrays(DrawMode drawMode, int offset, int count) override;
+
+		void SetViewPort(int x, int y, int screenWidth, int screenHeight) override;
 
 	private:
 		GLFWwindow* window;

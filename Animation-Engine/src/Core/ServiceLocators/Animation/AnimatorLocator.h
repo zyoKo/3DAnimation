@@ -2,7 +2,7 @@
 
 #include "Animation/NullServices/NullAnimator.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IAnimator;
 

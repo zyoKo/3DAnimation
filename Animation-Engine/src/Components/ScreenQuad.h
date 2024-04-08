@@ -2,13 +2,13 @@
 
 #include "Math/Math.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class IIndexBuffer;
 	class IVertexArray;
 	class IVertexBuffer;
 }
-namespace AnimationEngine
+namespace SculptorGL
 {
 	class ScreenQuad
 	{

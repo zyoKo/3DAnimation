@@ -10,7 +10,7 @@
 #include "Core/Utilities/Utilites.h"
 #include "Graphics/OpenGL/Textures/ITexture2D.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	Model::Model(const std::string& path)
 		:	location(0.0f, 0.0f, 0.0f),

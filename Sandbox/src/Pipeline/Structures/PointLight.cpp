@@ -6,7 +6,7 @@
 
 namespace Sandbox
 {
-	PointLight::PointLight(LightType type, const AnimationEngine::Math::Vec3F& newPosition, const AnimationEngine::Math::Vec3F& newColor)
+	PointLight::PointLight(LightType type, const SculptorGL::Math::Vec3F& newPosition, const SculptorGL::Math::Vec3F& newColor)
 		:	lightType{ type },
 			position{ newPosition },
 			color{ newColor },
@@ -21,7 +21,7 @@ namespace Sandbox
 		radius = CalculateLightRadius(*this);
 	}
 
-	void PointLight::MoveUpAndDown(float deltaTime, float minY, float maxY)
+	void PointLight::Move(float deltaTime, float minY, float maxY)
 	{
 		if (lightType == LightType::STATIC)
 		{

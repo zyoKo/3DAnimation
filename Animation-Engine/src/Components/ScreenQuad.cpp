@@ -5,7 +5,7 @@
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	ScreenQuad::ScreenQuad()
 		:	vertices(DEFAULT_SCREEN_QUAD_VERTICES),

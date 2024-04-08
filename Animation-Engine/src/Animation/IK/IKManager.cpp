@@ -16,7 +16,7 @@
 #include "Core/ServiceLocators/Assets/AnimationStorageLocator.h"
 #include "Core/Utilities/Utilites.h"
 
-namespace AnimationEngine
+namespace SculptorGL
 {
 	IKManager::IKManager()
 		:	targetFinder(nullptr),

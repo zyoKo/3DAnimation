@@ -3,7 +3,7 @@
 #include <string>
 #include "glad/glad.h"
 
-namespace AnimationEngine::Utilities
+namespace SculptorGL::Utilities
 {
 	enum class OpenGLDebugLogLevel
 	{
@@ -27,7 +27,7 @@ namespace AnimationEngine::Utilities
 #ifdef ANIM_DEBUG
 	#define GL_CALL(func, ...) \
 			func(__VA_ARGS__); \
-			AnimationEngine::Utilities::RunOpenGLErrorAnalyzer(__FILE__, __LINE__)
+			SculptorGL::Utilities::RunOpenGLErrorAnalyzer(__FILE__, __LINE__)
 #else
 	#define GL_CALL(func, ...) \
 			func(__VA_ARGS__)
