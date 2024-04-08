@@ -2,6 +2,8 @@
 
 #include "ShadowMapping.h"
 
+#include <Data/Constants.h>
+
 #include "Sandbox.h"
 #include "Core/Logger/Log.h"
 #include "Core/Memory/WeakPointer.h"
