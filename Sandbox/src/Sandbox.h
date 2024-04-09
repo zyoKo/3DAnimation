@@ -6,12 +6,12 @@
 
 namespace Sandbox
 {
+	class DirectionalLight;
 	class IPipeline;
 }
 
 namespace SculptorGL
 {
-	class ShadowMapping;
 	class DeferredShading;
 	class Quad;
 	class Model;
@@ -35,7 +35,9 @@ namespace Sandbox
 
 		std::weak_ptr<SculptorGL::Model> GetBackPackModel() const;
 
-		std::weak_ptr<SculptorGL::Quad> GetQuadModel() const;
+		std::weak_ptr<SculptorGL::Model> GetPlaneModel() const;
+
+		std::weak_ptr<DirectionalLight> GetDirectionalLight() const;
 
 	private:
 		bool enableModelMesh{ true };
@@ -44,11 +46,11 @@ namespace Sandbox
 
 		std::shared_ptr<IPipeline> deferredPipeline;
 
-		std::shared_ptr<IPipeline> shadowMappingPipeline;
-
 		std::shared_ptr<SculptorGL::Model> backPack;
 
-		std::shared_ptr<SculptorGL::Quad> floor;
+		std::shared_ptr<SculptorGL::Model> plane;
+
+		std::shared_ptr<DirectionalLight> directionalLight;
 
 		friend class DeferredShading;
 

@@ -22,7 +22,7 @@ namespace SculptorGL
 
 		~FrameBuffer();
 
-		void CreateAttachment(AttachmentType type, bool sample, std::string name = "", int floatingPrecision = 0);
+		void CreateAttachment(AttachmentType type, bool sample, int width, int height, std::string name = "", int floatingPrecision = 0);
 
 		void Bind() const;
 

@@ -3,7 +3,6 @@
 #include "ShadowMapping.h"
 
 #include <Data/Constants.h>
-
 #include "Sandbox.h"
 #include "Core/Logger/Log.h"
 #include "Core/Memory/WeakPointer.h"
@@ -14,15 +13,12 @@
 #include "Core/ServiceLocators/Assets/AssetManagerLocator.h"
 #include "Graphics/OpenGL/Textures/BufferTexture.h"
 #include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
-#include "Components/ScreenQuad.h"
-#include "Components/Quad.h"
 #include "Animation/Model.h"
 
 namespace Sandbox
 {
 	ShadowMapping::ShadowMapping(const PipelineInitializer* info)
-		:	enableShadowMapping(true),
-			directionalLight{ -10.0f, 10.0f, -10.0f, 10.0f, 1.0f, 7.5f, 0.0005f }
+		:	enableShadowMapping(true)
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -59,8 +55,6 @@ namespace Sandbox
 
 		shadowFrameBuffer = std::make_shared<SculptorGL::FrameBuffer>(window);
 
-		screenQuad = std::make_shared<SculptorGL::ScreenQuad>();
-
 		//-- Setting up Uniform Buffer Object for Blur shaders --//
 		constexpr unsigned kernelHalfWidth = 50;
 		constexpr unsigned kernelSize = 2 * kernelHalfWidth + 1;
@@ -95,19 +89,21 @@ namespace Sandbox
 
 		shadowFrameBuffer->Bind();
 
-		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, "ShadowTexture", 32);
-		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, "BlurredShadowTexture", 32);
+		constexpr int textureSize = 2048;
+
+		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, textureSize, textureSize, "ShadowTexture", 32);
+		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, textureSize, textureSize, "BlurredShadowTexture", 32);
 		const auto& shadowTexture = shadowFrameBuffer->GetFrameBufferTextures().back();
 		shadowTexture->SetTextureParameters({ GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER });
 
 		const auto totalBuffers = static_cast<int>(shadowFrameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;
 		usedOpenGLColorAttachments.reserve(totalBuffers);
-
+		
 		int currentAttachment = 0;
 		while(currentAttachment < totalBuffers)
 		{
-			usedOpenGLColorAttachments.emplace_back(SculptorGL::InternalAttachmentToOpenGLColorAttachment(SculptorGL::ColorAttachment::Attachment0 + currentAttachment));
+			usedOpenGLColorAttachments.emplace_back(ColorAttachmentToOpenGLType(SculptorGL::ColorAttachment::Attachment0 + currentAttachment));
 			++currentAttachment;
 		}
 		SculptorGL::GraphicsAPI::GetContext()->DrawBuffers(totalBuffers, usedOpenGLColorAttachments.data());
@@ -122,64 +118,68 @@ namespace Sandbox
 	{
 		if (!enableShadowMapping) { return; }	// Disable Shadow-Mapping Pipeline
 
+		// ShadowDepth and ShadowBlur texture dimensions are the same 
+		const auto shadowTextureWidth = shadowFrameBuffer->GetFrameBufferTextures().back()->GetWidth();
+		const auto shadowTextureHeight = shadowFrameBuffer->GetFrameBufferTextures().back()->GetHeight();
+		
+		SculptorGL::GraphicsAPI::GetContext()->SetViewPort(0, 0, shadowTextureWidth, shadowTextureHeight);
+
 		SculptorGL::GraphicsAPI::GetContext()->EnableDepthTest(true);
 		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(false);
-		SculptorGL::GraphicsAPI::GetContext()->ClearColor({ 0.0f, 0.0f, 0.0f, 0.0f });
-		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
 
 		shadowFrameBuffer->Bind();
-
-		SculptorGL::GraphicsAPI::GetContext()->SetFaceCulling(SculptorGL::CullType::FRONT_FACE);
 
 		for (const auto& fboTexture : shadowFrameBuffer->GetFrameBufferTextures())
 		{
 			fboTexture->Bind();
 		}
 
-		/* [... Start Rendering Scene ...] */
 		const SculptorGL::Memory::WeakPointer shadowShaderPtr{ shadowShader };
-		shadowShaderPtr->Bind();
+		{
+			shadowShaderPtr->Bind();
 
-		shadowShaderPtr->SetUniformMatrix4F(directionalLight.GetLightProjection(), "lightProjection");
-		shadowShaderPtr->SetUniformMatrix4F(directionalLight.GetLightView(), "lightView");
+			const SculptorGL::Memory::WeakPointer directionalLightPtr{ sandBox->GetDirectionalLight() };
 
-		const float lightDistance = glm::length(directionalLight.position);
-		const float minDepth = lightDistance - 40.0f;
-		const float maxDepth = lightDistance + 60.0f;
+			shadowShaderPtr->SetUniformMatrix4F(directionalLightPtr->GetLightProjection(), "lightProjection");
+			shadowShaderPtr->SetUniformMatrix4F(directionalLightPtr->GetLightView(), "lightView");
 
-		shadowShaderPtr->SetUniformFloat(minDepth, "minDepth");
-		shadowShaderPtr->SetUniformFloat(maxDepth, "maxDepth");
-
-		shadowShaderPtr->UnBind();
-
-		sandBox->backPack->SetShader(shadowShader);
-		sandBox->floor->SetShader(shadowShader);
+			shadowShaderPtr->UnBind();
+		}
 
 		SculptorGL::GraphicsAPI::GetContext()->ClearColor(COLOR_BLACK_A);
 		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
+		SculptorGL::GraphicsAPI::GetContext()->SetFaceCulling(SculptorGL::CullType::BACK_FACE);
 
+		/* [... Start Rendering Scene ...] */
+
+		sandBox->plane->SetShader(shadowShader);
+		sandBox->plane->Draw();
+
+		sandBox->backPack->SetShader(shadowShader);
 		for (auto& location : BACKPACK_LOCATIONS)
 		{
 			sandBox->backPack->SetLocation(location);
 			sandBox->backPack->Draw();
 		}
-		sandBox->floor->Draw();
+
 		/* [... Finish Rendering Scene ...] */
 
-		for (const auto& fboTexture : shadowFrameBuffer->GetFrameBufferTextures())
-		{
-			fboTexture->UnBind();
-		}
-
 		SculptorGL::GraphicsAPI::GetContext()->SetFaceCulling(SculptorGL::CullType::NONE);
+
+		if (!shadowFrameBuffer->GetFrameBufferTextures().empty())
+		{
+			shadowFrameBuffer->GetFrameBufferTextures().back()->UnBind();
+		}
 
 		shadowFrameBuffer->UnBind();
 
 		const SculptorGL::Memory::WeakPointer windowPtr{ window };
-		const auto screenWidth  = static_cast<int>(windowPtr->GetWidth());
-		const auto screenHeight = static_cast<int>(windowPtr->GetHeight());
+		{
+			const auto screenWidth  = static_cast<int>(windowPtr->GetWidth());
+			const auto screenHeight = static_cast<int>(windowPtr->GetHeight());
 
-		SculptorGL::GraphicsAPI::GetContext()->SetViewPort(0, 0, screenWidth, screenHeight);
+			SculptorGL::GraphicsAPI::GetContext()->SetViewPort(0, 0, screenWidth, screenHeight);
+		}
 
 		ConvolutionBlur();
 	}
@@ -194,12 +194,21 @@ namespace Sandbox
 		if (!enableShadowMapping) { return; }	// Disable Shadow-Mapping Pipeline
 
 		shadowFrameBuffer.reset();
-		screenQuad.reset();
+	}
+
+	bool ShadowMapping::IsEnabled() const
+	{
+		return enableShadowMapping;
 	}
 
 	void ShadowMapping::SetEnable(bool value)
 	{
 		enableShadowMapping = value;
+	}
+
+	std::weak_ptr<SculptorGL::FrameBuffer> ShadowMapping::GetShadowFrameBuffer() const
+	{
+		return shadowFrameBuffer;
 	}
 
 	void ShadowMapping::SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept
@@ -219,16 +228,19 @@ namespace Sandbox
 		const auto shadowDepth = shadowFrameBuffer->GetFrameBufferTextures()[0];
 		const auto blurredShadow = shadowFrameBuffer->GetFrameBufferTextures()[1];
 
+		const auto textureWidth = shadowDepth->GetWidth();
+		const auto textureHeight = shadowDepth->GetHeight();
+
 		//-- Horizontal Blur --//
+		const SculptorGL::Memory::WeakPointer hBlurPtr{ horizontalBlurShader };
 		{
-			const SculptorGL::Memory::WeakPointer hBlurPtr{ horizontalBlurShader };
 			hBlurPtr->Bind();
 
 			shadowDepth->BindImageTexture(SculptorGL::BufferAccess::READ, 1);		// sourceImage
 			blurredShadow->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);		// destinationImage
 
 			// tiles WxH images with groups sized 128x1
-			SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(shadowDepth->GetWidth() / 128,windowPtr->GetHeight(), 1);
+			SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(textureWidth / 128, textureHeight, 1);
 			SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
 			
 			hBlurPtr->UnBind();
@@ -236,15 +248,15 @@ namespace Sandbox
 		//-- !Horizontal Blur --//
 
 		//-- Vertical Blur --//
+		const SculptorGL::Memory::WeakPointer vBlurPtr{ verticalBlurShader };
 		{
-			const SculptorGL::Memory::WeakPointer vBlurPtr{ verticalBlurShader };
 			vBlurPtr->Bind();
 
 			blurredShadow->BindImageTexture(SculptorGL::BufferAccess::READ, 1);		// sourceImage
 			blurredShadow->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);		// destinationImage
 
 			// tiles WxH images with groups sized 128x1
-			SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(windowPtr->GetWidth(), windowPtr->GetHeight() / 128, 1);
+			SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(textureWidth, textureHeight / 128, 1);
 			SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
 
 			vBlurPtr->UnBind();

@@ -11,7 +11,6 @@ namespace Sandbox
 
 namespace SculptorGL
 {
-	class IApplication;
 	class ScreenQuad;
 	class IWindow;
 	class IShader;
@@ -40,12 +39,6 @@ namespace Sandbox
 
 		void PreUpdateSetup() override;
 
-		void GeometryPass() const;
-
-		void LocalLightingPass() const;
-
-		void GlobalLightingPass() const;
-
 		void Update() override;
 
 		void PostUpdate() override;
@@ -58,6 +51,8 @@ namespace Sandbox
 
 	private:
 		bool enableDeferredShading;
+
+		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
 		std::weak_ptr<SculptorGL::IWindow> window;
 
@@ -86,5 +81,11 @@ namespace Sandbox
 		std::shared_ptr<SculptorGL::Model> lightBox;
 
 		void UpdateLights();
+
+		void GeometryPass() const;
+
+		void LocalLightingPass() const;
+
+		void GlobalLightingPass() const;
 	};
 }

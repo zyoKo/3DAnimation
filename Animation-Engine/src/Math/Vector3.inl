@@ -149,21 +149,27 @@ namespace SculptorGL::Math
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::GetForward()
+	constexpr Vector3<T> Vector3<T>::GetForward()
 	{
 		return Vector3(static_cast<T>(0), static_cast<T>(0), static_cast<T>(1));
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::GetRight()
+	constexpr Vector3<T> Vector3<T>::GetRight()
 	{
 		return Vector3(static_cast<T>(1), static_cast<T>(0), static_cast<T>(0));
 	}
 
 	template <typename T>
-	Vector3<T> Vector3<T>::GetUp()
+	constexpr Vector3<T> Vector3<T>::GetUp()
 	{
 		return Vector3(static_cast<T>(0), static_cast<T>(1), static_cast<T>(0));
+	}
+
+	template <typename T>
+	constexpr Vector3<T> Vector3<T>::GetOrigin()
+	{
+		return Vector3(static_cast<T>(0), static_cast<T>(0), static_cast<T>(0));
 	}
 
 	template <typename T>

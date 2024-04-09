@@ -13,7 +13,9 @@ namespace Sandbox
 	static const std::string G_BUFFER_POSITION_TEXTURE	{ "gPosition"	};
 	static const std::string G_BUFFER_NORMAL_TEXTURE	{ "gNormal"		};
 	static const std::string G_BUFFER_ALBEDO_TEXTURE	{ "gAlbedoSpec"	};
-	const std::vector<std::string> G_BUFFER_SHADER_TEXTURE_NAMES{ G_BUFFER_POSITION_TEXTURE, G_BUFFER_NORMAL_TEXTURE, G_BUFFER_ALBEDO_TEXTURE };
+	static const std::string SHADOW_MAP_TEXTURE			{ "shadowMap"  };
+	const std::vector G_BUFFER_SHADER_TEXTURE_NAMES     { G_BUFFER_POSITION_TEXTURE, G_BUFFER_NORMAL_TEXTURE, G_BUFFER_ALBEDO_TEXTURE };
+	const std::vector GLOBAL_LIGHT_PASS_TEXTURE_NAMES   { G_BUFFER_POSITION_TEXTURE, G_BUFFER_NORMAL_TEXTURE, G_BUFFER_ALBEDO_TEXTURE, SHADOW_MAP_TEXTURE };
 
 	//-- Shader Files --//
 	static const std::string POINT_LIGHT_SHADER_NAME			{ "PointLightShader" };
@@ -32,6 +34,14 @@ namespace Sandbox
 	//-- Lights Data --//
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
 	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
+	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_LIGHT_POSITION{ 7.0f, 14.0f, 13.0f };	// -2.0f, 4.0f, -1.0f
+
+	static constexpr float LEFT = -10.0f;
+	static constexpr float RIGHT = 10.0f;
+	static constexpr float BOTTOM = -10.0f;
+	static constexpr float UP = 10.0f;
+	static constexpr float NEAR_PLANE = 1.0f;
+	static constexpr float FAR_PLANE = 100.0f;
 
 	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 10 };	// This should be used to generate 10 random point lights
 	static constexpr float LIGHT_COLOR_START_RANGE{ 0.5f };
@@ -77,5 +87,5 @@ namespace Sandbox
 
 	//-- ## MSM_SHADOW_MAPPING_CONSTANTS ## --//
 
-	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
+	//-- ## !MSM_SHADOW_MAPPING_CONSTANTS ## --//
 }

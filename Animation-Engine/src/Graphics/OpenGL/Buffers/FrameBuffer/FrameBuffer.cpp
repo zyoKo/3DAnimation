@@ -30,12 +30,12 @@ namespace SculptorGL
 		GL_CALL(glDeleteFramebuffers, 1, &frameBuffer);
 	}
 
-	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample, std::string name /* = "" */, int floatingPrecision /* = 0 */)
+	void FrameBuffer::CreateAttachment(AttachmentType type, bool sample, int width, int height, std::string name /* = "" */, int floatingPrecision /* = 0 */)
 	{
 		if (sample)
 		{
 			frameBufferTextures.reserve(frameBufferTextures.size() + 1);
-			frameBufferTextures.emplace_back(std::make_shared<BufferTexture>(window, type, floatingPrecision));
+			frameBufferTextures.emplace_back(std::make_shared<BufferTexture>(window, type, floatingPrecision, width, height));
 
 			if (!name.empty())
 			{
@@ -61,7 +61,7 @@ namespace SculptorGL
 
 		default:
 		case AttachmentType::COLOR:
-			nextAttachment		= InternalAttachmentToOpenGLColorAttachment(lastColorAttachment + 1);
+			nextAttachment		= ColorAttachmentToOpenGLType(lastColorAttachment + 1);
 			lastColorAttachment = OpenGLAttachmentToColorAttachment(nextAttachment);
 			break;
 		}
