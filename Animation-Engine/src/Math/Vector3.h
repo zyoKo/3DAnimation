@@ -75,9 +75,10 @@ namespace SculptorGL::Math
 		bool HasNaNs() const;
 		bool HasInfinite() const;
 
-		static Vector3 GetForward();
-		static Vector3 GetRight();
-		static Vector3 GetUp();
+		static constexpr Vector3 GetForward();
+		static constexpr Vector3 GetRight();
+		static constexpr Vector3 GetUp();
+		static constexpr Vector3 GetOrigin();
 		static bool IsZero(const Vector3& vector);
 
 		T LengthSquared() const;

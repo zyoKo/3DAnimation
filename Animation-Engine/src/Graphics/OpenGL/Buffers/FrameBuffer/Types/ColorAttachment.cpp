@@ -7,7 +7,7 @@
 
 namespace SculptorGL
 {
-	int InternalAttachmentToOpenGLColorAttachment(ColorAttachment attachment)
+	int ColorAttachmentToOpenGLType(ColorAttachment attachment)
 	{
 		ANIM_ASSERT(attachment != ColorAttachment::None, "Cannot convert color attachment None to OpenGLColorAttachment.");
 

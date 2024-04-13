@@ -25,10 +25,12 @@ void main()
 	// Local thread id in the 128x1 thread groups128x1
 	uint i = gl_LocalInvocationID.x;
 
+	// Do not sample beyond those pixels here
 	v[i] = imageLoad(sourceImage, texelCoord + ivec2(-halfSize, 0));
 
 	if (i < (2 * halfSize))
 	{
+		// Do not sample beyond those pixels here
 		v[i + 128] = imageLoad(sourceImage, texelCoord + ivec2(128 - halfSize, 0));
 	}
 

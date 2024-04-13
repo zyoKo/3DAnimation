@@ -11,7 +11,7 @@ out float depth;
 void main()
 {
     vec4 shadowPosition = lightProjection * lightView * model * vec4(position, 1.0);
-    depth = shadowPosition.w;
+    depth = (shadowPosition.xyz / shadowPosition.w).z;
 
     gl_Position = shadowPosition;
 }

@@ -11,6 +11,7 @@
 #include "Pipeline/IPipeline.h"
 #include "Pipeline/Fixed/CreatePipeline.h"
 #include "Pipeline/Structures/PipelineInitializer.h"
+#include "Pipeline/Structures/DirectionalLight.h"
 
 namespace Sandbox
 {
@@ -26,15 +27,6 @@ namespace Sandbox
 		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
 		deferredPipeline->Initialize();
 
-		// Create Shadow Pipeline
-		const PipelineInitializer shadowPipelineData{
-			.window = GetWindowsWindow(),
-			.sandBox = this
-		};
-		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
-		//shadowMappingPipeline->SetEnable(false);
-		shadowMappingPipeline->Initialize();
-
 		//-- ## ASSET LOADING ## --//
 		assetManager = AssetManagerLocator::GetAssetManager();
 
@@ -47,6 +39,9 @@ namespace Sandbox
 
 		const Memory::WeakPointer<ITexture2D> floorTexturePtr{ assetManager->CreateTexture(FLOOR_DIFFUSE_FILE_PATH) };
 		floorTexturePtr->SetTextureName(TEXTURE_DIFFUSE_1);
+
+		const Memory::WeakPointer<ITexture2D> whiteTexturePtr{ assetManager->CreateTexture("./assets/textures/white.jpg") };
+		whiteTexturePtr->SetTextureName(TEXTURE_DIFFUSE_1);
 		//-- !Texture Creation --//
 
 		//-- Shader Creation --//
@@ -73,7 +68,12 @@ namespace Sandbox
 		//-- ## !ASSET LOADING ## --//
 
 		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
-		floor = std::make_shared<Quad>();
+		plane = std::make_shared<Model>("./assets/models/primitives/plane.obj");
+		plane->SetLocation({ 0.0f, 0.0f, 0.0f });
+		plane->SetScale({ 10.0f, 10.0f, 10.0f });
+		plane->SetTextures({ whiteTexturePtr.GetShared() });
+		//floor = std::make_shared<Quad>();
+		directionalLight = std::make_shared<DirectionalLight>();
 	}
 
 	void SandboxApp::PreUpdate()
@@ -81,23 +81,22 @@ namespace Sandbox
 		using namespace SculptorGL;
 
 		// Pipelines Call
-		shadowMappingPipeline->PreUpdateSetup();
 		deferredPipeline->PreUpdateSetup();
 
-		const auto backPackShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
+		const auto gBufferShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
 		const auto quadShader = assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME);
 
 		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
 		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
 		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
-		backPack->SetShader(backPackShader);
+		backPack->SetShader(gBufferShader);
 
 		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
-		floor->SetGridTexture(gridTexture);
-		floor->SetShader(quadShader);
+		//floor->SetGridTexture(gridTexture);
+		//floor->SetShader(quadShader);
 
 		auto* camera = Camera::GetInstance();
-		camera->SetCameraPosition({ 7.0f, 14.0f, 13.0f });
+		camera->SetCameraPosition({ 7.0f, 7.0f, 13.0f });
 		camera->SetPitch(-21.0f);
 		camera->SetYaw(-120.0f);
 	}
@@ -107,30 +106,22 @@ namespace Sandbox
 		using namespace SculptorGL;
 
 		// Pipelines Call
-		shadowMappingPipeline->Update();
-
 		deferredPipeline->Update();
-
-		//deferredPipeline->GlobalLightingPass();
-		//
-		//deferredPipeline->LocalLightingPass();
 	}
 
 	void SandboxApp::PostUpdate()
 	{
 		// Pipelines Call
-		shadowMappingPipeline->PostUpdate();
 		deferredPipeline->PostUpdate();
 	}
 
 	void SandboxApp::Shutdown()
 	{
 		// Pipelines Call
-		shadowMappingPipeline->Shutdown();
 		deferredPipeline->Shutdown();
 
 		backPack.reset();
-		floor.reset();
+		plane.reset();
 	}
 
 	std::weak_ptr<SculptorGL::Model> SandboxApp::GetBackPackModel() const
@@ -138,9 +129,14 @@ namespace Sandbox
 		return backPack;
 	}
 
-	std::weak_ptr<SculptorGL::Quad> SandboxApp::GetQuadModel() const
+	std::weak_ptr<SculptorGL::Model> SandboxApp::GetPlaneModel() const
 	{
-		return floor;
+		return plane;
+	}
+
+	std::weak_ptr<DirectionalLight> SandboxApp::GetDirectionalLight() const
+	{
+		return directionalLight;
 	}
 }
 

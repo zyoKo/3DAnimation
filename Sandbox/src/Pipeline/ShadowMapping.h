@@ -13,10 +13,8 @@ namespace SculptorGL
 {
 	class UniformBuffer;
 	class IWindow;
-	class IApplication;
 	class IShader;
 	class BufferTexture;
-	class ScreenQuad;
 	class FrameBuffer;
 }
 
@@ -47,7 +45,11 @@ namespace Sandbox
 
 		void Shutdown() override;
 
+		bool IsEnabled() const;
+
 		void SetEnable(bool value) override;
+
+		std::weak_ptr<SculptorGL::FrameBuffer> GetShadowFrameBuffer() const;
 
 		void SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept;
 
@@ -62,11 +64,7 @@ namespace Sandbox
 
 		std::shared_ptr<SculptorGL::FrameBuffer> shadowFrameBuffer;
 
-		SculptorGL::DirectionalLight directionalLight;
-
 		std::weak_ptr<SculptorGL::IShader> shadowShader;
-
-		std::shared_ptr<SculptorGL::ScreenQuad> screenQuad;
 
 		std::weak_ptr<SculptorGL::IShader> screenQuadShader;
 

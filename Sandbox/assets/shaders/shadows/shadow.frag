@@ -4,14 +4,11 @@ out vec4 FragColor;
 
 in float depth;
 
-uniform float minDepth;
-uniform float maxDepth;
-
 void main()
 {
-    float relativeDepth = (depth - minDepth) / (maxDepth - minDepth);
-    float relativeDepthSquare = pow(relativeDepth, 2);
-    float relativeDepthCube   = pow(relativeDepth, 3);
-    float relativeDepthForth  = pow(relativeDepth, 4);
+    float relativeDepth       = 0.5 * (depth + 1.0);
+    float relativeDepthSquare = relativeDepth * relativeDepth;      //pow(relativeDepth, 2);
+    float relativeDepthCube   = relativeDepthSquare * relativeDepth;//pow(relativeDepth, 3);
+    float relativeDepthForth  = relativeDepthCube * relativeDepth;  //pow(relativeDepth, 4);
     FragColor = vec4(relativeDepth, relativeDepthSquare, relativeDepthCube, relativeDepthForth);
 }

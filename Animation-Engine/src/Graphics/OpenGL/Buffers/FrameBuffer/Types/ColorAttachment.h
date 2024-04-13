@@ -39,7 +39,7 @@ namespace SculptorGL
 		Attachment31
 	};
 
-	int InternalAttachmentToOpenGLColorAttachment(ColorAttachment attachment);
+	int ColorAttachmentToOpenGLType(ColorAttachment attachment);
 
 	ColorAttachment OpenGLAttachmentToColorAttachment(int openGLAttachment);
 
