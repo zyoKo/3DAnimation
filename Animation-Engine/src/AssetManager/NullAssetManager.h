@@ -12,6 +12,11 @@ namespace SculptorGL
 			return {};
 		}
 
+		std::weak_ptr<ITexture2D> CreateTextureHDR(const std::string& filePath, bool flipOnLoad) override
+		{
+			return {};
+		}
+
 		std::weak_ptr<IShader> CreateShaderWithDescription(const std::string& shaderName) override
 		{
 			return {};
@@ -39,5 +44,6 @@ namespace SculptorGL
 
 		void ClearStores() override
 		{ }
+
 	};
 }

@@ -20,37 +20,8 @@ uniform vec3 cameraPosition;
 
 uniform mat4 shadowMatrix;
 uniform float shadowBias;
-uniform float minDepth;
-uniform float maxDepth;
 
 float PI = 3.1415f;
-
-vec2 QuadraticEquation(float a, float b, float c) 
-{
-    float epsilon = 1e-6;
-
-    float discriminant = b * b - 4.0 * a * c;
-
-    if (discriminant > epsilon) 
-    {
-        // Two real roots
-        float root1 = (-b - sqrt(discriminant)) / (2.0 * a);
-        float root2 = (-b + sqrt(discriminant)) / (2.0 * a);
-        return vec2(min(root1, root2), max(root1, root2));
-    } 
-    
-    if (discriminant > 0.0 && discriminant < epsilon) 
-    {
-        // One real root (double root)
-        float root = -b / (2.0 * a);
-        return vec2(root, root);
-    }
-
-    // Complex roots
-    float realPart = -b / (2.0 * a);
-    float imaginaryPart = sqrt(-discriminant) / (2.0 * a);
-    return vec2(realPart, imaginaryPart);
-}
 
 vec3 CholeskyDecomposition(float m11, float m12, float m13, float m22, float m23, float m33, float z1, float z2, float z3)
 {

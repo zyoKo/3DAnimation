@@ -52,6 +52,11 @@ namespace Sandbox
 
 		std::shared_ptr<DirectionalLight> directionalLight;
 
+		// Skybox for IBL
+		std::shared_ptr<SculptorGL::Model> skySphere;
+
+		std::shared_ptr<SculptorGL::Model> iblTestModel;
+
 		friend class DeferredShading;
 
 		friend class ShadowMapping;

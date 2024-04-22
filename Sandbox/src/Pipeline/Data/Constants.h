@@ -9,15 +9,35 @@ namespace Sandbox
 	static const std::string COLOR_TEXTURE		{ "albedoTexture"   };	// (1) both are same use any...
 	static const std::string SPECULAR_TEXTURE	{ "specularTexture" };
 
-	//-- G-Buffer Texture Shader Reference --//
+	//-- # G-Buffer Texture Shader Reference --//
 	static const std::string G_BUFFER_POSITION_TEXTURE	{ "gPosition"	};
 	static const std::string G_BUFFER_NORMAL_TEXTURE	{ "gNormal"		};
 	static const std::string G_BUFFER_ALBEDO_TEXTURE	{ "gAlbedoSpec"	};
 	static const std::string SHADOW_MAP_TEXTURE			{ "shadowMap"  };
+
 	const std::vector G_BUFFER_SHADER_TEXTURE_NAMES     { G_BUFFER_POSITION_TEXTURE, G_BUFFER_NORMAL_TEXTURE, G_BUFFER_ALBEDO_TEXTURE };
 	const std::vector GLOBAL_LIGHT_PASS_TEXTURE_NAMES   { G_BUFFER_POSITION_TEXTURE, G_BUFFER_NORMAL_TEXTURE, G_BUFFER_ALBEDO_TEXTURE, SHADOW_MAP_TEXTURE };
+	//-- ! G-Buffer Texture Shader Reference --//
 
-	//-- Shader Files --//
+	//-- # IBL Texture-Shader Reference --//
+	static const std::string IBL_POSITION_TEXTURE		{ "gPosition"		};
+	static const std::string IBL_NORMAL_TEXTURE			{ "gNormal"			};
+	static const std::string IBL_ALBEDO_TEXTURE			{ "gAlbedoSpec"		};
+	static const std::string IBL_SKY_SPHERE_TEXTURE		{ "skySphere"		};
+	static const std::string IBL_IRRADIANCE_MAP_TEXTURE { "irradianceMap"	};
+
+	const std::vector IBL_SHADER_TEXTURE_NAMES
+	{
+		IBL_POSITION_TEXTURE,
+		IBL_NORMAL_TEXTURE,
+		IBL_ALBEDO_TEXTURE,
+		IBL_SKY_SPHERE_TEXTURE,
+		IBL_IRRADIANCE_MAP_TEXTURE
+	};
+	
+	//-- ! IBL Texture-Shader Reference --//
+
+	//-- # Shader Files --//
 	static const std::string POINT_LIGHT_SHADER_NAME			{ "PointLightShader" };
 	static const std::string POINT_LIGHT_VERTEX_SHADER_PATH		{ "./assets/shaders/Deferred/point_light.vert" };
 	static const std::string POINT_LIGHT_FRAGMENT_SHADER_PATH	{ "./assets/shaders/Deferred/point_light.frag" };
@@ -29,9 +49,13 @@ namespace Sandbox
 	static const std::string LIGHTS_BOX_SHADER_NAME				{ "LightBoxShader" };
 	static const std::string LIGHTS_BOX_SHADER_VERTEX_PATH		{ "./assets/shaders/deferred/light_box.vert" };
 	static const std::string LIGHTS_BOX_SHADER_FRAGMENT_PATH	{ "./assets/shaders/deferred/light_box.frag" };
-	//-- Shader Files --//
 
-	//-- Lights Data --//
+	static const std::string IBL_SHADER_NAME			{ "iblShader" };
+	static const std::string IBL_SHADER_VERTEX_PATH		{ "./assets/shaders/deferred/deferred_ibl.vert" };
+	static const std::string IBL_SHADER_FRAGMENT_PATH	{ "./assets/shaders/deferred/deferred_ibl.frag" };
+	//-- ! Shader Files --//
+
+	//-- # Lights Data --//
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
 	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
 	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_LIGHT_POSITION{ 7.0f, 14.0f, 13.0f };	// -2.0f, 4.0f, -1.0f
@@ -69,23 +93,32 @@ namespace Sandbox
 
 	static constexpr SculptorGL::Math::Vec3F LIGHT_BOX_SCALE{ 0.1f, 0.1f, 0.1f };
 	static const std::string LIGHT_COLOR_UNIFORM_NAME{ "lightColor" };
-	//-- !Lights Data --//
+	//-- ! Lights Data --//
 
-	//-- Misc Data --//
+	//-- # Misc Data --//
 	static const std::string CAMERA_POSITION	{ "cameraPosition" };
 	static const std::string PROJECTION_MATRIX	{ "projection" };
 	static const std::string VIEW_MATRIX		{ "view" };
-	//-- !Misc Data --//
+	//-- ! Misc Data --//
 
-	//-- Light Box --//
-	static const std::string CUBE_FILE_PATH		{ "./assets/models/primitives/cube.obj" };
-	static const std::string SPHERE_FILE_PATH	{ "./assets/models/primitives/sphere_old.obj" };
-	//-- !Light Box--//
-	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
+	//-- # Light Box --//
+	static constexpr std::string_view CUBE_FILE_PATH				{ "./assets/models/primitives/cube.obj" };
+	static constexpr std::string_view SPHERE_FILE_PATH				{ "./assets/models/primitives/sphere_old.obj" };
+	static constexpr std::string_view SPHERE_HIGH_POLY_FILE_PATH	{ "./assets/models/primitives/sphere_high_poly.obj" };
+	//-- ! Light Box--//
+	//-- !! DEFERRED_SHADING_CONSTANTS !! --//
 
 	//---------------------------------------------------------------------------------------------------------------------//
 
 	//-- ## MSM_SHADOW_MAPPING_CONSTANTS ## --//
 
-	//-- ## !MSM_SHADOW_MAPPING_CONSTANTS ## --//
+	//-- !! MSM_SHADOW_MAPPING_CONSTANTS !! --//
+
+	//-- ## IBL+ Constants ## --//
+	static constexpr std::string_view SKY_SPHERE_BOOL_UNIFORM_NAME{ "isSkySphere" };
+
+	static constexpr std::tuple<std::string_view, int> HAMMERSLY_BLOCK_DATA{ "N_Hammersley", 50 };
+
+	static constexpr std::string_view TEAPOT_MODEL_FILE_PATH{ "./assets/models/teapot/teapot.obj" };
+	//-- !! IBL+ Constants !! --//
 }

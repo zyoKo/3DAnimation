@@ -22,12 +22,13 @@
 #include "Sandbox.h"
 #include "Fixed/CreatePipeline.h"
 #include "Pipeline/ShadowMapping.h"
+#include "Graphics/OpenGL/Buffers/UniformBuffer.h"
 
 namespace Sandbox
 {
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	enableDeferredShading(true),
-			globalPointLight(LightType::STATIC, SculptorGL::Math::Vec3F(100.0f, 100.0f, 100.0f), SculptorGL::Math::Vec3F(1.0f, 1.0f, 1.0f))
+			useIBL(true)
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -41,15 +42,21 @@ namespace Sandbox
 
 		auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
 
+		//-- # Shader Initialization --//
+		// Deferred
 		globalLightShader	= assetManager->CreateShader(LIGHTING_PASS_SHADER_NAME, LIGHTING_PASS_VERTEX_SHADER_PATH, LIGHTING_PASS_FRAGMENT_SHADER_PATH);
 		shaderLightBox		= assetManager->CreateShader(LIGHTS_BOX_SHADER_NAME, LIGHTS_BOX_SHADER_VERTEX_PATH, LIGHTS_BOX_SHADER_FRAGMENT_PATH);
 		pointLightShader	= assetManager->CreateShader(POINT_LIGHT_SHADER_NAME, POINT_LIGHT_VERTEX_SHADER_PATH, POINT_LIGHT_FRAGMENT_SHADER_PATH);
 
+		// IBL
+		iblShader = assetManager->CreateShader(IBL_SHADER_NAME, IBL_SHADER_VERTEX_PATH, IBL_SHADER_FRAGMENT_PATH);
+		//-- ! Shader Initialization --//
+
 		frameBuffer = std::make_shared<SculptorGL::FrameBuffer>(window);
 		frameBuffer->Bind();
 		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 0, 0, POSITION_TEXTURE,	16);
-		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 0, 0, NORMAL_TEXTURE,		16);
-		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 0, 0, ALBEDO_TEXTURE,		8);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 0, 0, NORMAL_TEXTURE,	16);
+		frameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 0, 0, ALBEDO_TEXTURE,	8);
 
 		const auto totalBuffers = static_cast<int>(frameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;
@@ -71,10 +78,10 @@ namespace Sandbox
 
 		screenQuad = std::make_shared<SculptorGL::ScreenQuad>();
 
-		lightBox = std::make_shared<SculptorGL::Model>(CUBE_FILE_PATH);
+		lightBox = std::make_shared<SculptorGL::Model>(CUBE_FILE_PATH.data());
 		lightBox->SetShader(shaderLightBox);
 
-		lightSphere = std::make_shared<SculptorGL::Model>(SPHERE_FILE_PATH);
+		lightSphere = std::make_shared<SculptorGL::Model>(SPHERE_FILE_PATH.data());
 		lightSphere->SetShader(pointLightShader);
 
 		// Initialize Point Lights
@@ -125,8 +132,14 @@ namespace Sandbox
 			.sandBox = sandBox
 		};
 		shadowMappingPipeline = CreatePipeline<ShadowMapping>(&shadowPipelineData);
-		//shadowMappingPipeline->SetEnable(false);
+		shadowMappingPipeline->SetEnable(!useIBL);	// use shadow when not using IBL
 		shadowMappingPipeline->Initialize();
+
+		hammersleyBlock = std::make_unique<SculptorGL::Math::Hammersley>(std::get<1>(HAMMERSLY_BLOCK_DATA));
+
+		auto blockSize = static_cast<unsigned>(sizeof(float) * 100);
+		hammersleyUniformBuffer = SculptorGL::GraphicsAPI::CreateUniformBuffer(hammersleyBlock->GetHammerslySequence().data(), blockSize);
+		hammersleyUniformBuffer->BindBufferBase(0);
 	}
 
 	void DeferredShading::PreUpdateSetup()
@@ -154,13 +167,29 @@ namespace Sandbox
 		GlobalLightingPass();
 
 		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(true);
-		
-		LocalLightingPass();
+
+		if (!useIBL)
+		{
+			LocalLightingPass();
+		}
 		
 		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(false);
 		//-- 2 !Lighting Pass --//
 
 		frameBuffer->UnBind();
+
+		// Copy depth back to default frame-buffer
+		frameBuffer->BindForReading();
+		SculptorGL::FrameBuffer::BindDefaultFrameBufferForWriting();
+
+		const SculptorGL::Memory::WeakPointer windowPtr{ window };
+
+		const int windowWidth  = static_cast<int>(windowPtr->GetWidth());
+		const int windowHeight = static_cast<int>(windowPtr->GetHeight());
+
+		GL_CALL(glBlitFramebuffer, 0, 0, windowWidth, windowHeight, 0, 0, windowWidth, windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+		SculptorGL::FrameBuffer::BindDefaultFrameBuffer();
 	}
 
 	void DeferredShading::PostUpdate()
@@ -195,6 +224,11 @@ namespace Sandbox
 
 	void DeferredShading::GeometryPass() const
 	{
+		const auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
+
+		const auto gBufferShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
+		const SculptorGL::Memory::WeakPointer gBufferShaderPtr{ gBufferShader };
+
 		//-- 1. Geometry Pass --//
 		SculptorGL::GraphicsAPI::GetContext()->EnableDepthTest(true);
 		SculptorGL::GraphicsAPI::GetContext()->EnableDepthMask(true);
@@ -207,36 +241,64 @@ namespace Sandbox
 		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
 
 		/*----- [... Start Rendering Scene ...] -----*/
-		const auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
-
-		sandBox->backPack->SetShader(assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME));
-		sandBox->plane->SetShader(assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME));
-
-		//sandBox->floor->Draw();
-		sandBox->plane->Draw();
-		for (auto& location : BACKPACK_LOCATIONS)
-		{
-			sandBox->backPack->SetLocation(location);
-
-			sandBox->backPack->Draw();
-		}
-
-		//-- LightBoxes for lights: Visualization Purposes --//
-
-		const SculptorGL::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
-
-		for (const auto& light : pointLights)
-		{
-			lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
-			lightBox->SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
 		
-			shaderLightBoxPtr->Bind();
-			shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
-			//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
-			shaderLightBoxPtr->UnBind();
-		
-			lightBox->Draw();
+		if (useIBL)
+		{
+			// Draw Sky sphere
+			//sandBox->skySphere->SetShader(gBufferShader);
+			//{
+			//	gBufferShaderPtr->Bind();
+			//	gBufferShaderPtr->SetUniformBool(true, SKY_SPHERE_BOOL_UNIFORM_NAME.data());
+			//	gBufferShaderPtr->UnBind();
+			//}
+			//sandBox->skySphere->Draw();
+
+			sandBox->iblTestModel->SetShader(gBufferShader);
+			{
+				gBufferShaderPtr->Bind();
+				gBufferShaderPtr->SetUniformBool(false, SKY_SPHERE_BOOL_UNIFORM_NAME.data());
+				gBufferShaderPtr->UnBind();
+			}
+			sandBox->iblTestModel->Draw();
 		}
+		else
+		{
+			// Draw Plane
+			sandBox->plane->SetShader(gBufferShader);
+			{
+				gBufferShaderPtr->Bind();
+				gBufferShaderPtr->SetUniformBool(false, SKY_SPHERE_BOOL_UNIFORM_NAME.data());
+				gBufferShaderPtr->UnBind();
+			}
+			sandBox->plane->Draw();
+
+			// Draw backpacks
+			sandBox->backPack->SetShader(gBufferShader);
+			for (auto& location : BACKPACK_LOCATIONS)
+			{
+				sandBox->backPack->SetLocation(location);
+
+				sandBox->backPack->Draw();
+			}
+
+			//-- LightBoxes for lights: Visualization Purposes --//
+
+			const SculptorGL::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
+
+			for (const auto& light : pointLights)
+			{
+				lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
+				lightBox->SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
+			
+				shaderLightBoxPtr->Bind();
+				shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
+				//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
+				shaderLightBoxPtr->UnBind();
+			
+				lightBox->Draw();
+			}
+		}
+		
 		/*----- [... Finish Rendering Scene ...] ----*/
 
 		frameBuffer->UnBind();
@@ -309,7 +371,15 @@ namespace Sandbox
 
 	void DeferredShading::GlobalLightingPass() const
 	{
+		auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
+
 		const SculptorGL::Memory::WeakPointer globalLightShaderPtr{ globalLightShader };
+		const SculptorGL::Memory::WeakPointer iblShaderPtr{ iblShader };
+
+		//-- # Shader Variables --//
+		const auto* camera = SculptorGL::Camera::GetInstance();
+		const SculptorGL::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
+		//-- ! Shader Variables --//
 
 		// Bind G-Buffer Textures
 		int currentTextureSlot = 0;
@@ -326,47 +396,97 @@ namespace Sandbox
 			shadowFBO->GetFrameBufferTextures().back()->Bind(currentTextureSlot++);
 		}
 
-		globalLightShaderPtr->Bind();
-
-		const auto* camera = SculptorGL::Camera::GetInstance();
-		const SculptorGL::Math::Vec3F cameraPosition { camera->GetCameraPosition().x, camera->GetCameraPosition().y, camera->GetCameraPosition().z };
-		globalLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
-
-		int currentSlot = 0;
-		for (unsigned i = 0; i < GLOBAL_LIGHT_PASS_TEXTURE_NAMES.size(); ++i)
-		{
-			globalLightShaderPtr->SetUniformInt(currentSlot, GLOBAL_LIGHT_PASS_TEXTURE_NAMES[currentSlot]);
-			++currentSlot;
-		}
-
 		const SculptorGL::Memory::WeakPointer directionalLightPtr{ sandBox->GetDirectionalLight() };
 
-		// Light Uniforms
-		globalLightShaderPtr->SetUniformVector3F(directionalLightPtr->GetColor(),	"light.Color");
-		globalLightShaderPtr->SetUniformVector3F(directionalLightPtr->GetDirection(), "light.Direction");
+		//-- # IBL --//
 
-		// Shadow Uniforms
-		if (shadowMappingPtr)
+		if (useIBL)
 		{
-			const auto& lightPos = directionalLightPtr->GetPosition();
-			const float lightDist = glm::length(glm::vec3(lightPos.x, lightPos.y, lightPos.z));
-			const float minDepth = lightDist - 100.0f;
-			const float maxDepth = lightDist + 100.0f;
+			const auto skySphereTexture = assetManager->RetrieveTextureFromStorage("Alexs_Apt_2k");
+			const SculptorGL::Memory::WeakPointer skySphereTexturePtr{ skySphereTexture };
+			skySphereTexturePtr->Bind(currentTextureSlot++);
 
-			globalLightShaderPtr->SetUniformMatrix4F(directionalLightPtr->GetLightSpaceMatrix(), "shadowMatrix");
-			globalLightShaderPtr->SetUniformFloat(directionalLightPtr->GetBias(), "shadowBias");
-			globalLightShaderPtr->SetUniformFloat(minDepth, "minDepth");
-			globalLightShaderPtr->SetUniformFloat(maxDepth, "maxDepth");
+			const auto irradianceMap = assetManager->RetrieveTextureFromStorage("Alexs_Apt_2k_Irradiance");
+			const SculptorGL::Memory::WeakPointer irradianceMapPtr{ irradianceMap };
+			irradianceMapPtr->Bind(currentTextureSlot++);
+
+			iblShaderPtr->Bind();
+
+			int currentSlot = 0;
+			for (const auto& textureName : IBL_SHADER_TEXTURE_NAMES)
+			{
+				iblShaderPtr->SetUniformInt(currentSlot, textureName);
+				++currentSlot;
+			}
+
+			// Send Hammersley Block
+			auto& [ hammersleyUniformName, hammersleySize ] = HAMMERSLY_BLOCK_DATA;
+			iblShaderPtr->SetUniformInt(hammersleyBlock->GetSize(), hammersleyUniformName.data());
+
+			iblShaderPtr->SetUniformBlockBinding(0, "HammersleyBlock");
+
+			iblShaderPtr->SetUniformFloat(100.f, "exposure");	// TODO: Not sure if this is correct
+
+			// Light Data
+			iblShaderPtr->SetUniformVector3F(directionalLightPtr->GetDirection(), "light.Direction");
+			iblShaderPtr->SetUniformVector3F(directionalLightPtr->GetColor(),	"light.Color");
+
+			iblShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
+			
+			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetWidth()),  "bufferWidth");
+			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetHeight()), "bufferHeight");
+
+			iblShaderPtr->SetUniformFloat(1.0f, "metallic");
+			iblShaderPtr->SetUniformFloat(0.1f, "roughness");
+
+			// Draw the Quad
+			screenQuad->Draw();
+
+			iblShaderPtr->UnBind();
 		}
 
-		screenQuad->Draw();
+		//-- ! IBL --//
+
+		//-- # DEFERRED --//
+
+		if (!useIBL)
+		{
+			globalLightShaderPtr->Bind();
+
+			globalLightShaderPtr->SetUniformVector3F(cameraPosition, CAMERA_POSITION);
+
+			{
+				int currentSlot = 0;
+				for (unsigned i = 0; i < GLOBAL_LIGHT_PASS_TEXTURE_NAMES.size(); ++i)
+				{
+					globalLightShaderPtr->SetUniformInt(currentSlot, GLOBAL_LIGHT_PASS_TEXTURE_NAMES[currentSlot]);
+					++currentSlot;
+				}
+			}
+
+			// Light Uniforms
+			globalLightShaderPtr->SetUniformVector3F(directionalLightPtr->GetColor(),	"light.Color");
+			globalLightShaderPtr->SetUniformVector3F(directionalLightPtr->GetDirection(), "light.Direction");
+
+			// Shadow Uniforms
+			if (shadowMappingPtr)
+			{
+				globalLightShaderPtr->SetUniformMatrix4F(directionalLightPtr->GetLightSpaceMatrix(), "shadowMatrix");
+				globalLightShaderPtr->SetUniformFloat(directionalLightPtr->GetBias(), "shadowBias");
+			}
+
+			// Draw the Quad
+			screenQuad->Draw();
+
+			globalLightShaderPtr->UnBind();
+		}
 
 		if (!frameBuffer->GetFrameBufferTextures().empty())
 		{
 			frameBuffer->GetFrameBufferTextures().back()->UnBind();
 		}
 
-		globalLightShaderPtr->UnBind();
+		//-- ! DEFERRED --//
 	}
 
 	void DeferredShading::UpdateLights()

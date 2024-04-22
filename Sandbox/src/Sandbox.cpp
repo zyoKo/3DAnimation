@@ -8,7 +8,12 @@
 #include "Components/Quad.h"
 #include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
+#include "Graphics/GraphicsAPI.h"
+#include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
+#include "Graphics/OpenGL/Shader/Interface/IShader.h"
+#include "Pipeline/DeferredShading.h"
 #include "Pipeline/IPipeline.h"
+#include "Pipeline/Data/Constants.h"
 #include "Pipeline/Fixed/CreatePipeline.h"
 #include "Pipeline/Structures/PipelineInitializer.h"
 #include "Pipeline/Structures/DirectionalLight.h"
@@ -42,9 +47,25 @@ namespace Sandbox
 
 		const Memory::WeakPointer<ITexture2D> whiteTexturePtr{ assetManager->CreateTexture("./assets/textures/white.jpg") };
 		whiteTexturePtr->SetTextureName(TEXTURE_DIFFUSE_1);
+
+		const Memory::WeakPointer<ITexture2D> hdrTexture = assetManager->CreateTextureHDR("./assets/textures/HDR_Textures/Alexs_Apt_2k.hdr", false);
+		hdrTexture->SetTextureName(TEXTURE_DIFFUSE_1);
+
+		const Memory::WeakPointer<ITexture2D> hdrIrrTexture = assetManager->CreateTextureHDR("./assets/textures/HDR_Textures/Alexs_Apt_2k_Irradiance.hdr", false);
+		hdrIrrTexture->SetTextureName(TEXTURE_DIFFUSE_1);
 		//-- !Texture Creation --//
 
 		//-- Shader Creation --//
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = "./assets/shaders/skySphere/skySphere.vert"
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = "./assets/shaders/skySphere/skySphere.frag"
+		});
+		assetManager->CreateShaderWithDescription("skySphereShader");
+
 		assetManager->AddShaderDescription({
 			.type = ShaderType::VERTEX,
 			.filePath = G_BUFFER_VERTEX_SHADER_FILE_PATH
@@ -71,9 +92,15 @@ namespace Sandbox
 		plane = std::make_shared<Model>("./assets/models/primitives/plane.obj");
 		plane->SetLocation({ 0.0f, 0.0f, 0.0f });
 		plane->SetScale({ 10.0f, 10.0f, 10.0f });
-		plane->SetTextures({ whiteTexturePtr.GetShared() });
-		//floor = std::make_shared<Quad>();
+		plane->SetTextures({ whiteTexturePtr.GetWeakPointer() });
 		directionalLight = std::make_shared<DirectionalLight>();
+
+		skySphere = std::make_shared<SculptorGL::Model>(SPHERE_HIGH_POLY_FILE_PATH.data());
+		skySphere->SetScale(glm::vec3(10.0f));
+
+		iblTestModel = std::make_shared<SculptorGL::Model>(SPHERE_HIGH_POLY_FILE_PATH.data());
+		iblTestModel->SetScale(glm::vec3(0.1f));
+		iblTestModel->SetTextures({ whiteTexturePtr.GetWeakPointer() });
 	}
 
 	void SandboxApp::PreUpdate()
@@ -92,8 +119,6 @@ namespace Sandbox
 		backPack->SetShader(gBufferShader);
 
 		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
-		//floor->SetGridTexture(gridTexture);
-		//floor->SetShader(quadShader);
 
 		auto* camera = Camera::GetInstance();
 		camera->SetCameraPosition({ 7.0f, 7.0f, 13.0f });
@@ -107,6 +132,38 @@ namespace Sandbox
 
 		// Pipelines Call
 		deferredPipeline->Update();
+
+		glm::vec3 cameraPosition = Camera::GetInstance()->GetCameraPosition();
+		const auto skySphereShader = assetManager->RetrieveShaderFromStorage("skySphereShader");
+		const Memory::WeakPointer skySphereShaderPtr{ skySphereShader };
+		
+		const auto skySphereTexture = assetManager->RetrieveTextureFromStorage("Alexs_Apt_2k");
+		const Memory::WeakPointer skySphereTexturePtr{ skySphereTexture };
+		skySphereTexturePtr->Bind(0);
+
+		GraphicsAPI::GetContext()->EnableDepthTest(true);
+		GraphicsAPI::GetContext()->EnableDepthMask(true);
+		GraphicsAPI::GetContext()->SetFaceCulling(CullType::FRONT_FACE);
+		//GraphicsAPI::GetContext()->EnableBlending(true);
+		GL_CALL(glEnable, GL_BLEND);
+		GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		skySphere->SetShader(skySphereShader);
+		{
+			skySphereShaderPtr->Bind();
+			skySphereShaderPtr->SetUniformInt(0, "skySphere");
+			skySphereShaderPtr->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+			skySphereShaderPtr->UnBind();
+		}
+		skySphere->Draw();
+		
+		skySphereTexturePtr->UnBind();
+
+		GL_CALL(glDisable, GL_BLEND);
+
+		GraphicsAPI::GetContext()->SetFaceCulling(CullType::NONE);
+		GraphicsAPI::GetContext()->EnableDepthTest(false);
+		GraphicsAPI::GetContext()->EnableDepthMask(false);
 	}
 
 	void SandboxApp::PostUpdate()
@@ -122,6 +179,8 @@ namespace Sandbox
 
 		backPack.reset();
 		plane.reset();
+		skySphere.reset();
+		iblTestModel.reset();
 	}
 
 	std::weak_ptr<SculptorGL::Model> SandboxApp::GetBackPackModel() const

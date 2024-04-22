@@ -7,7 +7,7 @@ namespace SculptorGL
 	class Texture2D : public ITexture2D
 	{
 	public:
-		Texture2D(const void* pixels, int width, int height, int depth);
+		Texture2D(const void* pixels, int width, int height);
 
 		~Texture2D() override;
 
@@ -30,6 +30,6 @@ namespace SculptorGL
 
 		unsigned int textureID;
 
-		int width, height, depth;
+		int width, height;
 	};
 }

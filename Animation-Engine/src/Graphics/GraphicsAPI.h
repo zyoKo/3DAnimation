@@ -12,6 +12,7 @@
 #include "OpenGL/Shader/Shader.h"
 #include "Graphics/OpenGL/Textures/Texture2D.h"
 #include "OpenGL/Buffers/UniformBuffer.h"
+#include "OpenGL/Textures/TextureHDR.h"
 
 namespace SculptorGL
 {
@@ -67,6 +68,12 @@ namespace SculptorGL
 		static std::shared_ptr<ITexture2D> CreateTexture2D(Args&&... args)
 		{
 			return std::make_shared<Texture2D>(std::forward<Args>(args)...);
+		}
+
+		template <typename... Args>
+		static std::shared_ptr<ITexture2D> CreateTextureHDR(Args&&... args)
+		{
+			return std::make_shared<TextureHDR>(std::forward<Args>(args)...);
 		}
 
 		template <typename... Args>

@@ -16,7 +16,7 @@ namespace SculptorGL
 
 	static constexpr glm::vec3 CAMERA_DEFAULT_WORLD_UP = { 0.0f, 1.0f, 0.0f };
 
-	static constexpr float CAMERA_ROTATE_SPEED = 30.0f;
+	static constexpr float CAMERA_ROTATE_SPEED = 60.0f;
 
 	static constexpr float CAMERA_ZOOM_SPEED = 10.0f;
 

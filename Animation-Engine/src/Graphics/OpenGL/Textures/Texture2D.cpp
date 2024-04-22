@@ -7,11 +7,10 @@
 
 namespace SculptorGL
 {
-	Texture2D::Texture2D(const void* pixels, int width, int height, int depth)
+	Texture2D::Texture2D(const void* pixels, int width, int height)
 		:	textureID(0),
 			width(width),
-			height(height),
-			depth(depth)
+			height(height)
 	{
 		// TODO: Fix this for general vs other required textures
 		const int levels = 1 + static_cast<int>(floor(std::log2(std::max(width, height))));

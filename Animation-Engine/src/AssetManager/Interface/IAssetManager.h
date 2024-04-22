@@ -16,6 +16,8 @@ namespace SculptorGL
 
 		virtual std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad = true) = 0;
 
+		virtual std::weak_ptr<ITexture2D> CreateTextureHDR(const std::string& filePath, bool flipOnLoad = true) = 0;
+
 		virtual std::weak_ptr<IShader> CreateShaderWithDescription(const std::string& shaderName) = 0;
 
 		virtual std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) = 0;

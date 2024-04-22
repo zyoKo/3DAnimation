@@ -8,12 +8,17 @@ out vec3 FragPos;
 out vec2 TexCoords;
 out vec3 Normal;
 
+// For SkySphere
+out vec4 s_Pos;
+
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
+    s_Pos = vec4(position, 1.0);
+
     vec4 worldPos = model * vec4(position, 1.0);
     FragPos = worldPos.xyz;
 

@@ -2,6 +2,7 @@
 
 #include "IPipeline.h"
 #include "Structures/PointLight.h"
+#include "Math/Hammersly/Hammersley.h"
 
 namespace Sandbox
 {
@@ -11,6 +12,7 @@ namespace Sandbox
 
 namespace SculptorGL
 {
+	class UniformBuffer;
 	class ScreenQuad;
 	class IWindow;
 	class IShader;
@@ -49,8 +51,15 @@ namespace Sandbox
 
 		void SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept;
 
+		const std::shared_ptr<SculptorGL::FrameBuffer>& GetDeferredFBO() const
+		{
+			return frameBuffer;
+		}
+
 	private:
 		bool enableDeferredShading;
+
+		bool useIBL;
 
 		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
@@ -66,11 +75,11 @@ namespace Sandbox
 		std::weak_ptr<SculptorGL::IShader> pointLightShader;
 
 		std::weak_ptr<SculptorGL::IShader> shaderLightBox;
+
+		std::weak_ptr<SculptorGL::IShader> iblShader;
 		//-- !Shader --//
 
 		//-- Lights Data --//
-		PointLight globalPointLight;
-
 		std::vector<PointLight> pointLights;
 
 		std::shared_ptr<SculptorGL::Model> lightSphere;
@@ -79,6 +88,10 @@ namespace Sandbox
 		std::shared_ptr<SculptorGL::ScreenQuad> screenQuad;
 
 		std::shared_ptr<SculptorGL::Model> lightBox;
+
+		std::unique_ptr<SculptorGL::Math::Hammersley> hammersleyBlock;
+
+		std::shared_ptr<SculptorGL::UniformBuffer> hammersleyUniformBuffer;
 
 		void UpdateLights();
 

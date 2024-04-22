@@ -14,6 +14,8 @@ namespace SculptorGL
 	public:
 		std::weak_ptr<ITexture2D> CreateTexture(const std::string& filepath, bool flipOnLoad /* = true */) override;
 
+		std::weak_ptr<ITexture2D> CreateTextureHDR(const std::string& filePath, bool flipOnLoad /* = true */) override;
+
 		std::weak_ptr<IShader> CreateShaderWithDescription(const std::string& shaderName) override;
 
 		std::weak_ptr<IShader> CreateShader(const std::string& shaderName, const std::string& vertexFilepath, const std::string& fragmentFilepath) override;
@@ -33,7 +35,9 @@ namespace SculptorGL
 
 		std::vector<ShaderDescription> shaderDescriptions;
 
-		static stbi_uc* LoadTexture(bool flipOnLoad, const std::string& textureFile, int* width, int* height, int* depth);
+		static stbi_uc* LoadTexture(bool flipOnLoad, const std::string& textureFile, int* width, int* height);
+
+		static float* LoadTextureHDR(const std::string& textureFile, int* width, int* height, int* nrComponents, bool flipOnLoad);
 
 		static std::string ReadShaderFile(const std::string& filepath);
 	};

@@ -42,6 +42,8 @@ namespace SculptorGL
 
 		void SetUniformFloat(float value, const std::string& uniformName) override;
 
+		void SetUniformBool(bool value, const std::string& uniformName) override;
+
 		void SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName) override;
 
 	private:

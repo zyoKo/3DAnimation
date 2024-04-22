@@ -146,6 +146,11 @@ namespace SculptorGL
 		GL_CALL(glUniform1f, GetUniformLocation(uniformName), value);
 	}
 
+	void Shader::SetUniformBool(bool value, const std::string& uniformName)
+	{
+		SetUniformInt(value, uniformName);
+	}
+
 	void Shader::SetUniformBlockBinding(unsigned bindingPoint, const std::string& blockName)
 	{
 		const unsigned blockIndex = GL_CALL(glGetUniformBlockIndex, shaderID, blockName.c_str());
