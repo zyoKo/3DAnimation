@@ -65,6 +65,7 @@ void main()
 	// Local thread id in the 128x1 thread groups128x1
 	uint i = gl_LocalInvocationID.y;
 
+	// what pixel to read and don't read beyond texture
 	ivec2 pixel = texelCoord + ivec2(0, -halfSize);
 	pixel.y = int(max(0, min(pixel.y, bufferSize.y - 1)));
 
@@ -80,7 +81,7 @@ void main()
 
 	barrier();
 
-	vec4 sum = vec4(0);
+	vec4 sum = vec4(0.0);
 	for(int j = 0; j < (2 * halfSize + 1); j++)
 	{
 		sum += gaussianKernel[j] * v[i + j];

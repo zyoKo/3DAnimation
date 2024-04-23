@@ -480,6 +480,7 @@ namespace Sandbox
 			iblShaderPtr->SetUniformFloat(0.1f, "roughness");
 
 			iblShaderPtr->SetUniformBool(true, "useDirectionalLight");
+			iblShaderPtr->SetUniformBool(useBloom, "usingBloom");
 
 			// Draw the Quad
 			screenQuad->Draw();

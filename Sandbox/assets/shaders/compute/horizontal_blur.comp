@@ -69,7 +69,6 @@ void main()
 	ivec2 pixel = texelCoord + ivec2(-halfSize, 0);
 	pixel.x = int(max(0, min(pixel.x, bufferSize.x - 1)));
 
-	// Do not sample beyond those pixels here
 	v[i] = imageLoad(sourceImage, pixel);
 
 	if (i < (2 * halfSize))

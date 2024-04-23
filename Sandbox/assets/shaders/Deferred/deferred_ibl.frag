@@ -45,6 +45,7 @@ uniform float roughness;
 
 // directional light vs IBL
 uniform bool useDirectionalLight;
+uniform bool usingBloom;
 
 // Constants
 const float PI = 3.14159265359f;
@@ -59,29 +60,8 @@ vec3  FresnelSchickRoughness(float cosTheta, vec3 F0, float roughness);
 float ClampZeroToOne(float value);
 vec2  CalculateUVBasedOnDirection(vec3 direction);
 
-vec3 PhongLighting(vec3 FragPos, vec3 Normal, vec3 Diffuse, float Specular)
-{
-    // then calculate lighting as usual
-    vec3 ambient    = vec3(0.5f, 0.5f, 0.5f) * Diffuse;
-    vec3 viewDir    = normalize(cameraPosition - FragPos);
-
-    float shininess = 16.0;
-
-    // diffuse
-    vec3 lightDir = normalize(-light.Direction);
-    //vec3 lightDir   = normalize(light.Position - FragPos);
-    vec3 diffuse    = max(dot(Normal, lightDir), 0.0) * Diffuse * light.Color;
-
-    // specular
-    vec3 reflectDir = reflect(-lightDir, Normal);
-    float spec      = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-    vec3 specular   = light.Color * spec * Specular;
-
-    vec3 color = ambient + (diffuse + specular) * 100.0;
-
-    return color;
-}
-vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular);
+vec3 PhongLighting(vec3 FragPos, vec3 Normal, vec3 Diffuse, float Specular);
+vec3 ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular);
 
 void main()
 {
@@ -98,18 +78,21 @@ void main()
     }
     else
     {
-        color = ComputeColorForIBL(FragPos, Normal, Diffuse, specular);
+        color += ComputeColorForIBL(FragPos, Normal, Diffuse, specular);
     }
 
     // extract bright colors to compute bloom
-    float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    if(brightness > 1.0)
+    if (usingBloom)
     {
-        BrightColor = vec4(color, 1.0);
-    }
-    else
-    {
-        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+        float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
+        if(brightness > 1.0)
+        {
+            BrightColor = vec4(color, 1.0);
+        }
+        else
+        {
+            BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+        }
     }
 
     if (!useDirectionalLight)
@@ -282,6 +265,29 @@ vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular)
     vec3 ambient = Kd * diffuse;
 
     vec3 color = (ambient + diffuse + specular);
+
+    return color;
+}
+
+// ----------------------------------------------------------------------------
+vec3 PhongLighting(vec3 FragPos, vec3 Normal, vec3 Diffuse, float Specular)
+{
+    // then calculate lighting as usual
+    vec3 ambient    = vec3(0.5f, 0.5f, 0.5f) * Diffuse;
+    vec3 viewDir    = normalize(cameraPosition - FragPos);
+
+    float shininess = 16.0;
+
+    // diffuse
+    vec3 lightDir = normalize(-light.Direction);
+    vec3 diffuse  = max(dot(Normal, lightDir), 0.0) * Diffuse * light.Color;
+
+    // specular
+    vec3 reflectDir = reflect(-lightDir, Normal);
+    float spec      = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 specular   = light.Color * spec * Specular;
+
+    vec3 color = ambient + (diffuse + specular) * 100.0;
 
     return color;
 }
