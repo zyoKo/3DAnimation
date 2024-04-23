@@ -538,28 +538,12 @@ namespace Sandbox
 			const auto textureWidth = gBrightColorTexture->GetWidth();
 			const auto textureHeight = gBrightColorTexture->GetHeight();
 
-			//-- # Horizontal Blur --//
-			const SculptorGL::Memory::WeakPointer hBlurPtr{ assetManager->RetrieveShaderFromStorage("HorizontalBlur") };
-			{
-				hBlurPtr->Bind();
-
-				gBrightColorTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);	// sourceImage
-				blurredColorTexture->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);	// destinationImage
-
-				// tiles WxH images with groups sized 128x1
-				SculptorGL::GraphicsAPI::GetContext()->DispatchCompute((textureWidth + 128) / 128, textureHeight, 1);
-				SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
-				
-				hBlurPtr->UnBind();
-			}
-			//-- ! Horizontal Blur --//
-
 			//-- # Vertical Blur --//
 			const SculptorGL::Memory::WeakPointer vBlurPtr{ assetManager->RetrieveShaderFromStorage("VerticalBlur") };
 			{
 				vBlurPtr->Bind();
 
-				blurredColorTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);	// sourceImage
+				gBrightColorTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);	// sourceImage
 				blurredColorTexture->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);	// destinationImage
 
 				// tiles WxH images with groups sized 128x1
@@ -569,6 +553,22 @@ namespace Sandbox
 				vBlurPtr->UnBind();
 			}
 			//-- ! Vertical Blur --//
+
+			//-- # Horizontal Blur --//
+			const SculptorGL::Memory::WeakPointer hBlurPtr{ assetManager->RetrieveShaderFromStorage("HorizontalBlur") };
+			{
+				hBlurPtr->Bind();
+
+				blurredColorTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);	// sourceImage
+				blurredColorTexture->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);	// destinationImage
+
+				// tiles WxH images with groups sized 128x1
+				SculptorGL::GraphicsAPI::GetContext()->DispatchCompute((textureWidth + 128) / 128, textureHeight, 1);
+				SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
+				
+				hBlurPtr->UnBind();
+			}
+			//-- ! Horizontal Blur --//
 
 			const SculptorGL::Memory::WeakPointer windowPtr{ window };
 			{
