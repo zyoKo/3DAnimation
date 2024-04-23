@@ -161,9 +161,21 @@ namespace SculptorGL::Utils
 		// Create a random number engine
 		std::random_device rd;
 		std::mt19937 gen(rd());
-		
+
 		// Define a distribution
 		std::uniform_int_distribution<> dis(minRange, maxRange);
+
+		return dis(gen);
+	}
+
+	static float GenerateRandomFloatInRange(float min, float max)
+	{
+		// Create a random number engine
+		std::random_device rd;
+		std::mt19937 gen(rd());
+
+		// Define a distribution
+		std::uniform_real_distribution<float> dis(min, max);
 
 		return dis(gen);
 	}

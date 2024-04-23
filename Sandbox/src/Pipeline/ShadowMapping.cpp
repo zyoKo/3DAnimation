@@ -32,17 +32,8 @@ namespace Sandbox
 
 		auto* assetManager = SculptorGL::AssetManagerLocator::GetAssetManager();
 
-		assetManager->AddShaderDescription({
-			.type = SculptorGL::ShaderType::COMPUTE,
-			.filePath = "./assets/shaders/compute/horizontal_blur.comp"
-		});
-		horizontalBlurShader = assetManager->CreateShaderWithDescription("HorizontalBlur");
-
-		assetManager->AddShaderDescription({
-			.type = SculptorGL::ShaderType::COMPUTE,
-			.filePath = "./assets/shaders/compute/vertical_blur.comp"
-		});
-		verticalBlurShader = assetManager->CreateShaderWithDescription("VerticalBlur");
+		horizontalBlurShader = assetManager->RetrieveShaderFromStorage("HorizontalBlur");
+		verticalBlurShader = assetManager->RetrieveShaderFromStorage("VerticalBlur");
 
 		assetManager->AddShaderDescription({
 			.type = SculptorGL::ShaderType::VERTEX,
@@ -94,7 +85,7 @@ namespace Sandbox
 		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, textureSize, textureSize, "ShadowTexture", 32);
 		shadowFrameBuffer->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, textureSize, textureSize, "BlurredShadowTexture", 32);
 		const auto& shadowTexture = shadowFrameBuffer->GetFrameBufferTextures().back();
-		shadowTexture->SetTextureParameters({ GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER });
+		shadowTexture->SetTextureParameters({ GL_NEAREST, GL_NEAREST, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE });
 
 		const auto totalBuffers = static_cast<int>(shadowFrameBuffer->GetLastColorAttachment());
 		std::vector<unsigned> usedOpenGLColorAttachments;

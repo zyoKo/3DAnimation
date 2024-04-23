@@ -50,6 +50,20 @@ namespace Sandbox
 		{  0.0,  2.0,  5.0 },
 		{  5.0,  2.0,  5.0 }
 	};
+
+	static constexpr float LOCATION_FACTOR{ 20.0f };
+	static std::vector<glm::vec3> SPHERE_LOCATIONS
+	{
+		//{ -LOCATION_FACTOR,	5.0,	-LOCATION_FACTOR },
+		//{  0.0,				5.0,	-LOCATION_FACTOR },
+		{  LOCATION_FACTOR,	5.0,	-LOCATION_FACTOR },
+		//{ -LOCATION_FACTOR,	5.0,	 0.0			 },
+		//{  0.0,				5.0,	 0.0			 },
+		{  LOCATION_FACTOR,	5.0,	 0.0			 },
+		//{ -LOCATION_FACTOR,	5.0,	 LOCATION_FACTOR },
+		//{  0.0,				5.0,	 LOCATION_FACTOR },
+		{  LOCATION_FACTOR,	5.0,	 LOCATION_FACTOR }
+	};
 	//-- !BACKPACK --//
 
 	//-- GRID --//

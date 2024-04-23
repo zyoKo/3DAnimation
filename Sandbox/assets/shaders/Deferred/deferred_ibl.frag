@@ -2,6 +2,7 @@
 
 // Final output
 out vec4 FragColor;
+out vec4 BrightColor;
 
 in vec2 TexCoords;
 
@@ -42,36 +43,45 @@ uniform float bufferHeight;
 uniform float metallic;
 uniform float roughness;
 
+// directional light vs IBL
+uniform bool useDirectionalLight;
+
 // Constants
 const float PI = 3.14159265359f;
 
 // Function Declerations
-float DistributionGGX(vec3 N, vec3 H, float roughness);
+float LOG_DistributionGGX(vec3 N, vec3 H, float roughness);
 float Herron_DistributionGGX(vec3 N, vec3 H, float roughness);
 float GeometrySchlickGGX(float NdotV, float roughness);
 float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness);
-vec3 FresnelSchlick(float cosTheta, vec3 F0);
-vec3 FresnelSchickRoughness(float cosTheta, vec3 F0, float roughness)
+vec3  FresnelSchlick(float cosTheta, vec3 F0);
+vec3  FresnelSchickRoughness(float cosTheta, vec3 F0, float roughness);
+float ClampZeroToOne(float value);
+vec2  CalculateUVBasedOnDirection(vec3 direction);
+
+vec3 PhongLighting(vec3 FragPos, vec3 Normal, vec3 Diffuse, float Specular)
 {
-    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    // then calculate lighting as usual
+    vec3 ambient    = vec3(0.5f, 0.5f, 0.5f) * Diffuse;
+    vec3 viewDir    = normalize(cameraPosition - FragPos);
+
+    float shininess = 16.0;
+
+    // diffuse
+    vec3 lightDir = normalize(-light.Direction);
+    //vec3 lightDir   = normalize(light.Position - FragPos);
+    vec3 diffuse    = max(dot(Normal, lightDir), 0.0) * Diffuse * light.Color;
+
+    // specular
+    vec3 reflectDir = reflect(-lightDir, Normal);
+    float spec      = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+    vec3 specular   = light.Color * spec * Specular;
+
+    vec3 color = ambient + (diffuse + specular) * 100.0;
+
+    return color;
 }
-
-float ClampZeroToOne(float value)
-{
-    return clamp(value, 0.0, 1.0);
-}
-
-vec2 CalculateUVBasedOnDirection(vec3 direction)
-{
-    float u = 0.5 - atan(-direction.z, direction.x) / (2.0 * PI);
-    float v = acos(direction.y) / PI;
-
-    return vec2(u, v);
-}
-
-/*
-    Notations
-*/
+vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular);
 
 void main()
 {
@@ -81,6 +91,118 @@ void main()
     vec3 Diffuse  = texture(gAlbedoSpec,  TexCoords).rgb;
     vec3 specular = vec3(0.0, 0.0, 0.0);
 
+    vec3 color = vec3(0.0);
+    if (useDirectionalLight)
+    {
+        color += PhongLighting(FragPos, Normal, Diffuse, 1.0);
+    }
+    else
+    {
+        color = ComputeColorForIBL(FragPos, Normal, Diffuse, specular);
+    }
+
+    // extract bright colors to compute bloom
+    float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    if(brightness > 1.0)
+    {
+        BrightColor = vec4(color, 1.0);
+    }
+    else
+    {
+        BrightColor = vec4(0.0, 0.0, 0.0, 1.0);
+    }
+
+    if (!useDirectionalLight)
+    {
+        // apply gamma correction (if using IBL)
+        color = color / (color + vec3(1.0));
+        color = pow(color, vec3(1.0 / 2.2));
+    }
+
+    FragColor = vec4(color, 1.0);
+}
+
+// ----------------------------------------------------------------------------
+float Herron_DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float dotHN = max(dot(H, N), 0.0);
+    float tan_theta_m = sqrt((1.0f - pow(dotHN, 2))) / dotHN;
+    float tan_square_theta_m = pow(tan_theta_m, 2);
+    float alpha_square = roughness * roughness;
+
+    float denom = PI * pow(dotHN, 4) * pow(alpha_square + tan_square_theta_m, 2);
+    return clamp(dotHN, 0.0, 1.0) * (roughness * roughness / denom);
+}
+
+float DistributionGGX(vec3 N, vec3 H, float roughness)
+{
+    float roughnessSquare = roughness * roughness;
+    float roughnessFourth = roughnessSquare * roughnessSquare;
+
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotHSquare = NdotH * NdotH;
+
+    // distribution
+    float numerator = roughnessFourth;
+    float denominator = (NdotHSquare * (roughnessFourth - 1.0) + 1.0);
+    denominator = PI * denominator * denominator;
+
+    return (numerator / denominator);
+}
+
+// ----------------------------------------------------------------------------
+float GeometrySchlickGGX(vec3 N, vec3 V, float roughness)
+{
+    float r = (roughness + 1.0);
+    float k = (r * r) / 8.0;
+
+    float NdotV = max(dot(N, V), 0.0);
+
+    float numerator   = NdotV;
+    float denominator = NdotV * (1.0 - k) + k;
+
+    return numerator / denominator;
+}
+
+// ----------------------------------------------------------------------------
+float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
+{
+    float ggx2 = GeometrySchlickGGX(N, V, roughness);
+    float ggx1 = GeometrySchlickGGX(N, L, roughness);
+
+    return ggx1 * ggx2;
+}
+
+// ----------------------------------------------------------------------------
+vec3 FresnelSchlick(float cosTheta, vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+// ----------------------------------------------------------------------------
+vec3 FresnelSchickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
+// ----------------------------------------------------------------------------
+float ClampZeroToOne(float value)
+{
+    return clamp(value, 0.0, 1.0);
+}
+
+// ----------------------------------------------------------------------------
+vec2 CalculateUVBasedOnDirection(vec3 direction)
+{
+    float u = 0.5 - atan(-direction.z, direction.x) / (2.0 * PI);
+    float v = acos(direction.y) / PI;
+
+    return vec2(u, v);
+}
+
+// ----------------------------------------------------------------------------
+vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular)
+{
     // Rewriting for convinience
     vec3 N = normalize(Normal); // should be normalized
     vec3 L = normalize(-light.Direction);
@@ -159,68 +281,7 @@ void main()
 
     vec3 ambient = Kd * diffuse;
 
-    vec3 color = (diffuse + specular);
+    vec3 color = (ambient + diffuse + specular);
 
-    // apply tone mapping
-    color = color / (color + vec3(1.0));
-    color = pow(color, vec3(1.0 / 2.2));
-    
-    FragColor = vec4(color, 1.0);
-}
-
-// ----------------------------------------------------------------------------
-float Herron_DistributionGGX(vec3 N, vec3 H, float roughness)
-{
-    float dotHN = max(dot(H, N), 0.0);
-    float tan_theta_m = sqrt((1.0f - pow(dotHN, 2))) / dotHN;
-    float tan_square_theta_m = pow(tan_theta_m, 2);
-    float alpha_square = roughness * roughness;
-
-    float denom = PI * pow(dotHN, 4) * pow(alpha_square + tan_square_theta_m, 2);
-    return clamp(dotHN, 0.0, 1.0) * (roughness * roughness / denom);
-}
-
-float DistributionGGX(vec3 N, vec3 H, float roughness)
-{
-    float roughnessSquare = roughness * roughness;
-    float roughnessFourth = roughnessSquare * roughnessSquare;
-
-    float NdotH = max(dot(N, H), 0.0);
-    float NdotHSquare = NdotH * NdotH;
-
-    // distribution
-    float numerator = roughnessFourth;
-    float denominator = (NdotHSquare * (roughnessFourth - 1.0) + 1.0);
-    denominator = PI * denominator * denominator;
-
-    return (numerator / denominator);
-}
-
-// ----------------------------------------------------------------------------
-float GeometrySchlickGGX(vec3 N, vec3 V, float roughness)
-{
-    float r = (roughness + 1.0);
-    float k = (r * r) / 8.0;
-
-    float NdotV = max(dot(N, V), 0.0);
-
-    float numerator   = NdotV;
-    float denominator = NdotV * (1.0 - k) + k;
-
-    return numerator / denominator;
-}
-
-// ----------------------------------------------------------------------------
-float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
-{
-    float ggx2 = GeometrySchlickGGX(N, V, roughness);
-    float ggx1 = GeometrySchlickGGX(N, L, roughness);
-
-    return ggx1 * ggx2;
-}
-
-// ----------------------------------------------------------------------------
-vec3 FresnelSchlick(float cosTheta, vec3 F0)
-{
-    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+    return color;
 }

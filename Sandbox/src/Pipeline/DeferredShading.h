@@ -51,15 +51,18 @@ namespace Sandbox
 
 		void SetWindowsWindow(std::weak_ptr<SculptorGL::IWindow> windowsWindow) noexcept;
 
-		const std::shared_ptr<SculptorGL::FrameBuffer>& GetDeferredFBO() const
-		{
-			return frameBuffer;
-		}
+		const std::shared_ptr<SculptorGL::FrameBuffer>& GetDeferredFBO() const;
+
+		bool IsIBLEnabled() const;
+
+		bool IsBloomEnabled() const;
 
 	private:
 		bool enableDeferredShading;
 
 		bool useIBL;
+
+		bool useBloom;
 
 		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
@@ -67,7 +70,9 @@ namespace Sandbox
 
 		SandboxApp* sandBox;
 
-		std::shared_ptr<SculptorGL::FrameBuffer> frameBuffer;
+		std::shared_ptr<SculptorGL::FrameBuffer> gBufferFBO;
+
+		std::shared_ptr<SculptorGL::FrameBuffer> bloomFBO;
 
 		//-- Shader --//
 		std::weak_ptr<SculptorGL::IShader> globalLightShader;

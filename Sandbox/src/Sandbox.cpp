@@ -9,7 +9,6 @@
 #include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
 #include "Graphics/GraphicsAPI.h"
-#include "Graphics/OpenGL/Buffers/FrameBuffer/FrameBuffer.h"
 #include "Graphics/OpenGL/Shader/Interface/IShader.h"
 #include "Pipeline/DeferredShading.h"
 #include "Pipeline/IPipeline.h"
@@ -57,6 +56,18 @@ namespace Sandbox
 
 		//-- Shader Creation --//
 		assetManager->AddShaderDescription({
+			.type = SculptorGL::ShaderType::COMPUTE,
+			.filePath = "./assets/shaders/compute/horizontal_blur.comp"
+		});
+		assetManager->CreateShaderWithDescription("HorizontalBlur");
+
+		assetManager->AddShaderDescription({
+			.type = SculptorGL::ShaderType::COMPUTE,
+			.filePath = "./assets/shaders/compute/vertical_blur.comp"
+		});
+		assetManager->CreateShaderWithDescription("VerticalBlur");
+
+		assetManager->AddShaderDescription({
 			.type = ShaderType::VERTEX,
 			.filePath = "./assets/shaders/skySphere/skySphere.vert"
 		});
@@ -85,6 +96,16 @@ namespace Sandbox
 			.filePath = QUAD_FRAGMENT_SHADER_FILE_PATH
 		});
 		assetManager->CreateShaderWithDescription(QUAD_SHADER_NAME);
+
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = "./assets/shaders/bloom/bloom.vert"
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = "./assets/shaders/bloom/bloom.frag"
+		});
+		assetManager->CreateShaderWithDescription("bloomShader");
 		//-- !Shader Creation --//
 		//-- ## !ASSET LOADING ## --//
 
@@ -133,37 +154,42 @@ namespace Sandbox
 		// Pipelines Call
 		deferredPipeline->Update();
 
-		glm::vec3 cameraPosition = Camera::GetInstance()->GetCameraPosition();
-		const auto skySphereShader = assetManager->RetrieveShaderFromStorage("skySphereShader");
-		const Memory::WeakPointer skySphereShaderPtr{ skySphereShader };
-		
-		const auto skySphereTexture = assetManager->RetrieveTextureFromStorage("Alexs_Apt_2k");
-		const Memory::WeakPointer skySphereTexturePtr{ skySphereTexture };
-		skySphereTexturePtr->Bind(0);
-
-		GraphicsAPI::GetContext()->EnableDepthTest(true);
-		GraphicsAPI::GetContext()->EnableDepthMask(true);
-		GraphicsAPI::GetContext()->SetFaceCulling(CullType::FRONT_FACE);
-		//GraphicsAPI::GetContext()->EnableBlending(true);
-		GL_CALL(glEnable, GL_BLEND);
-		GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		skySphere->SetShader(skySphereShader);
+		static auto* deferredPtr = dynamic_cast<DeferredShading*>(deferredPipeline.get());
+		if (deferredPtr && deferredPtr->IsIBLEnabled())
 		{
-			skySphereShaderPtr->Bind();
-			skySphereShaderPtr->SetUniformInt(0, "skySphere");
-			skySphereShaderPtr->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
-			skySphereShaderPtr->UnBind();
+			glm::vec3 cameraPosition = Camera::GetInstance()->GetCameraPosition();
+			const auto skySphereShader = assetManager->RetrieveShaderFromStorage("skySphereShader");
+			const Memory::WeakPointer skySphereShaderPtr{ skySphereShader };
+			
+			const auto skySphereTexture = assetManager->RetrieveTextureFromStorage("Alexs_Apt_2k");
+			const Memory::WeakPointer skySphereTexturePtr{ skySphereTexture };
+			skySphereTexturePtr->Bind(0);
+
+			GraphicsAPI::GetContext()->EnableDepthTest(true);
+			GraphicsAPI::GetContext()->EnableDepthMask(true);
+			GraphicsAPI::GetContext()->SetFaceCulling(CullType::FRONT_FACE);
+			//GraphicsAPI::GetContext()->EnableBlending(true);
+			// Additive Blending
+			GL_CALL(glEnable, GL_BLEND);
+			GL_CALL(glBlendFunc, GL_SRC_ALPHA, GL_ONE);
+
+			skySphere->SetShader(skySphereShader);
+			{
+				skySphereShaderPtr->Bind();
+				skySphereShaderPtr->SetUniformInt(0, "skySphere");
+				skySphereShaderPtr->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+				skySphereShaderPtr->UnBind();
+			}
+			skySphere->Draw();
+			
+			skySphereTexturePtr->UnBind();
+
+			GL_CALL(glDisable, GL_BLEND);
+
+			GraphicsAPI::GetContext()->SetFaceCulling(CullType::NONE);
+			GraphicsAPI::GetContext()->EnableDepthTest(false);
+			GraphicsAPI::GetContext()->EnableDepthMask(false);
 		}
-		skySphere->Draw();
-		
-		skySphereTexturePtr->UnBind();
-
-		GL_CALL(glDisable, GL_BLEND);
-
-		GraphicsAPI::GetContext()->SetFaceCulling(CullType::NONE);
-		GraphicsAPI::GetContext()->EnableDepthTest(false);
-		GraphicsAPI::GetContext()->EnableDepthMask(false);
 	}
 
 	void SandboxApp::PostUpdate()
