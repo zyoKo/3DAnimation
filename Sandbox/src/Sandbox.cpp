@@ -106,6 +106,16 @@ namespace Sandbox
 			.filePath = "./assets/shaders/bloom/bloom.frag"
 		});
 		assetManager->CreateShaderWithDescription("bloomShader");
+
+		assetManager->AddShaderDescription({
+			.type = ShaderType::VERTEX,
+			.filePath = "./assets/shaders/ambientOcclusion/ao.vert"
+		});
+		assetManager->AddShaderDescription({
+			.type = ShaderType::FRAGMENT,
+			.filePath = "./assets/shaders/ambientOcclusion/ao.frag"
+		});
+		assetManager->CreateShaderWithDescription("aoShader");
 		//-- !Shader Creation --//
 		//-- ## !ASSET LOADING ## --//
 

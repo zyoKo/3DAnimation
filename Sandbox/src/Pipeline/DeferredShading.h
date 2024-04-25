@@ -74,6 +74,8 @@ namespace Sandbox
 
 		std::shared_ptr<SculptorGL::FrameBuffer> bloomFBO;
 
+		std::shared_ptr<SculptorGL::FrameBuffer> aoFBO;
+
 		//-- Shader --//
 		std::weak_ptr<SculptorGL::IShader> globalLightShader;
 

@@ -29,7 +29,7 @@ namespace Sandbox
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	enableDeferredShading(true),
 			useIBL(true),
-			useBloom(true)
+			useBloom(false)
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -87,6 +87,7 @@ namespace Sandbox
 		//-- ! G-Buffer FBO --//
 
 		//-- # Bloom FBO --//
+
 		bloomFBO = std::make_shared<SculptorGL::FrameBuffer>(window);
 
 		bloomFBO->Bind();
@@ -112,6 +113,33 @@ namespace Sandbox
 		bloomFBO->UnBind();
 
 		//-- ! Bloom FBO --//
+
+		//-- # AO FBO --//
+
+		aoFBO = std::make_shared<SculptorGL::FrameBuffer>(window);
+
+		aoFBO->Bind();
+		{
+			aoFBO->CreateAttachment(SculptorGL::AttachmentType::COLOR, true, 1280, 720, "fragColorTexture", 32);
+
+			const auto totalBuffers = static_cast<int>(aoFBO->GetLastColorAttachment());
+			std::vector<unsigned> usedOpenGLColorAttachments;
+			usedOpenGLColorAttachments.reserve(totalBuffers);
+
+			int currentAttachment = 0;
+			while(currentAttachment < totalBuffers)
+			{
+				usedOpenGLColorAttachments.emplace_back(SculptorGL::ColorAttachmentToOpenGLType(SculptorGL::ColorAttachment::Attachment0 + currentAttachment));
+				++currentAttachment;
+			}
+
+			SculptorGL::GraphicsAPI::GetContext()->DrawBuffers(totalBuffers, usedOpenGLColorAttachments.data());
+
+			aoFBO->IsValid();
+		}
+		aoFBO->UnBind();
+
+		//-- ! AO FBO --//
 
 		screenQuad = std::make_shared<SculptorGL::ScreenQuad>();
 
@@ -244,6 +272,7 @@ namespace Sandbox
 
 		gBufferFBO.reset();
 		bloomFBO.reset();
+		aoFBO.reset();
 		pointLights.clear();
 		lightSphere.reset();
 		screenQuad.reset();
@@ -302,6 +331,11 @@ namespace Sandbox
 				sandBox->iblTestModel->SetLocation(location);
 				sandBox->iblTestModel->Draw();
 			}
+
+			// Draw Plane
+			sandBox->plane->SetShader(gBufferShader);
+			sandBox->plane->SetLocation(glm::vec3(20.0f, 10.0f, 0.0f));
+			sandBox->plane->Draw();
 		}
 		else
 		{
@@ -342,8 +376,39 @@ namespace Sandbox
 
 		SculptorGL::GraphicsAPI::GetContext()->EnableDepthMask(false);
 		SculptorGL::GraphicsAPI::GetContext()->EnableDepthTest(false);
-		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers(); 
+		SculptorGL::GraphicsAPI::GetContext()->ClearBuffers();
 		//-- 1. !Geometry Pass --//
+
+		//-- # AO PASS --//
+
+		glm::vec3 cameraPosition = SculptorGL::Camera::GetInstance()->GetCameraPosition();
+
+		const SculptorGL::Memory::WeakPointer aoShader { assetManager->RetrieveShaderFromStorage("aoShader") };
+		aoShader->Bind();
+		{
+			const auto gPosition = gBufferFBO->GetFrameBufferTextures()[0];
+			const auto gNormal = gBufferFBO->GetFrameBufferTextures()[1];
+
+			aoShader->SetUniformInt(0, "gPosition");
+			aoShader->SetUniformInt(1, "gNormal");
+
+			aoShader->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+
+			aoShader->SetUniformFloat(1.0f, "s");
+			aoShader->SetUniformFloat(1.0f, "k");
+			aoShader->SetUniformFloat(0.5f, "R");
+
+			gPosition->Bind(0);
+			gNormal->Bind(1);
+
+			screenQuad->Draw();
+
+			gPosition->UnBind();
+			gNormal->Bind();
+		}
+		aoShader->UnBind();
+
+		//-- ! AO PASS --//
 	}
 
 	void DeferredShading::LocalLightingPass() const
@@ -477,9 +542,9 @@ namespace Sandbox
 			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetHeight()), "bufferHeight");
 
 			iblShaderPtr->SetUniformFloat(1.0f, "metallic");
-			iblShaderPtr->SetUniformFloat(0.1f, "roughness");
+			iblShaderPtr->SetUniformFloat(0.001f, "roughness");
 
-			iblShaderPtr->SetUniformBool(true, "useDirectionalLight");
+			iblShaderPtr->SetUniformBool(false, "useDirectionalLight");
 			iblShaderPtr->SetUniformBool(useBloom, "usingBloom");
 
 			// Draw the Quad
