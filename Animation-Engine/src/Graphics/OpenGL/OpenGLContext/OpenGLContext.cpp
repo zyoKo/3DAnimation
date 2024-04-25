@@ -123,7 +123,13 @@ namespace AnimationEngine
 
 	void OpenGLContext::SetFaceCulling(CullType type)
 	{
-		type == CullType::NONE ? GL_CALL(glDisable, GL_CULL_FACE) : GL_CALL(glEnable, GL_CULL_FACE);
+		if (type == CullType::NONE)
+		{
+			GL_CALL(glDisable, GL_CULL_FACE);
+			return;
+		}
+
+		GL_CALL(glEnable, GL_CULL_FACE);
 
 		switch(type)
 		{
