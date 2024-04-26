@@ -34,14 +34,14 @@ namespace Sandbox
 	//-- Lights Data --//
 	static constexpr unsigned TOTAL_DIR_LIGHTS { 1 };
 	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_POINT_LIGHT_POSITION{ 100.0f, 100.0f, 100.0f };
-	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_LIGHT_POSITION{ 7.0f, 14.0f, 13.0f };	// -2.0f, 4.0f, -1.0f
+	static constexpr SculptorGL::Math::Vec3F DIRECTIONAL_LIGHT_POSITION{ 10.0f, 10.0f, 20.0f };	//7.0f, 14.0f, 13.0f
 
-	static constexpr float LEFT = -10.0f;
-	static constexpr float RIGHT = 10.0f;
-	static constexpr float BOTTOM = -10.0f;
-	static constexpr float UP = 10.0f;
-	static constexpr float NEAR_PLANE = 1.0f;
-	static constexpr float FAR_PLANE = 100.0f;
+	static constexpr float LEFT			= -15.0f;
+	static constexpr float RIGHT		=  15.0f;
+	static constexpr float BOTTOM		= -15.0f;
+	static constexpr float UP			=  15.0f;
+	static constexpr float NEAR_PLANE	=   1.0f;
+	static constexpr float FAR_PLANE	= 100.0f;
 
 	static constexpr unsigned TOTAL_RANDOM_POINT_LIGHTS { 10 };	// This should be used to generate 10 random point lights
 	static constexpr float LIGHT_COLOR_START_RANGE{ 0.5f };
@@ -78,8 +78,8 @@ namespace Sandbox
 	//-- !Misc Data --//
 
 	//-- Light Box --//
-	static const std::string CUBE_FILE_PATH		{ "./assets/models/primitives/cube.obj" };
-	static const std::string SPHERE_FILE_PATH	{ "./assets/models/primitives/sphere_old.obj" };
+	static const std::string CUBE_FILE_PATH		{ "./assets/models/primitives/cube.obj"   };
+	static const std::string SPHERE_FILE_PATH	{ "./assets/models/primitives/sphere.obj" };
 	//-- !Light Box--//
 	//-- ## DEFERRED_SHADING_CONSTANTS ## --//
 

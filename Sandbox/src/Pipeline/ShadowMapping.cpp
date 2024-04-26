@@ -60,12 +60,14 @@ namespace Sandbox
 		constexpr unsigned kernelSize = 2 * kernelHalfWidth + 1;
 		// s controls the width of the bell curve to match the number of desired weights
 		constexpr float s = static_cast<float>(kernelHalfWidth) / 2.0f;
+
+		constexpr float blurStrength = 2.0f;
 		
 		float sum = 0.0f;
 		std::vector<float> weights(kernelSize);
 		for (unsigned i = 0; i < kernelSize; ++i) 
 		{
-		    const float exponent = -0.5f * (static_cast<float>(i - kernelHalfWidth) / s) * (static_cast<float>(i - kernelHalfWidth) / s);
+		    const float exponent = -blurStrength * (static_cast<float>(i - kernelHalfWidth) / s) * (static_cast<float>(i - kernelHalfWidth) / s);
 		
 		    weights[i] = std::expf(exponent);
 		

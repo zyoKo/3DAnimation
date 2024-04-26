@@ -155,7 +155,7 @@ namespace Sandbox
 
 		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(true);
 		
-		LocalLightingPass();
+		//LocalLightingPass();
 		
 		SculptorGL::GraphicsAPI::GetContext()->EnableBlending(false);
 		//-- 2 !Lighting Pass --//
@@ -223,20 +223,20 @@ namespace Sandbox
 
 		//-- LightBoxes for lights: Visualization Purposes --//
 
-		const SculptorGL::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
-
-		for (const auto& light : pointLights)
-		{
-			lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
-			lightBox->SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
-		
-			shaderLightBoxPtr->Bind();
-			shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
-			//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
-			shaderLightBoxPtr->UnBind();
-		
-			lightBox->Draw();
-		}
+		//const SculptorGL::Memory::WeakPointer shaderLightBoxPtr{ shaderLightBox };
+		//
+		//for (const auto& light : pointLights)
+		//{
+		//	lightBox->SetLocation({ light.position.x, light.position.y, light.position.z });
+		//	lightBox->SetScale({ LIGHT_BOX_SCALE.x, LIGHT_BOX_SCALE.y, LIGHT_BOX_SCALE.z });
+		//
+		//	shaderLightBoxPtr->Bind();
+		//	shaderLightBoxPtr->SetUniformVector3F(light.color, LIGHT_COLOR_UNIFORM_NAME);
+		//	//shaderLightBoxPtr->SetUniformVector3F(COLOR_WHITE, LIGHT_COLOR_UNIFORM_NAME);
+		//	shaderLightBoxPtr->UnBind();
+		//
+		//	lightBox->Draw();
+		//}
 		/*----- [... Finish Rendering Scene ...] ----*/
 
 		frameBuffer->UnBind();

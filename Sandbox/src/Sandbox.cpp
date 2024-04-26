@@ -9,6 +9,7 @@
 #include "Components/Camera/Camera.h"
 #include "Data/Constants.h"
 #include "Pipeline/IPipeline.h"
+#include "Pipeline/Data/Constants.h"
 #include "Pipeline/Fixed/CreatePipeline.h"
 #include "Pipeline/Structures/PipelineInitializer.h"
 #include "Pipeline/Structures/DirectionalLight.h"
@@ -67,10 +68,11 @@ namespace Sandbox
 		//-- !Shader Creation --//
 		//-- ## !ASSET LOADING ## --//
 
-		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
+		backPack = std::make_shared<Model>(SPHERE_FILE_PATH);
+		backPack->SetScale(glm::vec3(0.5f));
 		plane = std::make_shared<Model>("./assets/models/primitives/plane.obj");
 		plane->SetLocation({ 0.0f, 0.0f, 0.0f });
-		plane->SetScale({ 10.0f, 10.0f, 10.0f });
+		plane->SetScale(glm::vec3(10.0f, 10.0f, 10.0f));
 		plane->SetTextures({ whiteTexturePtr.GetShared() });
 		//floor = std::make_shared<Quad>();
 		directionalLight = std::make_shared<DirectionalLight>();
@@ -80,18 +82,21 @@ namespace Sandbox
 	{
 		using namespace SculptorGL;
 
+		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
+
+		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
+		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
+
 		// Pipelines Call
 		deferredPipeline->PreUpdateSetup();
 
 		const auto gBufferShader = assetManager->RetrieveShaderFromStorage(G_BUFFER_SHADER_NAME);
 		const auto quadShader = assetManager->RetrieveShaderFromStorage(QUAD_SHADER_NAME);
 
-		const Memory::WeakPointer<ITexture2D> backPackDiffuseTexturePtr		{ assetManager->RetrieveTextureFromStorage(BACKPACK_DIFFUSE_TEXTURE_FILE_NAME) };
-		const Memory::WeakPointer<ITexture2D> backPackSpecularTexturePtr	{ assetManager->RetrieveTextureFromStorage(BACKPACK_SPECULAR_TEXTURE_FILE_NAME) };
-		backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
+		backPack->SetTextures({ gridTexture.lock() });
+		//backPack->SetTextures({ backPackDiffuseTexturePtr.GetShared(), backPackSpecularTexturePtr.GetShared() });
 		backPack->SetShader(gBufferShader);
 
-		const auto gridTexture = assetManager->RetrieveTextureFromStorage(FLOOR_FILE_NAME);
 		//floor->SetGridTexture(gridTexture);
 		//floor->SetShader(quadShader);
 

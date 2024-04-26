@@ -19,19 +19,27 @@ void main()
 {
 	int halfSize = 50;
 	
+	// image size
+	ivec2 bufferSize = imageSize(sourceImage);
+
 	// Combo of groupID, groupSize and localID
 	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
 
 	// Local thread id in the 128x1 thread groups128x1
 	uint i = gl_LocalInvocationID.x;
 
-	// Do not sample beyond those pixels here
-	v[i] = imageLoad(sourceImage, texelCoord + ivec2(-halfSize, 0));
+	// what pixel to read and don't read beyond texture
+	ivec2 pixel = texelCoord + ivec2(-halfSize, 0);
+	pixel.x = int(max(0, min(pixel.x, bufferSize.x - 1)));
+
+	v[i] = imageLoad(sourceImage, pixel);
 
 	if (i < (2 * halfSize))
 	{
-		// Do not sample beyond those pixels here
-		v[i + 128] = imageLoad(sourceImage, texelCoord + ivec2(128 - halfSize, 0));
+		pixel = texelCoord + ivec2(128 - halfSize, 0);
+		pixel.x = int(max(0, min(pixel.x, bufferSize.x - 1)));
+
+		v[i + 128] = imageLoad(sourceImage, pixel);
 	}
 
 	barrier();

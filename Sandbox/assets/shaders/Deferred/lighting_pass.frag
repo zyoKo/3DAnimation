@@ -245,7 +245,7 @@ void main()
     float Specular  = texture(gAlbedoSpec,  TexCoords).a;
     
     // then calculate lighting as usual
-    vec3 ambient    = vec3(0.5f, 0.5f, 0.5f) * Diffuse;
+    vec3 ambient    = vec3(0.1) * Diffuse;
     vec3 viewDir    = normalize(cameraPosition - FragPos);
 
     float shininess = 16.0;
@@ -270,8 +270,8 @@ void main()
     if (shadowPos.w > 0 && (shadowCoord.x >= 0.0f && shadowCoord.x <= 1.0f) && (shadowCoord.y >= 0.0f && shadowCoord.y <= 1.0f))
     {
         vec4 Moments = texture(shadowMap, shadowCoord.xy);
-        //shadow = 1.0f - MomentShadowMap_Hamburger(Moments, shadowCoord.z);
-        shadow = 1.0f - VarianceShadowMap(Moments.xy, shadowCoord.z);
+        shadow = 1.0f - MomentShadowMap_Hamburger(Moments, shadowCoord.z);
+        //shadow = 1.0f - VarianceShadowMap(Moments.xy, shadowCoord.z);
     }
 
     FragColor = vec4(ambient + (diffuse + specular) * shadow, 1.0);
