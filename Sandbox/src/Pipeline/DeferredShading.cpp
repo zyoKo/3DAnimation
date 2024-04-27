@@ -29,7 +29,7 @@ namespace Sandbox
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	enableDeferredShading(true),
 			useIBL(true),
-			useBloom(true)
+			useBloom(false)
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -477,9 +477,9 @@ namespace Sandbox
 			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetHeight()), "bufferHeight");
 
 			iblShaderPtr->SetUniformFloat(1.0f, "metallic");
-			iblShaderPtr->SetUniformFloat(0.1f, "roughness");
+			iblShaderPtr->SetUniformFloat(0.001f, "roughness");
 
-			iblShaderPtr->SetUniformBool(true, "useDirectionalLight");
+			iblShaderPtr->SetUniformBool(false, "useDirectionalLight");
 			iblShaderPtr->SetUniformBool(useBloom, "usingBloom");
 
 			// Draw the Quad

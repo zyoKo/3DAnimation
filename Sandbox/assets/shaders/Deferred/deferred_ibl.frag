@@ -79,6 +79,7 @@ void main()
     else
     {
         color += ComputeColorForIBL(FragPos, Normal, Diffuse, specular);
+        color *= 50.0;
     }
 
     // extract bright colors to compute bloom
