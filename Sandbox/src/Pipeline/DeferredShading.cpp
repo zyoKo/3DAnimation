@@ -29,7 +29,8 @@ namespace Sandbox
 	DeferredShading::DeferredShading(const PipelineInitializer* info) noexcept
 		:	enableDeferredShading(true),
 			useIBL(true),
-			useBloom(false)
+			useBloom(false),
+			useAO(true)
 	{
 		ANIM_ASSERT(info != nullptr, "Pipeline Initializer is nullptr.");
 
@@ -381,32 +382,95 @@ namespace Sandbox
 
 		//-- # AO PASS --//
 
-		glm::vec3 cameraPosition = SculptorGL::Camera::GetInstance()->GetCameraPosition();
-
-		const SculptorGL::Memory::WeakPointer aoShader { assetManager->RetrieveShaderFromStorage("aoShader") };
-		aoShader->Bind();
+		if (useAO)
 		{
+			aoFBO->Bind();
+
+			glm::vec3 cameraPosition = SculptorGL::Camera::GetInstance()->GetCameraPosition();
+
+			const SculptorGL::Memory::WeakPointer aoShader { assetManager->RetrieveShaderFromStorage("aoShader") };
+			aoShader->Bind();
+			{
+				const auto gPosition = gBufferFBO->GetFrameBufferTextures()[0];
+				const auto gNormal = gBufferFBO->GetFrameBufferTextures()[1];
+
+				aoShader->SetUniformInt(0, "gPosition");
+				aoShader->SetUniformInt(1, "gNormal");
+
+				aoShader->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+
+				constexpr float scale    = 2.0f;
+				constexpr float contrast = 2.0f;
+				constexpr float range    = 2.0f;
+
+				aoShader->SetUniformFloat(scale, "scale");
+				aoShader->SetUniformFloat(contrast, "contrast");
+				aoShader->SetUniformFloat(range, "range");
+
+				gPosition->Bind(0);
+				gNormal->Bind(1);
+
+				screenQuad->Draw();
+
+				gPosition->UnBind();
+				gNormal->Bind();
+			}
+			aoShader->UnBind();
+
+			aoFBO->UnBind();
+
+			// Blur gBuffer AO Map to get final AO Map
+			const SculptorGL::Memory::WeakPointer biLateralHorizontalFilter	{ assetManager->RetrieveShaderFromStorage("bilateralHorizontalFilterShader")	};
+			const SculptorGL::Memory::WeakPointer biLateralVerticalFilter	{ assetManager->RetrieveShaderFromStorage("biLateralVerticalFilterShader")	};
+
+			const auto rawAOTexture = aoFBO->GetFrameBufferTextures().back();
+
+			const int textureWidth  = rawAOTexture->GetWidth();
+			const int textureHeight = rawAOTexture->GetHeight();
+
 			const auto gPosition = gBufferFBO->GetFrameBufferTextures()[0];
 			const auto gNormal = gBufferFBO->GetFrameBufferTextures()[1];
-
-			aoShader->SetUniformInt(0, "gPosition");
-			aoShader->SetUniformInt(1, "gNormal");
-
-			aoShader->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
-
-			aoShader->SetUniformFloat(1.0f, "s");
-			aoShader->SetUniformFloat(1.0f, "k");
-			aoShader->SetUniformFloat(0.5f, "R");
 
 			gPosition->Bind(0);
 			gNormal->Bind(1);
 
-			screenQuad->Draw();
+			// Apply Vertical Filter
+			biLateralVerticalFilter->Bind();
+			{
+				biLateralVerticalFilter->SetUniformInt(0, "gPosition");
+				biLateralVerticalFilter->SetUniformInt(1, "gNormal");
+
+				biLateralVerticalFilter->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+
+				rawAOTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);		// sourceImage
+				rawAOTexture->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);		// destinationImage
+
+				// tiles WxH images with groups sized 128x1
+				SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(textureWidth, textureHeight / 128, 1);
+				SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
+			}
+			biLateralVerticalFilter->UnBind();
+
+			// Apply Horizontal Filter
+			biLateralHorizontalFilter->Bind();
+			{
+				biLateralHorizontalFilter->SetUniformInt(0, "gPosition");
+				biLateralHorizontalFilter->SetUniformInt(1, "gNormal");
+
+				biLateralHorizontalFilter->SetUniformVector3F({ cameraPosition.x, cameraPosition.y, cameraPosition.z }, "cameraPosition");
+
+				rawAOTexture->BindImageTexture(SculptorGL::BufferAccess::READ, 1);		// sourceImage
+				rawAOTexture->BindImageTexture(SculptorGL::BufferAccess::WRITE, 2);		// destinationImage
+
+				// tiles WxH images with groups sized 128x1
+				SculptorGL::GraphicsAPI::GetContext()->DispatchCompute(textureWidth / 128, textureHeight, 1);
+				SculptorGL::GraphicsAPI::GetContext()->CreateMemoryBarrier(GL_ALL_BARRIER_BITS);
+			}
+			biLateralHorizontalFilter->UnBind();
 
 			gPosition->UnBind();
-			gNormal->Bind();
+			gNormal->UnBind();
 		}
-		aoShader->UnBind();
 
 		//-- ! AO PASS --//
 	}
@@ -513,12 +577,26 @@ namespace Sandbox
 			const SculptorGL::Memory::WeakPointer irradianceMapPtr{ irradianceMap };
 			irradianceMapPtr->Bind(currentTextureSlot++);
 
+			// Bind Ambient Occlusion Map
+			if (useAO)
+			{
+				auto aoMap = aoFBO->GetFrameBufferTextures().back();
+				aoMap->Bind(currentTextureSlot++);
+			}
+
 			iblShaderPtr->Bind();
 
 			int currentSlot = 0;
 			for (const auto& textureName : IBL_SHADER_TEXTURE_NAMES)
 			{
 				iblShaderPtr->SetUniformInt(currentSlot, textureName);
+				++currentSlot;
+			}
+
+			// Set Shader to Use AO
+			if (useAO)
+			{
+				iblShaderPtr->SetUniformInt(currentSlot, "ambientOcclusionMap");
 				++currentSlot;
 			}
 
@@ -541,11 +619,12 @@ namespace Sandbox
 			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetWidth()),  "bufferWidth");
 			iblShaderPtr->SetUniformFloat(static_cast<float>(skySphereTexturePtr->GetHeight()), "bufferHeight");
 
-			iblShaderPtr->SetUniformFloat(1.0f, "metallic");
+			iblShaderPtr->SetUniformFloat(0.0f, "metallic");
 			iblShaderPtr->SetUniformFloat(0.001f, "roughness");
 
 			iblShaderPtr->SetUniformBool(false, "useDirectionalLight");
 			iblShaderPtr->SetUniformBool(useBloom, "usingBloom");
+			iblShaderPtr->SetUniformBool(useAO, "useAO");
 
 			// Draw the Quad
 			screenQuad->Draw();

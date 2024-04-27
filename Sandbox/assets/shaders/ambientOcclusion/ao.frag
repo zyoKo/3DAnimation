@@ -5,7 +5,7 @@ out vec4 gAmbientOcclusion;
 in vec2 TexCoords;
 
 uniform vec3 cameraPosition;
-uniform float s, k, R;
+uniform float scale, contrast, range;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -14,29 +14,34 @@ const float PI = 3.141592;
 
 void main()
 {
-	int n = 10;
-	float c = 0.1 * R;
+	// read gBuffer Data
+	vec3 FragPos = texture(gPosition, TexCoords).xyz;
+	vec3 Normal  = texture(gNormal, TexCoords).xyz;
+
+	int samples = 50;
+	float c = 0.1 * range;
 	float delta = 0.001;
 
-	ivec2 integerCoeff = ivec2(gl_FragCoord.xy);
-    vec3 FragPos = texture(gPosition, TexCoords).xyz;
-	vec3 Normal  = texture(gNormal, TexCoords).xyz;
+	ivec2 iFragCoords = ivec2(gl_FragCoord.xy);
+    
 	float d = length(cameraPosition - FragPos);
 
-	float phi = (30 * integerCoeff.x) ^ integerCoeff.y + 10 * integerCoeff.x * integerCoeff.y;
+	float phi = (30 * iFragCoords.x ^ iFragCoords.y) + 10 * iFragCoords.x * iFragCoords.y;
 	float sum = 0;
-	for(int i = 0; i < n; ++i)
+	for(int i = 0; i < samples; ++i)
 	{
-		float alpha = (i + 0.5)/n;
-		float h = alpha * R/d;
-		float theta = 2.0 * PI * alpha * (7.0 * n / 9.0) + phi;
+		float alpha = (i + 0.5) / samples;
+		float h = alpha * range / d;
+		float theta = 2.0 * PI * alpha * (7.0 * samples / 9.0) + phi;
 
-		vec3 Pi = texture(gPosition, TexCoords + h * vec2(cos(theta), sin(theta))).xyz;
-		vec3 wi = Pi - FragPos;
+		vec2 newUV = TexCoords + h * vec2(cos(theta), sin(theta));
+
+		vec3  Pi = texture(gPosition, newUV).xyz;
+		vec3  wi = Pi - FragPos;
 		float di = length(cameraPosition - Pi);
-		float H = 1.0;
+		float H  = 1.0;
 
-		if (R - length(wi) < 0.0)
+		if (range - length(wi) < 0.0)
         {
 			H = 0.0;
         }
@@ -45,11 +50,11 @@ void main()
 	}
 
     float numerator = 2.0 * PI * c;
-    float denominator = n;
+    float denominator = samples;
 
 	sum *= numerator / denominator;
 
-	vec3 result = vec3(pow((1.0 - s * sum), k));
+	vec3 result = vec3(pow((1.0 - scale * sum), contrast));
 
 	gAmbientOcclusion = vec4(result, 1.0);
 }

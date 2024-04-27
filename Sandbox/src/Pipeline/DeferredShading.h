@@ -64,6 +64,8 @@ namespace Sandbox
 
 		bool useBloom;
 
+		bool useAO;
+
 		std::shared_ptr<IPipeline> shadowMappingPipeline;
 
 		std::weak_ptr<SculptorGL::IWindow> window;

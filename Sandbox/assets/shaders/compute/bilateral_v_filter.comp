@@ -1,0 +1,127 @@
+#version 460 core
+
+// Declares thread group size
+layout (local_size_x = 1, local_size_y = 128, local_size_z = 1) in; 
+
+const float gaussianKernel[101] = float[101](
+    1.53892e-23, 1.1146e-22,  7.75621e-22, 
+    5.18573e-21, 3.33118e-20, 2.05595e-19, 
+    1.21915e-18, 6.94593e-18, 3.80217e-17, 
+    1.99968e-16, 1.01045e-15, 4.90571e-15, 
+    2.28832e-14, 1.02555e-13, 4.41598e-13, 
+    1.82694e-12, 7.26192e-12, 2.77336e-11, 
+    1.01763e-10, 3.58757e-10, 1.21518e-09, 
+    3.95464e-09, 1.23652e-08, 3.71472e-08, 
+    1.07221e-07, 2.97344e-07, 7.92259e-07, 
+    2.02817e-06, 4.98849e-06, 1.17886e-05, 
+    2.6766e-05,  5.83894e-05, 0.00012238, 
+    0.000246444, 0.000476818, 0.00088637, 
+    0.00158309,  0.00271659,  0.00447891, 
+    0.00709492,  0.0107982,   0.01579, 
+    0.0221842,   0.0299455,   0.0388372, 
+    0.0483942,   0.0579383,   0.0666449, 
+    0.073654,    0.0782085,   0.0797885, 
+    0.0782085,   0.073654,    0.0666449, 
+    0.0579383,   0.0483942,   0.0388372, 
+    0.0299455,   0.0221842,   0.01579, 
+    0.0107982,   0.00709492,  0.00447891, 
+    0.00271659,  0.00158309,  0.00088637, 
+    0.000476818, 0.000246444, 0.00012238, 
+    5.83894e-05, 2.6766e-05,  1.17886e-05, 
+    4.98849e-06, 2.02817e-06, 7.92259e-07, 
+    2.97344e-07, 1.07221e-07, 3.71472e-08, 
+    1.23652e-08, 3.95464e-09, 1.21518e-09, 
+    3.58757e-10, 1.01763e-10, 2.77336e-11, 
+    7.26192e-12, 1.82694e-12, 4.41598e-13, 
+    1.02555e-13, 2.28832e-14, 4.90571e-15, 
+    1.01045e-15, 1.99968e-16, 3.80217e-17, 
+    6.94593e-18, 1.21915e-18, 2.05595e-19, 
+    3.33118e-20, 5.18573e-21, 7.75621e-22, 
+    1.1146e-22,  1.53892e-23
+);
+
+// Declares a uniform block
+layout (binding = 0) uniform blurKernel
+{
+	float weights[101];
+};
+
+// half-size of kernel
+const int halfSize = 50;
+//uniform int w;
+
+// image as 4 channel 32bit float strict access type
+layout (rgba32f, binding = 1) uniform readonly image2D sourceImage; 
+layout (rgba32f, binding = 2) uniform writeonly image2D destinationImage; 
+
+// Variable shared with other threads in the 128x1 thread group
+shared vec4 v[128 + 101];
+shared vec3 n[128 + 101];
+shared float dist[128 + 101];
+
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+
+uniform vec3 cameraPosition;
+
+const float PI = 3.14159265359;
+const float s  = 0.01;
+
+void main()
+{
+	// Combo of groupID, groupSize and localID
+	ivec2 texelCoord = ivec2(gl_GlobalInvocationID.xy);
+
+	// Local thread id in the 128x1 thread groups128x1
+	uint i = gl_LocalInvocationID.y;
+
+	ivec2 bufferSize = imageSize(sourceImage);
+
+	// Clamp texture coordinates
+	ivec2 clampedTexelCoord = clamp(texelCoord, ivec2(0), bufferSize - ivec2(1));
+
+	// read an image pixel at an ivec2(..., ...) position
+	v[i] 	= imageLoad(sourceImage, clampedTexelCoord + ivec2(0, -halfSize));
+	n[i] 	= texelFetch(gNormal, clampedTexelCoord + ivec2(0, -halfSize), 0).xyz;
+	dist[i] = length(cameraPosition - texelFetch(gPosition, clampedTexelCoord + ivec2(0, -halfSize), 0).xyz);
+
+	// read extra (2 * halfSize) pixels
+	if (i < (2 * halfSize))
+	{
+		v[i + 128] = imageLoad(sourceImage, clampedTexelCoord + ivec2(0, 128 - halfSize));
+
+		dist[i + 128] = length(cameraPosition - texelFetch(gPosition, clampedTexelCoord + ivec2(0, 128 - halfSize), 0).xyz);
+
+		n[i + 128] = texelFetch(gNormal, clampedTexelCoord + ivec2(0, 128 - halfSize), 0).xyz;
+	}
+
+	//---------------------------------------------------------------
+	barrier(); // Wait for all threads to catch up before reading v[]
+
+	vec3  N = n[i + halfSize];
+	float d = dist[i + halfSize];
+
+	vec4 sum = vec4(0.0);
+	float sumWeights = 0.0;
+	for(int j = 0; j < (2 * halfSize + 1); j++)
+	{
+		vec3 Ni = n[i + j];
+
+		float di = dist[i + j];
+
+		float numerator = gaussianKernel[j] * max(dot(Ni, N), 0.0) * exp(-pow(di - d, 2) / (2.0 * s));
+		float denominator = sqrt(2 * PI * s);
+
+		float currWeight = numerator / denominator;
+
+		sumWeights += currWeight;
+		sum += currWeight * v[i + j];
+	}
+
+	if(sumWeights != 0.0)
+	{
+		sum /= sumWeights;
+	}
+
+	imageStore(destinationImage, texelCoord, sum); // Write to destination image
+}

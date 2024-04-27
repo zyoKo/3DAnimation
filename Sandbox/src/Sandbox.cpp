@@ -23,14 +23,6 @@ namespace Sandbox
 	{
 		using namespace SculptorGL;
 
-		// Create Deferred Pipeline
-		const PipelineInitializer deferredPipelineData{
-			.window = GetWindowsWindow(),
-			.sandBox = this
-		};
-		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
-		deferredPipeline->Initialize();
-
 		//-- ## ASSET LOADING ## --//
 		assetManager = AssetManagerLocator::GetAssetManager();
 
@@ -56,13 +48,13 @@ namespace Sandbox
 
 		//-- Shader Creation --//
 		assetManager->AddShaderDescription({
-			.type = SculptorGL::ShaderType::COMPUTE,
+			.type = ShaderType::COMPUTE,
 			.filePath = "./assets/shaders/compute/horizontal_blur.comp"
 		});
 		assetManager->CreateShaderWithDescription("HorizontalBlur");
 
 		assetManager->AddShaderDescription({
-			.type = SculptorGL::ShaderType::COMPUTE,
+			.type = ShaderType::COMPUTE,
 			.filePath = "./assets/shaders/compute/vertical_blur.comp"
 		});
 		assetManager->CreateShaderWithDescription("VerticalBlur");
@@ -116,13 +108,25 @@ namespace Sandbox
 			.filePath = "./assets/shaders/ambientOcclusion/ao.frag"
 		});
 		assetManager->CreateShaderWithDescription("aoShader");
+
+		assetManager->AddShaderDescription({
+			.type = ShaderType::COMPUTE,
+			.filePath = "./assets/shaders/compute/bilateral_h_filter.comp"
+		});
+		assetManager->CreateShaderWithDescription("bilateralHorizontalFilterShader");
+
+		assetManager->AddShaderDescription({
+			.type = ShaderType::COMPUTE,
+			.filePath = "./assets/shaders/compute/bilateral_v_filter.comp"
+		});
+		assetManager->CreateShaderWithDescription("biLateralVerticalFilterShader");
 		//-- !Shader Creation --//
 		//-- ## !ASSET LOADING ## --//
 
 		backPack = std::make_shared<Model>(BACKPACK_FILE_PATH);
 		plane = std::make_shared<Model>("./assets/models/primitives/plane.obj");
-		plane->SetLocation({ 0.0f, 0.0f, 0.0f });
-		plane->SetScale({ 10.0f, 10.0f, 10.0f });
+		plane->SetLocation({ 0.0f, -20.0f, 100.0f });
+		plane->SetScale({ 20.0f, 10.0f, 20.0f });
 		plane->SetTextures({ whiteTexturePtr.GetWeakPointer() });
 		directionalLight = std::make_shared<DirectionalLight>();
 
@@ -132,6 +136,14 @@ namespace Sandbox
 		iblTestModel = std::make_shared<SculptorGL::Model>(SPHERE_HIGH_POLY_FILE_PATH.data());
 		iblTestModel->SetScale(glm::vec3(0.1f));
 		iblTestModel->SetTextures({ whiteTexturePtr.GetWeakPointer() });
+
+		// Create Deferred Pipeline
+		const PipelineInitializer deferredPipelineData{
+			.window = GetWindowsWindow(),
+			.sandBox = this
+		};
+		deferredPipeline = CreatePipeline<DeferredShading>(&deferredPipelineData);
+		deferredPipeline->Initialize();
 	}
 
 	void SandboxApp::PreUpdate()

@@ -11,16 +11,20 @@ uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpec;
 
+// IBL
+uniform sampler2D skySphere;
+uniform sampler2D irradianceMap;
+
+// AO
+uniform sampler2D ambientOcclusionMap;
+
+// Directional Light
 struct Light
 {
     vec3 Direction;
     vec3 Color;
 };
 uniform Light light;
-
-// IBL
-uniform sampler2D skySphere;
-uniform sampler2D irradianceMap;
 
 // Hammersly Block Uniforms
 const int HAMMERSLY_BLOCK_SIZE = 2 * 50;
@@ -46,6 +50,7 @@ uniform float roughness;
 // directional light vs IBL
 uniform bool useDirectionalLight;
 uniform bool usingBloom;
+uniform bool useAO;
 
 // Constants
 const float PI = 3.14159265359f;
@@ -202,8 +207,7 @@ vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular)
     F0 = mix(F0, Diffuse, metallic);
 
     // Diffuse Color
-    //vec3 Ks = FresnelSchlick(ClampZeroToOne(HdotV), F0);
-    vec3 Ks = vec3(0.8); //FresnelSchickRoughness(NdotV, F0, roughness);
+    vec3 Ks = FresnelSchickRoughness(NdotV, F0, roughness);
     vec3 Kd = vec3(1.0) - Ks;
     Kd *= 1.0 - metallic;
 
@@ -262,9 +266,16 @@ vec3  ComputeColorForIBL(vec3 FragPos, vec3 Normal, vec3 Diffuse, vec3 specular)
     vec3 irradiance = texture(irradianceMap, CalculateUVBasedOnDirection(N)).rgb;
     vec3 diffuse    = (Kd / PI) * irradiance;
 
+    // read ao
+    float AmbientOcclusion = 1.0;
+    if (useAO)
+    {
+        AmbientOcclusion = texture(ambientOcclusionMap, TexCoords).r;
+    }
+
     vec3 ambient = Kd * diffuse;
 
-    vec3 color = (ambient + diffuse + specular);
+    vec3 color = (ambient + diffuse + specular) * AmbientOcclusion;
 
     return color;
 }
