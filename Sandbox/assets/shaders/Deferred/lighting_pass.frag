@@ -34,12 +34,15 @@ void main()
     // diffuse
     vec3 lightDir   = normalize(light.Position - FragPos);
     vec3 diffuse    = max(dot(Normal, lightDir), 0.0) * Diffuse * light.Color;
+    diffuse /= 10.0;
 
     // specular
     vec3 reflectDir = reflect(-lightDir, Normal);
     float spec      = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
     vec3 specular   = light.Color * spec * Specular;
 
-    FragColor = vec4(ambient + diffuse + specular, 1.0);
+    vec3 color = ambient + diffuse + specular;
+
+    FragColor = vec4(color, 1.0);
     //FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 }
